@@ -53,7 +53,7 @@ const PathwaySelection = () => {
           <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent mb-6 leading-tight">
             How would you like to
             <br />
-            <span className="relative">
+            <span className="relative bg-gradient-to-r from-purple-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent">
               conquer
               <div className="absolute -bottom-2 left-0 right-0 h-3 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 rounded-full transform -rotate-1"></div>
             </span>
