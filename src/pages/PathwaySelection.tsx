@@ -1,4 +1,5 @@
 
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,8 @@ import {
 } from "lucide-react";
 
 const PathwaySelection = () => {
+  const navigate = useNavigate();
+  
   return (
     <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background */}
@@ -131,6 +134,7 @@ const PathwaySelection = () => {
                 <Button 
                   size="lg" 
                   className="w-full bg-white text-purple-600 hover:bg-gray-100 font-bold py-4 text-lg group-hover:scale-105 transition-all duration-300"
+                  onClick={() => navigate("/self-directed")}
                 >
                   Start My Adventure
                   <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -207,6 +211,7 @@ const PathwaySelection = () => {
                 <Button 
                   size="lg" 
                   className="w-full bg-white text-emerald-600 hover:bg-gray-100 font-bold py-4 text-lg group-hover:scale-105 transition-all duration-300"
+                  onClick={() => navigate("/premium-service")}
                 >
                   Connect Me Now
                   <ArrowRight className="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" />
