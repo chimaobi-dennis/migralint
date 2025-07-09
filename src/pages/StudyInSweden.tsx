@@ -1,13 +1,15 @@
-
-import { Calendar, Clock, MapPin, Star, Users, Globe, Award, BookOpen } from "lucide-react";
+import { Calendar, Clock, MapPin, Star, Users, Globe, Award, BookOpen, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const StudyInSweden = () => {
+  const navigate = useNavigate();
+
   const benefits = [
     {
       icon: Globe,
-      title: "Sustainability Hub",
+      title: "Sustainability Hub", 
       description: "Link Sweden is a global leader in sustainability living. Immerse yourself in a culture that values eco-consciousness and empowers you to champion environmental causes within your community."
     },
     {
@@ -54,9 +56,17 @@ const StudyInSweden = () => {
               <h1 className="text-3xl md:text-5xl font-bold mb-4">
                 Study in Sweden for International Students
               </h1>
-              <p className="text-lg md:text-xl max-w-4xl mx-auto">
+              <p className="text-lg md:text-xl max-w-4xl mx-auto mb-8">
                 Take business easy in your career by choosing Swedish conventional courses from world-class education, a culture of sustainability, and real career opportunities. Discover why Sweden is the perfect place to further your academic journey.
               </p>
+              <Button 
+                size="lg" 
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8"
+                onClick={() => navigate('/pathway-selection')}
+              >
+                Start Application
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
             </div>
           </div>
         </div>
@@ -143,7 +153,7 @@ const StudyInSweden = () => {
         </p>
         <Button 
           className="bg-white text-red-600 hover:bg-gray-100 font-semibold px-8"
-          onClick={() => window.location.href = '/application-journey'}
+          onClick={() => navigate('/application-journey')}
         >
           Start Here
         </Button>
