@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pathway Selection - UniTracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --primary: 222.2 47.4% 11.2%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96.1%;
+            --secondary-foreground: 222.2 47.4% 11.2%;
+            --muted: 210 40% 96.1%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --border: 214.3 31.8% 91.4%;
+            --radius: 0.5rem;
+        }
+        body {
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+        }
+        .card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+        }
+        .btn-primary {
+            background: linear-gradient(to right, #2563eb, #9333ea);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(to right, #1d4ed8, #7c3aed);
+            transform: translateY(-1px);
+        }
+        .badge {
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid currentColor;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+            40%, 43% { transform: translate3d(0,-30px,0); }
+            70% { transform: translate3d(0,-15px,0); }
+            90% { transform: translate3d(0,-4px,0); }
+        }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .animate-bounce { animation: bounce 1s infinite; }
+        .bg-blur { backdrop-filter: blur(10px); }
+        .pathway-card {
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+        .pathway-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+        }
+        .floating-icon {
+            animation: bounce 2s infinite;
+        }
+        .floating-icon:nth-child(2) { animation-delay: 0.1s; }
+        .floating-icon:nth-child(3) { animation-delay: 0.3s; }
+        .floating-icon:nth-child(4) { animation-delay: 0.7s; }
+        .floating-icon:nth-child(5) { animation-delay: 0.5s; }
+        .floating-icon:nth-child(6) { animation-delay: 0.9s; }
+    </style>
+</head>
+<body class="min-h-screen relative overflow-hidden">
+    <!-- Animated Background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-violet-50 via-cyan-50 to-emerald-50">
+        <div class="absolute top-10 left-10 w-72 h-72 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-10 right-10 w-80 h-80 bg-gradient-to-r from-blue-400/20 to-cyan-400/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-emerald-400/10 to-teal-400/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 0.5s;"></div>
+    </div>
+
+    <!-- Floating Icons -->
+    <div class="absolute inset-0 pointer-events-none overflow-hidden">
+        <svg class="floating-icon absolute top-20 left-20 h-8 w-8 text-purple-300/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"></path>
+        </svg>
+        <svg class="floating-icon absolute top-40 right-32 h-6 w-6 text-blue-300/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+        <svg class="floating-icon absolute bottom-40 left-32 h-5 w-5 text-yellow-300/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+        </svg>
+        <svg class="floating-icon absolute bottom-60 right-20 h-7 w-7 text-pink-300/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+        </svg>
+        <svg class="floating-icon absolute top-60 left-1/4 h-6 w-6 text-emerald-300/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+        </svg>
+    </div>
+
+    <div class="relative z-10 max-w-6xl mx-auto px-4 py-8">
+        <!-- Hero Section -->
+        <div class="text-center mb-16">
+            <div class="inline-flex items-center bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-full mb-6 shadow-lg">
+                <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                </svg>
+                <span class="font-bold">Choose Your Adventure! 🎯</span>
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent mb-6 leading-tight">
+                How would you like to
+                <br />
+                <span class="relative">
+                    conquer
+                    <div class="absolute -bottom-2 left-0 right-0 h-3 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 rounded-full transform -rotate-1"></div>
+                </span>
+                your dreams?
+            </h1>
+            
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Pick your perfect path to studying in Sweden! Whether you're a 
+                <span class="text-purple-600 font-semibold"> self-starter </span> or prefer 
+                <span class="text-blue-600 font-semibold"> expert guidance</span>, 
+                we've got you covered! ✨
+            </p>
+        </div>
+
+        <!-- Pathway Cards -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-5xl mx-auto mb-16">
+            <!-- Self Directed Card -->
+            <div class="pathway-card relative border-0 shadow-2xl bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                <div class="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-purple-700/90 rounded-lg"></div>
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
+                
+                <div class="relative p-8 text-white">
+                    <div class="space-y-6">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between">
+                            <span class="badge bg-white/20 text-white border-white/30">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                DIY Style
+                            </span>
+                            <div class="flex space-x-1">
+                                <svg class="h-4 w-4 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                                <svg class="h-4 w-4 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                                <svg class="h-4 w-4 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                                <svg class="h-4 w-4 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                                <svg class="h-4 w-4 fill-yellow-400 text-yellow-400" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-3xl font-bold mb-4 flex items-center">
+                                <svg class="h-8 w-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                Self Directed
+                            </h2>
+                            <p class="text-blue-100 text-lg leading-relaxed mb-6">
+                                Take control of your journey! Navigate through our super-friendly interface 
+                                with video tutorials, step-by-step guides, and 24/7 support. Perfect for 
+                                independent learners! 🚀
+                            </p>
+                        </div>
+
+                        <!-- Features -->
+                        <div class="space-y-3">
+                            <div class="flex items-center text-sm">
+                                <svg class="h-5 w-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Interactive video tutorials</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <svg class="h-5 w-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Real-time progress tracking</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <svg class="h-5 w-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Instant chat support</span>
+                            </div>
+                        </div>
+
+                        <!-- Visual Element -->
+                        <div class="flex justify-center my-6">
+                            <div class="relative">
+                                <div class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center bg-blur">
+                                    <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                                    </svg>
+                                </div>
+                                <div class="absolute -top-2 -right-2 w-6 h-6 bg-yellow-400 rounded-full flex items-center justify-center">
+                                    <svg class="h-3 w-3 text-yellow-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="w-full bg-white text-purple-600 hover:bg-gray-100 font-bold py-4 text-lg rounded-lg transition-all duration-300 hover:scale-105"
+                                onclick="window.location.href='self-directed.html'">
+                            Start My Adventure
+                            <svg class="h-5 w-5 ml-2 inline transition-transform hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+
+                        <div class="flex items-center justify-center text-sm text-blue-200">
+                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span>Get started in 2 minutes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Find an Adviser Card -->
+            <div class="pathway-card relative border-0 shadow-2xl bg-gradient-to-br from-emerald-500 to-teal-600 rounded-lg">
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-600/90 to-teal-700/90 rounded-lg"></div>
+                <div class="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <div class="absolute bottom-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
+                
+                <div class="relative p-8 text-white">
+                    <div class="space-y-6">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between">
+                            <span class="badge bg-white/20 text-white border-white/30">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                VIP Treatment
+                            </span>
+                            <div class="flex items-center">
+                                <svg class="h-4 w-4 mr-1 text-orange-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"></path>
+                                </svg>
+                                <span class="text-sm text-emerald-200">Premium</span>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-3xl font-bold mb-4 flex items-center">
+                                <svg class="h-8 w-8 mr-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                Find an Adviser
+                            </h2>
+                            <p class="text-emerald-100 text-lg leading-relaxed mb-6">
+                                Get paired with a personal education consultant who'll handle everything! 
+                                From applications to visa guidance - sit back, relax, and let the pros 
+                                work their magic! ✨
+                            </p>
+                        </div>
+
+                        <!-- Features -->
+                        <div class="space-y-3">
+                            <div class="flex items-center text-sm">
+                                <svg class="h-5 w-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Dedicated personal consultant</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <svg class="h-5 w-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>End-to-end application support</span>
+                            </div>
+                            <div class="flex items-center text-sm">
+                                <svg class="h-5 w-5 mr-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>Priority visa assistance</span>
+                            </div>
+                        </div>
+
+                        <!-- Visual Element -->
+                        <div class="flex justify-center my-6">
+                            <div class="relative">
+                                <div class="w-20 h-20 bg-white/20 rounded-2xl flex items-center justify-center bg-blur">
+                                    <svg class="h-10 w-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                    </svg>
+                                </div>
+                                <div class="absolute -top-2 -right-2 w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center">
+                                    <svg class="h-3 w-3 text-orange-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="w-full bg-white text-emerald-600 hover:bg-gray-100 font-bold py-4 text-lg rounded-lg transition-all duration-300 hover:scale-105"
+                                onclick="window.location.href='premium-service.html'">
+                            Connect Me Now
+                            <svg class="h-5 w-5 ml-2 inline transition-transform hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </button>
+
+                        <div class="flex items-center justify-center text-sm text-emerald-200">
+                            <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>Expert matched in 24h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom CTA Section -->
+        <div class="text-center bg-white/70 bg-blur rounded-3xl p-8 border border-white/50 shadow-xl">
+            <div class="max-w-3xl mx-auto">
+                <h3 class="text-2xl font-bold text-gray-900 mb-4 flex items-center justify-center">
+                    <svg class="h-6 w-6 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    Not sure which path to choose?
+                </h3>
+                <p class="text-gray-600 mb-6 text-lg">
+                    Watch our 3-minute explainer video or chat with our friendly team to find your perfect match! 
+                    We're here to make your Swedish study dreams come true! 🇸🇪
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button class="border border-gray-300 bg-white/80 hover:bg-white px-6 py-3 rounded-lg transition-all">
+                        <svg class="h-5 w-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        Watch Video Guide
+                    </button>
+                    <button class="border border-gray-300 bg-white/80 hover:bg-white px-6 py-3 rounded-lg transition-all">
+                        <svg class="h-5 w-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        Chat with Us
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-16 text-center text-gray-500">
+            <div class="flex items-center justify-center mb-4">
+                <div class="flex space-x-2">
+                    <div class="w-2 h-2 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 animate-pulse"></div>
+                    <div class="w-2 h-2 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 animate-pulse" style="animation-delay: 200ms;"></div>
+                    <div class="w-2 h-2 rounded-full bg-gradient-to-r from-purple-400 to-pink-400 animate-pulse" style="animation-delay: 400ms;"></div>
+                </div>
+            </div>
+            <p class="text-lg">
+                <span class="font-semibold text-purple-600">Uniplanr</span> - Where Swedish study dreams become reality! 
+                <br />
+                <span class="text-sm">Your trusted education consultancy partner since day one ✨</span>
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
