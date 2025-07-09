@@ -1,63 +1,81 @@
 
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
-import { AppSidebar } from "./AppSidebar";
-import { Bell, Search } from "lucide-react";
+import { Home, Calendar, BarChart3, Settings } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
+  const navigationItems = [
+    {
+      title: "Dashboard",
+      url: "/",
+      icon: Home,
+    },
+    {
+      title: "Applications",
+      url: "/applications",
+      icon: Calendar,
+    },
+    {
+      title: "Analytics", 
+      url: "/analytics",
+      icon: BarChart3,
+    },
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: Settings,
+    },
+  ];
+
   return (
-    <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <AppSidebar />
-        
-        <SidebarInset className="flex-1">
-          {/* Mobile Header */}
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-white/80 backdrop-blur-sm px-4 lg:hidden">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex items-center space-x-3 flex-1">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-                <Search className="h-4 w-4 text-white" />
-              </div>
-              <h1 className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                UniTracker
-              </h1>
-            </div>
-            <Button variant="ghost" size="sm">
-              <Bell className="h-4 w-4" />
-            </Button>
-          </header>
+    <div className="min-h-screen flex flex-col w-full bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Header */}
+      <header className="flex h-16 shrink-0 items-center justify-center border-b bg-white/80 backdrop-blur-sm px-4">
+        <div className="flex items-center space-x-3">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
+            <Calendar className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              UniTracker
+            </h1>
+            <p className="text-sm text-muted-foreground">Smart Application Management</p>
+          </div>
+        </div>
+      </header>
 
-          {/* Desktop Header */}
-          <header className="hidden lg:flex h-16 shrink-0 items-center gap-2 border-b bg-white/80 backdrop-blur-sm px-6">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex flex-1 items-center justify-between">
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search applications..."
-                  className="pl-10"
-                />
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="ghost" size="sm">
-                  <Bell className="h-4 w-4 mr-2" />
-                  Notifications
-                </Button>
-              </div>
-            </div>
-          </header>
+      {/* Main Content */}
+      <main className="flex-1 p-4 lg:p-6 pb-24">
+        {children}
+      </main>
 
-          {/* Main Content */}
-          <main className="flex-1 p-4 lg:p-6">
-            {children}
-          </main>
-        </SidebarInset>
+      {/* Floating Bottom Navigation */}
+      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
+        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200 p-2">
+          <div className="flex items-center space-x-2">
+            {navigationItems.map((item) => (
+              <NavLink
+                key={item.title}
+                to={item.url}
+                className={({ isActive }) =>
+                  `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 min-w-[60px] ${
+                    isActive
+                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`
+                }
+              >
+                <item.icon className="h-5 w-5 mb-1" />
+                <span className="text-xs font-medium">{item.title}</span>
+              </NavLink>
+            ))}
+          </div>
+        </div>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
