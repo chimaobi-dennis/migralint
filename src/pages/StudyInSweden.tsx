@@ -141,7 +141,10 @@ const StudyInSweden = () => {
         <p className="mb-6 opacity-90">
           Our team of expert advisors is ready to guide you exploring opportunities and find the right programs. Discover what's possible as you chart the right preparations within today.
         </p>
-        <Button className="bg-white text-red-600 hover:bg-gray-100 font-semibold px-8">
+        <Button 
+          className="bg-white text-red-600 hover:bg-gray-100 font-semibold px-8"
+          onClick={() => window.location.href = '/application-journey'}
+        >
           Start Here
         </Button>
       </div>
