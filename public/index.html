@@ -370,23 +370,116 @@
             const container = document.getElementById('application-steps');
             if (!selectedApplication) return;
 
+            const steps = [
+                {
+                    id: 1,
+                    title: "Research & Planning",
+                    description: "Research university requirements and prepare documents",
+                    completed: true
+                },
+                {
+                    id: 2,
+                    title: "Document Preparation",
+                    description: "Gather transcripts, test scores, and references",
+                    completed: selectedApplication.completed.includes("Transcripts")
+                },
+                {
+                    id: 3,
+                    title: "Personal Statement",
+                    description: "Write and review your personal statement",
+                    completed: selectedApplication.completed.includes("Personal Statement")
+                },
+                {
+                    id: 4,
+                    title: "Letters of Recommendation",
+                    description: "Request and follow up on recommendation letters",
+                    completed: selectedApplication.completed.includes("Letters of Rec")
+                },
+                {
+                    id: 5,
+                    title: "Application Submission",
+                    description: "Review and submit your complete application",
+                    completed: selectedApplication.status === "Submitted" || selectedApplication.status === "Under Review"
+                }
+            ];
+
+            const currentStepIndex = steps.findIndex(step => !step.completed);
+            const currentStep = currentStepIndex >= 0 ? currentStepIndex + 1 : steps.length + 1;
+
             container.innerHTML = `
-                <div class="p-6 border-b border-gray-200">
-                    <h3 class="font-semibold text-gray-900">Application Steps</h3>
-                    <p class="text-sm text-gray-600">${selectedApplication.university}</p>
-                </div>
-                <div class="p-6 space-y-4">
-                    ${selectedApplication.requirements.map(req => `
-                        <div class="flex items-center justify-between p-3 border rounded-lg ${selectedApplication.completed.includes(req) ? 'bg-green-50 border-green-200' : 'bg-gray-50'}">
-                            <div class="flex items-center">
-                                ${selectedApplication.completed.includes(req) ? 
-                                    '<svg class="h-5 w-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>' :
-                                    '<div class="w-5 h-5 border-2 border-gray-300 rounded-full mr-3"></div>'
-                                }
-                                <span class="text-sm ${selectedApplication.completed.includes(req) ? 'text-green-800' : 'text-gray-700'}">${req}</span>
+                <div class="p-6">
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Application Steps</h3>
+                        <p class="text-sm text-gray-600 mb-4">
+                            ${selectedApplication.university} - ${selectedApplication.program}
+                        </p>
+                        
+                        <div class="mb-4">
+                            <div class="flex items-center justify-between text-sm mb-2">
+                                <span class="text-gray-600">Overall Progress</span>
+                                <span class="font-medium">${selectedApplication.progress}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="progress-bar h-2 rounded-full" style="width: ${selectedApplication.progress}%"></div>
                             </div>
                         </div>
-                    `).join('')}
+                    </div>
+
+                    <div class="space-y-4">
+                        ${steps.map((step, index) => {
+                            const isActive = index + 1 === currentStep;
+                            const iconColor = step.completed ? 'bg-green-100 text-green-600' : isActive ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-400';
+                            const textColor = step.completed ? 'text-green-900' : isActive ? 'text-blue-900' : 'text-gray-600';
+                            
+                            let icon = '';
+                            if (step.completed) {
+                                icon = '<svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                            } else if (isActive) {
+                                icon = '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                            } else {
+                                icon = '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle></svg>';
+                            }
+
+                            return `
+                                <div class="flex items-start space-x-3">
+                                    <div class="mt-1 flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${iconColor}">
+                                        ${icon}
+                                    </div>
+                                    
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-sm font-medium ${textColor}">
+                                            ${step.title}
+                                        </h4>
+                                        <p class="text-xs text-gray-500 mt-1">${step.description}</p>
+                                        
+                                        ${isActive ? `
+                                            <button class="mt-2 px-3 py-1 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md">
+                                                Start Step
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div class="mt-6 p-4 bg-gray-50 rounded-lg">
+                        <h4 class="text-sm font-medium text-gray-900 mb-2">Quick Actions</h4>
+                        <div class="space-y-2">
+                            <button class="w-full flex items-center justify-start px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                View Requirements
+                            </button>
+                            <button class="w-full flex items-center justify-start px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-100">
+                                <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                                </svg>
+                                Upload Documents
+                            </button>
+                        </div>
+                    </div>
                 </div>
             `;
         }
