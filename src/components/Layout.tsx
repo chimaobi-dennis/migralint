@@ -49,28 +49,28 @@ export function Layout({ children }: LayoutProps) {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 lg:p-6 pb-24">
+      <main className="flex-1 p-4 lg:p-6 pb-20 sm:pb-24">
         {children}
       </main>
 
       {/* Floating Bottom Navigation */}
-      <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-        <div className="bg-white/90 backdrop-blur-md rounded-2xl shadow-lg border border-gray-200 p-2">
-          <div className="flex items-center space-x-2">
+      <div className="fixed bottom-3 sm:bottom-4 left-1/2 transform -translate-x-1/2 z-50 px-4 w-full max-w-sm">
+        <div className="bg-white/90 backdrop-blur-md rounded-xl sm:rounded-2xl shadow-lg border border-gray-200 p-1.5 sm:p-2">
+          <div className="flex items-center justify-between space-x-1 sm:space-x-2">
             {navigationItems.map((item) => (
               <NavLink
                 key={item.title}
                 to={item.url}
                 className={({ isActive }) =>
-                  `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 min-w-[60px] ${
+                  `flex flex-col items-center justify-center p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-200 flex-1 ${
                     isActive
                       ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
                       : "text-gray-600 hover:bg-gray-100"
                   }`
                 }
               >
-                <item.icon className="h-5 w-5 mb-1" />
-                <span className="text-xs font-medium">{item.title}</span>
+                <item.icon className="h-4 w-4 sm:h-5 sm:w-5 mb-0.5 sm:mb-1" />
+                <span className="text-xs font-medium hidden xs:block sm:block">{item.title}</span>
               </NavLink>
             ))}
           </div>
