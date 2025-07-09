@@ -34,7 +34,7 @@ export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col w-full bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Header */}
-      <header className="flex h-16 shrink-0 items-center justify-center border-b bg-white/80 backdrop-blur-sm px-4">
+      <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-center border-b bg-white/80 backdrop-blur-sm px-4">
         <div className="flex items-center space-x-3">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
             <Calendar className="h-6 w-6 text-white" />
