@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { 
   Crown,
   Shield,
@@ -18,12 +19,40 @@ import {
   Clock,
   Award,
   Zap,
-  DollarSign
+  DollarSign,
+  X
 } from "lucide-react";
 
 const PremiumService = () => {
   const navigate = useNavigate();
   const [selectedPlan, setSelectedPlan] = useState("premium");
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [canAgree, setCanAgree] = useState(false);
+  const termsScrollRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = () => {
+    if (termsScrollRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } = termsScrollRef.current;
+      const scrolledToBottom = scrollTop + clientHeight >= scrollHeight - 5;
+      setCanAgree(scrolledToBottom);
+    }
+  };
+
+  useEffect(() => {
+    if (showTermsModal) {
+      setCanAgree(false);
+    }
+  }, [showTermsModal]);
+
+  const handlePayNow = () => {
+    setShowTermsModal(true);
+  };
+
+  const handleAgreeAndContinue = () => {
+    setShowTermsModal(false);
+    // Proceed with payment logic here
+    console.log("Proceeding with payment...");
+  };
 
   const benefits = [
     {
@@ -218,6 +247,7 @@ const PremiumService = () => {
               <Button 
                 size="lg" 
                 className="w-full bg-white text-emerald-600 hover:bg-gray-100 font-bold py-4 text-lg mb-4"
+                onClick={handlePayNow}
               >
                 <DollarSign className="h-5 w-5 mr-2" />
                 Pay Now - SEK300
@@ -293,6 +323,89 @@ const PremiumService = () => {
           </div>
         </div>
       </div>
+
+      {/* Terms and Conditions Modal */}
+      <Dialog open={showTermsModal} onOpenChange={setShowTermsModal}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center">Terms and Conditions</DialogTitle>
+          </DialogHeader>
+          
+          <div 
+            ref={termsScrollRef}
+            onScroll={handleScroll}
+            className="max-h-96 overflow-y-auto px-6 py-4 space-y-4 text-sm leading-relaxed border rounded-lg"
+          >
+            <h3 className="text-lg font-semibold">Premium Service Agreement</h3>
+            
+            <div className="space-y-3">
+              <p><strong>1. Service Description</strong></p>
+              <p>By purchasing our premium service for SEK300, you gain access to:</p>
+              <ul className="list-disc pl-6 space-y-1">
+                <li>Complete document verification and review</li>
+                <li>Expert consultation and guidance throughout your application process</li>
+                <li>One-year full access subscription with real-time notifications</li>
+                <li>Enhanced application support with priority assistance</li>
+                <li>24/7 dedicated support team access</li>
+              </ul>
+
+              <p><strong>2. Success Rate and Guarantee</strong></p>
+              <p>We maintain a 98% admission success rate based on historical data. However, admission decisions are ultimately made by individual universities and are subject to their specific requirements and criteria.</p>
+
+              <p><strong>3. Money-Back Guarantee</strong></p>
+              <p>If you follow our guidance completely and are not admitted to any Master's program you applied to through our service, we offer a full premium package for the next admission round at no additional cost.</p>
+
+              <p><strong>4. Payment Terms</strong></p>
+              <p>The SEK300 fee is a one-time payment that provides access to all premium features for one academic year. Payment is processed securely through our payment system.</p>
+
+              <p><strong>5. Service Limitations</strong></p>
+              <p>While we provide expert guidance and support, we cannot guarantee admission to any specific university or program. Final admission decisions rest solely with the respective educational institutions.</p>
+
+              <p><strong>6. User Responsibilities</strong></p>
+              <p>To be eligible for our guarantee, you must:</p>
+              <ul className="list-disc pl-6 space-y-1">
+                <li>Provide accurate and complete information</li>
+                <li>Follow all recommendations and guidance provided</li>
+                <li>Submit applications within specified deadlines</li>
+                <li>Respond promptly to requests for additional information</li>
+              </ul>
+
+              <p><strong>7. Privacy and Data Protection</strong></p>
+              <p>We are committed to protecting your personal information and will handle all data in accordance with applicable privacy laws and regulations.</p>
+
+              <p><strong>8. Refund Policy</strong></p>
+              <p>Refunds are only available under the specific conditions outlined in our money-back guarantee. No refunds will be provided for other reasons.</p>
+
+              <p><strong>9. Service Modifications</strong></p>
+              <p>We reserve the right to modify our services, but any changes will not affect the core benefits you have paid for during your subscription period.</p>
+
+              <p><strong>10. Contact Information</strong></p>
+              <p>For any questions or concerns regarding these terms, please contact our support team available 24/7 through the platform.</p>
+
+              <p className="text-center font-semibold mt-6">
+                By clicking "Agree and Continue", you acknowledge that you have read, understood, and agree to be bound by these terms and conditions.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowTermsModal(false)}
+              className="w-full sm:w-auto"
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleAgreeAndContinue}
+              disabled={!canAgree}
+              className={`w-full sm:w-auto ${!canAgree ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {canAgree ? 'Agree and Continue' : 'Please scroll to read all terms'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
