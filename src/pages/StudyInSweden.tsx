@@ -143,7 +143,7 @@ const StudyInSweden = () => {
         </p>
         <Button 
           className="bg-white text-red-600 hover:bg-gray-100 font-semibold px-8"
-          onClick={() => window.location.href = '/pathway-selection'}
+          onClick={() => window.location.href = '/application-journey'}
         >
           Start Here
         </Button>
