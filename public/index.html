@@ -166,9 +166,9 @@
                             </div>
                         </div>
 
-                        <div class="divide-y divide-gray-200" id="applications-list">
-                            <!-- Applications will be populated by JavaScript -->
-                        </div>
+        <div class="divide-y divide-gray-200" id="applications-list">
+            <!-- Applications will be populated by JavaScript -->
+        </div>
                     </div>
                 </div>
 
@@ -272,35 +272,96 @@
             return statusMap[status] || "status-not-started";
         }
 
+        function getStatusIcon(status) {
+            const icons = {
+                "Submitted": '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+                "In Progress": '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                "Under Review": '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>',
+                "Not Started": '<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 18.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>'
+            };
+            return icons[status] || icons["Not Started"];
+        }
+
+        function isUrgent(deadline) {
+            const deadlineDate = new Date(deadline);
+            const today = new Date();
+            const diffTime = deadlineDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays <= 7 && diffDays > 0;
+        }
+
+        function formatDeadline(deadline) {
+            const date = new Date(deadline);
+            const today = new Date();
+            const diffTime = date.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 0) return "Overdue";
+            if (diffDays === 0) return "Due Today";
+            if (diffDays === 1) return "Due Tomorrow";
+            if (diffDays <= 7) return `${diffDays} days left`;
+            return date.toLocaleDateString();
+        }
+
         function renderApplications() {
             const container = document.getElementById('applications-list');
             container.innerHTML = applications.map(app => `
-                <div class="p-4 lg:p-6 cursor-pointer hover:bg-gray-50 ${selectedApplication.id === app.id ? 'bg-blue-50 border-l-4 border-blue-500' : ''}" 
+                <div class="p-6 hover:bg-gray-50 transition-all duration-200 cursor-pointer border-l-4 ${
+                    selectedApplication.id === app.id ? 'bg-blue-50 border-l-blue-500' : 'border-l-transparent'
+                } ${isUrgent(app.deadline) ? 'bg-red-50' : ''}" 
                      onclick="selectApplication(${app.id})">
-                    <div class="flex items-center justify-between mb-3">
-                        <div>
-                            <h3 class="font-semibold text-gray-900">${app.university}</h3>
-                            <p class="text-sm text-gray-600">${app.program}</p>
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-1 truncate">
+                                ${app.university}
+                            </h3>
+                            <div class="flex items-center text-sm text-gray-600 mb-2">
+                                <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                ${app.program}
+                            </div>
                         </div>
-                        <span class="status-badge ${getStatusClass(app.status)}">${app.status}</span>
+                        
+                        <span class="status-badge ${getStatusClass(app.status)} flex items-center gap-1 px-3 py-1">
+                            ${getStatusIcon(app.status)}
+                            ${app.status}
+                        </span>
                     </div>
-                    
-                    <div class="mb-3">
-                        <div class="flex items-center justify-between text-sm text-gray-600 mb-1">
-                            <span>Progress</span>
-                            <span>${app.progress}%</span>
+
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between text-sm mb-2">
+                            <span class="text-gray-600">Progress</span>
+                            <span class="font-medium text-gray-900">${app.progress}%</span>
                         </div>
                         <div class="w-full bg-gray-200 rounded-full h-2">
                             <div class="progress-bar h-2 rounded-full" style="width: ${app.progress}%"></div>
                         </div>
                     </div>
-                    
-                    <div class="flex items-center text-sm text-gray-500">
-                        <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        Deadline: ${new Date(app.deadline).toLocaleDateString()}
+
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center text-sm">
+                            <svg class="h-4 w-4 mr-1 ${isUrgent(app.deadline) ? 'text-red-500' : 'text-gray-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span class="${isUrgent(app.deadline) ? 'text-red-600 font-medium' : 'text-gray-600'}">
+                                ${formatDeadline(app.deadline)}
+                            </span>
+                        </div>
+                        
+                        <div class="text-xs text-gray-500">
+                            ${app.completed.length} of ${app.requirements.length} completed
+                        </div>
                     </div>
+
+                    ${isUrgent(app.deadline) ? `
+                        <div class="mt-3 p-2 bg-red-100 border border-red-200 rounded-lg">
+                            <p class="text-xs text-red-800 font-medium">
+                                ⚠️ Deadline approaching! Complete remaining requirements soon.
+                            </p>
+                        </div>
+                    ` : ''}
                 </div>
             `).join('');
         }
