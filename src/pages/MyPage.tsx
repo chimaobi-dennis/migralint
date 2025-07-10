@@ -12,7 +12,10 @@ import {
   FileText,
   MessageSquare,
   Plus,
-  Download
+  Download,
+  Play,
+  X,
+  HelpCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,174 +26,59 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
+import ChatbotModal from "@/components/ChatbotModal";
+import VideoModal from "@/components/VideoModal";
+import { useStepsData, ApplicationStep } from "@/hooks/useStepsData";
 
-interface StepField {
-  id: string;
-  type: 'text' | 'textarea' | 'email' | 'number' | 'date' | 'file';
-  label: string;
-  placeholder?: string;
-  required?: boolean;
-  value?: string;
-}
-
-interface StepButton {
-  id: string;
-  label: string;
-  url?: string;
-  variant?: 'default' | 'outline' | 'secondary';
-}
-
-interface ApplicationStep {
-  id: string;
-  stepNumber: number;
-  title: string;
-  type: 'form' | 'document' | 'information' | 'verification';
-  status: 'completed' | 'current' | 'pending' | 'overdue';
-  deadline?: string;
-  instructions: {
-    header?: string;
-    paragraphs?: string[];
-    bulletPoints?: string[];
-    footer?: string;
-  };
-  buttons: StepButton[];
-  formFields?: StepField[];
-  documents?: {
-    required: string[];
-    uploaded: string[];
-  };
-  alerts?: {
-    type: 'info' | 'warning' | 'error' | 'success';
-    message: string;
-  }[];
-  adminMessage?: string;
-}
+// Interfaces moved to useStepsData hook
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("application");
   const [selectedStep, setSelectedStep] = useState<string>("1");
+  const [chatbotOpen, setChatbotOpen] = useState(false);
+  const [videoModalOpen, setVideoModalOpen] = useState(false);
+  const [currentVideoUrl, setCurrentVideoUrl] = useState("");
+  const [currentVideoTitle, setCurrentVideoTitle] = useState("");
+  
+  const { steps: applicationSteps, updateStep } = useStepsData();
 
-  // Mock data - in real app this would come from database
-  const applicationSteps: ApplicationStep[] = [
-    {
-      id: "1",
-      stepNumber: 1,
-      title: "Create account in the admissions portal",
-      type: "verification",
-      status: "completed",
-      deadline: "2024-01-30",
-      instructions: {
-        header: "Account Creation Required",
-        paragraphs: [
-          "Go to the University Admissions website, the central admission processing unit for all Swedish universities."
-        ],
-        bulletPoints: [
-          "Visit the official admissions portal",
-          "Complete your personal information",
-          "Verify your email address",
-          "Set up your login credentials"
-        ]
-      },
-      buttons: [
-        { id: "create", label: "Create Account", url: "#", variant: "default" },
-        { id: "help", label: "Need Help?", url: "#", variant: "outline" }
-      ],
-      alerts: [
-        {
-          type: "success",
-          message: "Account successfully created and verified!"
+  // Handle program removal
+  const removeProgram = (stepId: string, programToRemove: string) => {
+    const step = applicationSteps.find(s => s.id === stepId);
+    if (step?.programSettings) {
+      const updatedPrograms = step.programSettings.selectedPrograms.filter(p => p !== programToRemove);
+      updateStep(stepId, {
+        programSettings: {
+          ...step.programSettings,
+          selectedPrograms: updatedPrograms
         }
-      ]
-    },
-    {
-      id: "2",
-      stepNumber: 2,
-      title: "Add programs to your application",
-      type: "form",
-      status: "current",
-      deadline: "2024-02-15",
-      instructions: {
-        header: "Program Selection Guidelines",
-        paragraphs: [
-          "NextStep has simplified the program selection process by suggesting programs that you are most eligible for."
-        ],
-        bulletPoints: [
-          "Review the programs carefully tailored to your academic background",
-          "Select up to 8 programs from the recommendations or choose additional ones",
-          "Rank your selections by preference",
-          "Click 'Add to Application' to finalize your selection"
-        ]
-      },
-      buttons: [
-        { id: "add", label: "Add Programs", url: "#", variant: "default" },
-        { id: "guidelines", label: "Read Guidelines", url: "#", variant: "outline" }
-      ],
-      formFields: [
-        {
-          id: "preferred_program",
-          type: "text",
-          label: "Preferred Program",
-          placeholder: "Enter your preferred program",
-          required: true
-        },
-        {
-          id: "backup_programs",
-          type: "textarea",
-          label: "Backup Programs",
-          placeholder: "List your backup program choices",
-          required: false
-        }
-      ],
-      alerts: [
-        {
-          type: "warning",
-          message: "Deadline approaching in 15 days. Complete this step soon!"
-        }
-      ]
-    },
-    {
-      id: "3",
-      stepNumber: 3,
-      title: "Upload all required documents",
-      type: "document",
-      status: "pending",
-      deadline: "2024-02-28",
-      instructions: {
-        header: "Document Upload Requirements",
-        paragraphs: [
-          "Go to your dashboard and submit all required documents. You can make use of NextStep's document writing services to prepare documents that SOP ML, Cover letter etc."
-        ],
-        bulletPoints: [
-          "Ensure all documents are in PDF format",
-          "Maximum file size: 10MB per document",
-          "Documents must be in English or officially translated"
-        ],
-        footer: "All documents will be reviewed within 3-5 business days."
-      },
-      buttons: [
-        { id: "upload", label: "Upload Documents", url: "#", variant: "default" },
-        { id: "services", label: "Document Services", url: "#", variant: "secondary" }
-      ],
-      documents: {
-        required: [
-          "Academic Transcripts",
-          "Statement of Purpose",
-          "Letters of Recommendation",
-          "Language Proficiency Certificate",
-          "CV/Resume"
-        ],
-        uploaded: [
-          "Academic Transcripts",
-          "CV/Resume"
-        ]
-      },
-      alerts: [
-        {
-          type: "info",
-          message: "Document writing services available to help you create professional documents."
-        }
-      ]
+      });
     }
+  };
+
+  // Handle external account save
+  const saveExternalAccount = (stepId: string, username: string, password: string) => {
+    const step = applicationSteps.find(s => s.id === stepId);
+    if (step?.externalAccount) {
+      updateStep(stepId, {
+        externalAccount: {
+          ...step.externalAccount,
+          username,
+          password
+        }
+      });
+    }
+  };
+
+  const openVideoModal = (videoUrl: string, title: string) => {
+    setCurrentVideoUrl(videoUrl);
+    setCurrentVideoTitle(title);
+    setVideoModalOpen(true);
+  };
+
+  // Legacy mock data structure - replaced with dynamic data
+  const legacySteps: ApplicationStep[] = [
+    // Legacy data - now using dynamic data from useStepsData
   ];
 
   const getStepStatusIcon = (status: string) => {
@@ -234,6 +122,10 @@ const MyPage = () => {
           <Button variant="default" size="sm">
             <Edit className="h-4 w-4 mr-2" />
             Update Profile
+          </Button>
+          <Button variant="secondary" size="sm" onClick={() => setChatbotOpen(true)}>
+            <HelpCircle className="h-4 w-4 mr-2" />
+            Get Help
           </Button>
         </div>
       </div>
@@ -319,23 +211,57 @@ const MyPage = () => {
                         )}
                       </div>
                     </div>
-                    <Badge 
-                      variant={currentStep.status === 'completed' ? 'default' : 'secondary'}
-                      className={
-                        currentStep.status === 'completed' 
-                          ? 'bg-green-100 text-green-700' 
-                          : currentStep.status === 'current'
-                          ? 'bg-blue-100 text-blue-700'
-                          : currentStep.status === 'overdue'
-                          ? 'bg-red-100 text-red-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }
-                    >
-                      {currentStep.status.charAt(0).toUpperCase() + currentStep.status.slice(1)}
-                    </Badge>
+                    <div className="flex gap-2">
+                      {currentStep.videoUrl && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openVideoModal(currentStep.videoUrl!, currentStep.title)}
+                        >
+                          <Play className="h-4 w-4 mr-2" />
+                          Watch Video
+                        </Button>
+                      )}
+                      <Badge 
+                        variant={currentStep.status === 'completed' ? 'default' : 'secondary'}
+                        className={
+                          currentStep.status === 'completed' 
+                            ? 'bg-green-100 text-green-700' 
+                            : currentStep.status === 'current'
+                            ? 'bg-blue-100 text-blue-700'
+                            : currentStep.status === 'overdue'
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-gray-100 text-gray-700'
+                        }
+                      >
+                        {currentStep.status.charAt(0).toUpperCase() + currentStep.status.slice(1)}
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
               </Card>
+
+              {/* Video Placeholder */}
+              {currentStep.videoUrl && (
+                <Card className="bg-gradient-to-r from-blue-50 to-purple-50">
+                  <CardContent className="p-6">
+                    <div 
+                      className="relative aspect-video bg-gray-900 rounded-lg overflow-hidden cursor-pointer group"
+                      onClick={() => openVideoModal(currentStep.videoUrl!, currentStep.title)}
+                    >
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/60 transition-colors">
+                        <div className="bg-white/20 p-4 rounded-full group-hover:bg-white/30 transition-colors">
+                          <Play className="h-8 w-8 text-white" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-4 left-4 text-white">
+                        <h4 className="font-semibold">Video Tutorial</h4>
+                        <p className="text-sm opacity-90">Click to watch step-by-step guide</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Alerts */}
               {currentStep.alerts && currentStep.alerts.length > 0 && (
@@ -407,6 +333,11 @@ const MyPage = () => {
                         key={button.id}
                         variant={button.variant || 'default'}
                         className="flex items-center gap-2"
+                        onClick={() => {
+                          if (button.id === 'help') {
+                            setChatbotOpen(true);
+                          }
+                        }}
                       >
                         {button.label}
                       </Button>
@@ -414,6 +345,97 @@ const MyPage = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* External Account Integration */}
+              {currentStep.type === 'verification' && currentStep.externalAccount && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <User className="h-5 w-5" />
+                      External Portal Account
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">
+                          Username
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder="Enter your portal username"
+                          defaultValue={currentStep.externalAccount.username}
+                          onChange={(e) => {
+                            if (currentStep.externalAccount) {
+                              saveExternalAccount(currentStep.id, e.target.value, currentStep.externalAccount.password || '');
+                            }
+                          }}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-700">
+                          Password
+                        </label>
+                        <Input
+                          type="password"
+                          placeholder="Enter your portal password"
+                          defaultValue={currentStep.externalAccount.password}
+                          onChange={(e) => {
+                            if (currentStep.externalAccount) {
+                              saveExternalAccount(currentStep.id, currentStep.externalAccount.username || '', e.target.value);
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      Portal URL: {currentStep.externalAccount.portalUrl}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Program Selection */}
+              {currentStep.type === 'program' && currentStep.programSettings && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Selected Programs ({currentStep.programSettings.selectedPrograms.length}/{currentStep.programSettings.maxPrograms})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {currentStep.programSettings.selectedPrograms.length > 0 ? (
+                      <div className="space-y-2">
+                        {currentStep.programSettings.selectedPrograms.map((program, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-blue-50">
+                            <span className="font-medium text-blue-900">{program}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeProgram(currentStep.id, program)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-muted-foreground">No programs selected yet.</p>
+                    )}
+                    
+                    {currentStep.programSettings.selectedPrograms.length < currentStep.programSettings.maxPrograms && (
+                      <Alert>
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>
+                          You can select up to {currentStep.programSettings.maxPrograms - currentStep.programSettings.selectedPrograms.length} more programs.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Form Fields */}
               {currentStep.formFields && currentStep.formFields.length > 0 && (
@@ -523,6 +545,15 @@ const MyPage = () => {
           )}
         </div>
       </div>
+
+      {/* Modals */}
+      <ChatbotModal isOpen={chatbotOpen} onClose={() => setChatbotOpen(false)} />
+      <VideoModal 
+        isOpen={videoModalOpen} 
+        onClose={() => setVideoModalOpen(false)}
+        videoUrl={currentVideoUrl}
+        title={currentVideoTitle}
+      />
     </div>
   );
 };

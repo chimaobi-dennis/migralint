@@ -42,88 +42,10 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-interface StepField {
-  id: string;
-  type: 'text' | 'textarea' | 'email' | 'number' | 'date' | 'file';
-  label: string;
-  placeholder?: string;
-  required?: boolean;
-  value?: string;
-  jsId?: string;
-  wireModel?: string;
-}
-
-interface StepButton {
-  id: string;
-  label: string;
-  url?: string;
-  variant?: 'default' | 'outline' | 'secondary';
-  jsId?: string;
-  wireClick?: string;
-  icon?: string;
-}
-
-interface ApplicationStep {
-  id: string;
-  stepNumber: number;
-  title: string;
-  type: 'form' | 'document' | 'information' | 'verification';
-  status: 'completed' | 'current' | 'pending' | 'overdue';
-  deadline?: string;
-  instructions: {
-    header?: string;
-    paragraphs?: string[];
-    bulletPoints?: string[];
-    footer?: string;
-  };
-  buttons: StepButton[];
-  formFields?: StepField[];
-  documents?: {
-    required: string[];
-    uploaded: string[];
-  };
-  alerts?: {
-    type: 'info' | 'warning' | 'error' | 'success';
-    message: string;
-  }[];
-  adminMessage?: string;
-}
+import { useStepsData, ApplicationStep, StepField, StepButton } from "@/hooks/useStepsData";
 
 const AdminSteps = () => {
-  const [steps, setSteps] = useState<ApplicationStep[]>([
-    {
-      id: "1",
-      stepNumber: 1,
-      title: "Create account in the admissions portal",
-      type: "verification",
-      status: "completed",
-      deadline: "2024-01-30",
-      instructions: {
-        header: "Account Creation Required",
-        paragraphs: [
-          "Go to the University Admissions website, the central admission processing unit for all Swedish universities."
-        ],
-        bulletPoints: [
-          "Visit the official admissions portal",
-          "Complete your personal information",
-          "Verify your email address",
-          "Set up your login credentials"
-        ]
-      },
-      buttons: [
-        { id: "create", label: "Create Account", url: "#", variant: "default" },
-        { id: "help", label: "Need Help?", url: "#", variant: "outline" }
-      ],
-      alerts: [
-        {
-          type: "success",
-          message: "Account successfully created and verified!"
-        }
-      ]
-    }
-  ]);
-
+  const { steps, updateSteps, addStep, deleteStep: removeStep } = useStepsData();
   const [editingStep, setEditingStep] = useState<ApplicationStep | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -137,7 +59,8 @@ const AdminSteps = () => {
       instructions: {
         paragraphs: [""]
       },
-      buttons: []
+      buttons: [],
+      videoUrl: ""
     };
     setEditingStep(newStep);
     setIsCreating(true);
@@ -147,16 +70,20 @@ const AdminSteps = () => {
     if (!editingStep) return;
 
     if (isCreating) {
-      setSteps([...steps, editingStep]);
+      addStep(editingStep);
       setIsCreating(false);
     } else {
-      setSteps(steps.map(step => step.id === editingStep.id ? editingStep : step));
+      const updatedSteps = steps.map(step => step.id === editingStep.id ? editingStep : step);
+      updateSteps(updatedSteps);
     }
     setEditingStep(null);
   };
 
-  const deleteStep = (stepId: string) => {
-    setSteps(steps.filter(step => step.id !== stepId));
+  const deleteStepHandler = (stepId: string) => {
+    removeStep(stepId);
+    if (editingStep?.id === stepId) {
+      setEditingStep(null);
+    }
   };
 
   const moveStep = (stepId: string, direction: 'up' | 'down') => {
@@ -174,7 +101,7 @@ const AdminSteps = () => {
         step.stepNumber = index + 1;
       });
       
-      setSteps(newSteps);
+      updateSteps(newSteps);
     }
   };
 
@@ -326,7 +253,7 @@ const AdminSteps = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => deleteStep(step.id)}
+                            onClick={() => deleteStepHandler(step.id)}
                             className="h-6 w-6 p-0 text-red-500 hover:text-red-700"
                           >
                             <Trash2 className="h-3 w-3" />
@@ -393,8 +320,9 @@ const AdminSteps = () => {
               
               <CardContent>
                 <Tabs defaultValue="basic" className="space-y-4">
-                  <TabsList className="grid w-full grid-cols-5">
+                  <TabsList className="grid w-full grid-cols-6">
                     <TabsTrigger value="basic">Basic</TabsTrigger>
+                    <TabsTrigger value="video">Video</TabsTrigger>
                     <TabsTrigger value="instructions">Instructions</TabsTrigger>
                     <TabsTrigger value="buttons">Buttons</TabsTrigger>
                     <TabsTrigger value="forms">Forms</TabsTrigger>
@@ -432,6 +360,7 @@ const AdminSteps = () => {
                             <SelectItem value="document">Document</SelectItem>
                             <SelectItem value="information">Information</SelectItem>
                             <SelectItem value="verification">Verification</SelectItem>
+                            <SelectItem value="program">Program Selection</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -482,6 +411,82 @@ const AdminSteps = () => {
                         />
                       </div>
                     </div>
+
+                    {/* Program Settings */}
+                    {editingStep.type === 'program' && (
+                      <div className="space-y-4 border-t pt-4">
+                        <Label>Program Settings</Label>
+                        <div className="space-y-2">
+                          <Label>Maximum Programs Users Can Select</Label>
+                          <Input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={editingStep.programSettings?.maxPrograms || 8}
+                            onChange={(e) => setEditingStep({
+                              ...editingStep,
+                              programSettings: {
+                                maxPrograms: parseInt(e.target.value) || 8,
+                                selectedPrograms: editingStep.programSettings?.selectedPrograms || []
+                              }
+                            })}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* External Account Settings */}
+                    {editingStep.type === 'verification' && (
+                      <div className="space-y-4 border-t pt-4">
+                        <Label>External Portal Settings</Label>
+                        <div className="space-y-2">
+                          <Label>Portal URL</Label>
+                          <Input
+                            value={editingStep.externalAccount?.portalUrl || ''}
+                            onChange={(e) => setEditingStep({
+                              ...editingStep,
+                              externalAccount: {
+                                ...editingStep.externalAccount,
+                                portalUrl: e.target.value,
+                                username: editingStep.externalAccount?.username || '',
+                                password: editingStep.externalAccount?.password || ''
+                              }
+                            })}
+                            placeholder="https://portal.example.com"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  {/* Video Tab */}
+                  <TabsContent value="video" className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Video URL</Label>
+                      <Input
+                        value={editingStep.videoUrl || ''}
+                        onChange={(e) => setEditingStep({
+                          ...editingStep,
+                          videoUrl: e.target.value
+                        })}
+                        placeholder="Enter YouTube video URL"
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Enter a YouTube URL (e.g., https://www.youtube.com/watch?v=...)
+                      </p>
+                    </div>
+                    
+                    {editingStep.videoUrl && (
+                      <div className="mt-4">
+                        <Label>Video Preview</Label>
+                        <div className="mt-2 aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+                          <div className="text-center">
+                            <Play className="h-12 w-12 mx-auto text-gray-400 mb-2" />
+                            <p className="text-sm text-gray-600">Video will display here</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </TabsContent>
 
                   {/* Instructions Tab */}
