@@ -208,8 +208,8 @@ export default function MockInterview({ userInfo }: MockInterviewProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="h-full bg-background p-4 flex flex-col">
+      <div className="max-w-4xl mx-auto flex-1 flex flex-col">
         {/* Header */}
         <Card className="mb-4">
           <CardHeader>
@@ -239,7 +239,7 @@ export default function MockInterview({ userInfo }: MockInterviewProps) {
         </Card>
 
         {/* Chat Interface */}
-        <Card className="h-[600px] flex flex-col">
+        <Card className="flex-1 flex flex-col min-h-0">
           <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message) => (
               <div

@@ -36,15 +36,17 @@ export default function VisaInfoModal({ isOpen, onClose }: VisaInfoModalProps) {
         setShowInterview(false);
         onClose();
       }}>
-        <DialogContent className="max-w-6xl h-[90vh] p-0">
-          <MockInterview 
-            userInfo={{
-              name: userVisaInfo.name,
-              program: userVisaInfo.program,
-              university: userVisaInfo.university,
-              country: userVisaInfo.country
-            }}
-          />
+        <DialogContent className="max-w-5xl max-h-[85vh] overflow-hidden flex flex-col p-0">
+          <div className="h-full overflow-auto">
+            <MockInterview 
+              userInfo={{
+                name: userVisaInfo.name,
+                program: userVisaInfo.program,
+                university: userVisaInfo.university,
+                country: userVisaInfo.country
+              }}
+            />
+          </div>
         </DialogContent>
       </Dialog>
     );
@@ -52,7 +54,7 @@ export default function VisaInfoModal({ isOpen, onClose }: VisaInfoModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />

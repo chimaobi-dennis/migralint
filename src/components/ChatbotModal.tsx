@@ -111,9 +111,9 @@ const ChatbotModal = ({ isOpen, onClose }: ChatbotModalProps) => {
 
         <Separator />
 
-        <CardContent className="flex-1 flex flex-col p-0">
-          <ScrollArea className="flex-1 p-4">
-            <div className="space-y-4">
+        <CardContent className="flex-1 flex flex-col p-0 min-h-0">
+          <ScrollArea className="flex-1 p-4 max-h-[400px]">
+            <div className="space-y-4 pr-4">
               {messages.map((message) => (
                 <div
                   key={message.id}
