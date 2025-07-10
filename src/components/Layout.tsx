@@ -56,39 +56,40 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
 
-      {/* Floating Bottom Navigation */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
-        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/60 px-2 py-3">
-          <div className="flex items-center space-x-1">
+      {/* Floating Navigation - Left Side */}
+      <div className="fixed bottom-6 left-6 z-40">
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/60 transition-all duration-300">
+          <div className="flex items-center">
             {/* Nav Toggle Button */}
             <Button
               onClick={() => setIsNavExpanded(!isNavExpanded)}
-              className="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 min-w-[60px] text-gray-600 hover:bg-gray-100 hover:scale-102"
+              className="h-12 w-12 rounded-2xl transition-all duration-300 text-gray-600 hover:bg-gray-100 hover:scale-105 sm:h-16 sm:w-16 sm:rounded-2xl"
               variant="ghost"
               size="icon"
             >
-              <Menu className="h-5 w-5 mb-1" />
-              <span className="text-xs font-medium">Menu</span>
+              <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
 
             {/* Navigation Items - Only visible when expanded */}
-            <div className={`flex items-center space-x-1 transition-all duration-300 ${
-              isNavExpanded ? 'opacity-100 max-w-none' : 'opacity-0 max-w-0 overflow-hidden'
+            <div className={`flex items-center transition-all duration-300 ease-in-out ${
+              isNavExpanded 
+                ? 'opacity-100 max-w-none translate-x-0 ml-1' 
+                : 'opacity-0 max-w-0 translate-x-[-10px] overflow-hidden'
             }`}>
               {navigationItems.map((item) => (
                 <NavLink
                   key={item.title}
                   to={item.url}
                   className={({ isActive }) =>
-                    `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 min-w-[60px] ${
+                    `flex flex-col items-center justify-center transition-all duration-200 h-12 w-12 rounded-xl sm:h-16 sm:w-16 sm:rounded-2xl ${
                       isActive
                         ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md scale-105"
-                        : "text-gray-600 hover:bg-gray-100 hover:scale-102"
+                        : "text-gray-600 hover:bg-gray-100 hover:scale-105"
                     }`
                   }
                 >
-                  <item.icon className="h-5 w-5 mb-1" />
-                  <span className="text-xs font-medium">{item.title}</span>
+                  <item.icon className="h-4 w-4 sm:h-5 sm:w-5 mb-0.5 sm:mb-1" />
+                  <span className="text-[10px] sm:text-xs font-medium hidden sm:block">{item.title}</span>
                 </NavLink>
               ))}
             </div>
