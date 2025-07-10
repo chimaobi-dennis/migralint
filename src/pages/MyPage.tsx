@@ -45,6 +45,7 @@ import ProgramSelectionModal from "@/components/ProgramSelectionModal";
 import { useStepsData, ApplicationStep } from "@/hooks/useStepsData";
 import { useScholarshipSteps, ScholarshipStep } from "@/hooks/useScholarshipSteps";
 import { useAdmissionSteps } from "@/hooks/useAdmissionSteps";
+import { useVisaSteps } from "@/hooks/useVisaSteps";
 import { useActivityLogger, ActivityLog } from "@/components/ActivityLogger";
 
 const MyPage = () => {
@@ -64,6 +65,7 @@ const MyPage = () => {
   const { steps: applicationSteps, updateStep } = useStepsData();
   const { steps: scholarshipSteps, updateStep: updateScholarshipStep } = useScholarshipSteps();
   const { applications, acceptAdmission, declineAdmission } = useAdmissionSteps();
+  const { steps: visaSteps, updateStep: updateVisaStep } = useVisaSteps();
   const { activities, logActivity } = useActivityLogger();
 
   // Handle program removal
@@ -858,28 +860,122 @@ const MyPage = () => {
             </TabsContent>
 
             {/* Visa Application Tab */}
-            <TabsContent value="visa" className="p-6 space-y-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="text-center space-y-4">
-                    <UserCheck className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                    <h3 className="text-lg font-medium mb-2">Visa Application</h3>
-                    <p className="text-gray-600 mb-4">Visa application process will be guided here.</p>
-                    
-                    {/* YouTube Video Button */}
-                    <div className="flex justify-center">
-                      <Button
-                        onClick={() => openVideoModal("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "Visa Application Guide")}
-                        className="flex items-center gap-2"
-                        variant="outline"
-                      >
-                        <Youtube className="h-4 w-4 text-red-500" />
-                        Watch Visa Guide Video
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            <TabsContent value="visa" className="p-6">
+              <div className="grid gap-6">
+                {/* YouTube Video Button */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Visa Application Guide
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={() => openVideoModal("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "Visa Application Guide")}
+                      className="w-full flex items-center gap-2"
+                      variant="outline"
+                    >
+                      <Youtube className="h-4 w-4 text-red-500" />
+                      Watch Visa Application Guide Video
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Visa Steps */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Visa Application Steps</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {visaSteps.map((step) => (
+                      <div key={step.id} className="border rounded-lg p-4 space-y-3">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold flex items-center gap-2">
+                              Step {step.stepNumber}: {step.title}
+                              <Badge variant={
+                                step.status === 'completed' ? 'default' :
+                                step.status === 'current' ? 'secondary' :
+                                step.status === 'overdue' ? 'destructive' : 'outline'
+                              }>
+                                {step.status}
+                              </Badge>
+                            </h3>
+                            {step.deadline && (
+                              <p className="text-sm text-muted-foreground">Deadline: {step.deadline}</p>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {step.instructions.header && (
+                          <div className="space-y-2">
+                            <h4 className="font-medium">{step.instructions.header}</h4>
+                            {step.instructions.paragraphs?.map((paragraph, index) => (
+                              <p key={index} className="text-sm text-muted-foreground">{paragraph}</p>
+                            ))}
+                            {step.instructions.bulletPoints && step.instructions.bulletPoints.length > 0 && (
+                              <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                                {step.instructions.bulletPoints.map((point, index) => (
+                                  <li key={index}>{point}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        )}
+
+                        {step.documents && (
+                          <div className="space-y-2">
+                            <h4 className="font-medium text-sm">Required Documents:</h4>
+                            <div className="grid grid-cols-2 gap-2">
+                              {step.documents.required.map((doc) => (
+                                <div key={doc} className="flex items-center gap-2 text-sm">
+                                  <div className={`w-2 h-2 rounded-full ${
+                                    step.documents?.uploaded.includes(doc) ? 'bg-green-500' : 'bg-gray-300'
+                                  }`} />
+                                  {doc}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {step.appointmentDetails && (
+                          <div className="bg-muted/50 p-3 rounded-md space-y-1">
+                            <p className="font-medium text-sm">Appointment Details:</p>
+                            <p className="text-sm">Location: {step.appointmentDetails.location}</p>
+                            <p className="text-sm">Date: {step.appointmentDetails.date}</p>
+                            <p className="text-sm">Time: {step.appointmentDetails.time}</p>
+                          </div>
+                        )}
+
+                        {step.alerts?.map((alert, index) => (
+                          <div key={index} className={`p-2 rounded text-sm ${
+                            alert.type === 'warning' ? 'bg-orange-100 text-orange-800' :
+                            alert.type === 'error' ? 'bg-red-100 text-red-800' :
+                            alert.type === 'success' ? 'bg-green-100 text-green-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {alert.message}
+                          </div>
+                        ))}
+
+                        <div className="flex gap-2">
+                          {step.buttons.map((button) => (
+                            <Button 
+                              key={button.id} 
+                              variant={button.variant || 'default'}
+                              size="sm"
+                            >
+                              {button.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
             </TabsContent>
 
             {/* Activity Log Tab */}

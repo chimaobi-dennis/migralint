@@ -12,6 +12,7 @@ import PathwaySelection from "./pages/PathwaySelection";
 import SelfDirectedPath from "./pages/SelfDirectedPath";
 import PremiumService from "./pages/PremiumService";
 import MyPage from "./pages/MyPage";
+import AdminScholarshipSteps from "./pages/AdminScholarshipSteps";
 import AdminSteps from "./pages/AdminSteps";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/self-directed" element={<Layout><SelfDirectedPath /></Layout>} />
           <Route path="/premium-service" element={<Layout><PremiumService /></Layout>} />
           <Route path="/my-page" element={<Layout><MyPage /></Layout>} />
+          <Route path="/admin/scholarship-steps" element={<Layout><AdminScholarshipSteps /></Layout>} />
           <Route path="/admin/steps" element={<Layout><AdminSteps /></Layout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
