@@ -44,6 +44,7 @@ import FileManagerModal from "@/components/FileManagerModal";
 import ProgramSelectionModal from "@/components/ProgramSelectionModal";
 import { useStepsData, ApplicationStep } from "@/hooks/useStepsData";
 import { useScholarshipSteps, ScholarshipStep } from "@/hooks/useScholarshipSteps";
+import { useAdmissionSteps } from "@/hooks/useAdmissionSteps";
 import { useActivityLogger, ActivityLog } from "@/components/ActivityLogger";
 
 const MyPage = () => {
@@ -62,6 +63,7 @@ const MyPage = () => {
   
   const { steps: applicationSteps, updateStep } = useStepsData();
   const { steps: scholarshipSteps, updateStep: updateScholarshipStep } = useScholarshipSteps();
+  const { applications, acceptAdmission, declineAdmission } = useAdmissionSteps();
   const { activities, logActivity } = useActivityLogger();
 
   // Handle program removal
@@ -783,10 +785,74 @@ const MyPage = () => {
             {/* Admission Status Tab */}
             <TabsContent value="admission" className="p-6">
               <Card>
-                <CardContent className="p-6 text-center">
-                  <BarChart3 className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Admission Status</h3>
-                  <p className="text-gray-600">Your admission status and updates will appear here.</p>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5" />
+                    Admission Applications
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {applications.map((app) => (
+                    <div key={app.id} className="border rounded-lg p-4 space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold">{app.programName}</h3>
+                          <p className="text-sm text-muted-foreground">{app.universityName}</p>
+                          <p className="text-xs text-muted-foreground">{app.degree} • Applied: {new Date(app.appliedDate).toLocaleDateString()}</p>
+                        </div>
+                        <Badge variant={
+                          app.applicationStatus === 'admitted' ? 'default' : 
+                          app.applicationStatus === 'rejected' ? 'destructive' :
+                          app.applicationStatus === 'under_review' ? 'secondary' : 'outline'
+                        }>
+                          {app.applicationStatus.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                      
+                      {app.applicationStatus === 'admitted' && (
+                        <div className="space-y-3 p-3 bg-muted/50 rounded-md">
+                          <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div><span className="font-medium">Start Date:</span> {app.startDate}</div>
+                            <div><span className="font-medium">Tuition:</span> {app.tuitionFee}</div>
+                            <div><span className="font-medium">Deadline:</span> {app.deadline}</div>
+                          </div>
+                          
+                          {app.admissionStatus === 'pending' ? (
+                            <div className="flex gap-2 mt-3">
+                              <Button 
+                                onClick={() => acceptAdmission(app.id)}
+                                size="sm"
+                                className="flex-1"
+                              >
+                                Accept Admission
+                              </Button>
+                              <Button 
+                                onClick={() => declineAdmission(app.id)}
+                                variant="outline" 
+                                size="sm"
+                                className="flex-1"
+                              >
+                                Decline
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="mt-3">
+                              <Badge variant={app.admissionStatus === 'accepted' ? 'default' : 'secondary'}>
+                                {app.admissionStatus === 'accepted' ? 'Admission Accepted' : 'Admission Declined'}
+                              </Badge>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      {app.applicationStatus === 'under_review' && (
+                        <div className="space-y-2">
+                          <Progress value={75} className="h-2" />
+                          <p className="text-xs text-muted-foreground">Application under review</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             </TabsContent>
