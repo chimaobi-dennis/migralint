@@ -46,6 +46,7 @@ import { useStepsData, ApplicationStep } from "@/hooks/useStepsData";
 import { useScholarshipSteps, ScholarshipStep } from "@/hooks/useScholarshipSteps";
 import { useAdmissionSteps } from "@/hooks/useAdmissionSteps";
 import { useVisaSteps } from "@/hooks/useVisaSteps";
+import VisaInfoModal from "@/components/VisaInfoModal";
 import { useActivityLogger, ActivityLog } from "@/components/ActivityLogger";
 
 const MyPage = () => {
@@ -66,6 +67,8 @@ const MyPage = () => {
   const { steps: scholarshipSteps, updateStep: updateScholarshipStep } = useScholarshipSteps();
   const { applications, acceptAdmission, declineAdmission } = useAdmissionSteps();
   const { steps: visaSteps, updateStep: updateVisaStep } = useVisaSteps();
+  
+  const [showVisaInfoModal, setShowVisaInfoModal] = useState(false);
   const { activities, logActivity } = useActivityLogger();
 
   // Handle program removal
@@ -970,7 +973,12 @@ const MyPage = () => {
                               {button.label}
                             </Button>
                           ))}
-                        </div>
+        {/* Visa Info Modal */}
+        <VisaInfoModal 
+          isOpen={showVisaInfoModal} 
+          onClose={() => setShowVisaInfoModal(false)} 
+        />
+      </div>
                       </div>
                     ))}
                   </CardContent>
@@ -1044,8 +1052,14 @@ const MyPage = () => {
           >
             <MessageSquare className="h-5 w-5" />
           </Button>
-        </div>
+        
+        {/* Visa Info Modal */}
+        <VisaInfoModal 
+          isOpen={showVisaInfoModal} 
+          onClose={() => setShowVisaInfoModal(false)} 
+        />
       </div>
+    </div>
 
       {/* Modals */}
       <ChatbotModal 
