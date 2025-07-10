@@ -73,23 +73,25 @@ const ChatbotModal = ({ isOpen, onClose }: ChatbotModalProps) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <Card className="w-full max-w-md h-[600px] flex flex-col">
-        <CardHeader className="pb-3">
+      <Card className="w-full max-w-md h-[600px] flex flex-col shadow-xl border-0">
+        <CardHeader className="pb-3 bg-gradient-to-r from-primary/10 to-primary/5 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <MessageSquare className="h-5 w-5 text-primary" />
+              </div>
               <CardTitle className="text-lg">Help Center</CardTitle>
             </div>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <Button variant="ghost" size="sm" onClick={onClose} className="hover:bg-destructive/10 hover:text-destructive">
               <X className="h-4 w-4" />
             </Button>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-2 mt-3">
             <Button
               variant={activeChat === 'ai' ? 'default' : 'outline'}
               size="sm"
-              className="flex-1"
+              className="flex-1 rounded-full"
               onClick={() => setActiveChat('ai')}
             >
               <Bot className="h-4 w-4 mr-2" />
@@ -98,7 +100,7 @@ const ChatbotModal = ({ isOpen, onClose }: ChatbotModalProps) => {
             <Button
               variant={activeChat === 'officer' ? 'default' : 'outline'}
               size="sm"
-              className="flex-1"
+              className="flex-1 rounded-full"
               onClick={switchToOfficer}
             >
               <Phone className="h-4 w-4 mr-2" />
@@ -119,23 +121,27 @@ const ChatbotModal = ({ isOpen, onClose }: ChatbotModalProps) => {
                     message.type === 'user' ? 'justify-end' : 'justify-start'
                   }`}
                 >
-                  {message.type !== 'user' && (
+                   {message.type !== 'user' && (
                     <div className="flex-shrink-0">
                       {message.type === 'ai' ? (
-                        <Bot className="h-8 w-8 p-1.5 bg-blue-100 text-blue-600 rounded-full" />
+                        <div className="h-8 w-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                          <Bot className="h-4 w-4 text-white" />
+                        </div>
                       ) : (
-                        <User className="h-8 w-8 p-1.5 bg-green-100 text-green-600 rounded-full" />
+                        <div className="h-8 w-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
+                          <User className="h-4 w-4 text-white" />
+                        </div>
                       )}
                     </div>
                   )}
                   
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
+                    className={`max-w-[80%] p-3 rounded-2xl shadow-sm ${
                       message.type === 'user'
-                        ? 'bg-primary text-primary-foreground'
+                        ? 'bg-gradient-to-r from-primary to-primary/90 text-primary-foreground'
                         : message.type === 'ai'
-                        ? 'bg-blue-50 text-blue-900'
-                        : 'bg-green-50 text-green-900'
+                        ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-slate-800 border border-blue-100'
+                        : 'bg-gradient-to-r from-green-50 to-emerald-50 text-slate-800 border border-green-100'
                     }`}
                   >
                     <p className="text-sm">{message.content}</p>
@@ -146,7 +152,9 @@ const ChatbotModal = ({ isOpen, onClose }: ChatbotModalProps) => {
 
                   {message.type === 'user' && (
                     <div className="flex-shrink-0">
-                      <User className="h-8 w-8 p-1.5 bg-gray-100 text-gray-600 rounded-full" />
+                      <div className="h-8 w-8 bg-gradient-to-br from-slate-600 to-slate-700 rounded-full flex items-center justify-center">
+                        <User className="h-4 w-4 text-white" />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -156,15 +164,16 @@ const ChatbotModal = ({ isOpen, onClose }: ChatbotModalProps) => {
 
           <Separator />
 
-          <div className="p-4">
+          <div className="p-4 bg-muted/30">
             <div className="flex gap-2">
               <Input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Type your message..."
                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                className="rounded-full border-0 bg-background shadow-sm"
               />
-              <Button onClick={handleSendMessage}>
+              <Button onClick={handleSendMessage} className="rounded-full px-4">
                 <Send className="h-4 w-4" />
               </Button>
             </div>

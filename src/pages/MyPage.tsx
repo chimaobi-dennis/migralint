@@ -963,7 +963,7 @@ const MyPage = () => {
                           </div>
                         ))}
 
-                        <div className="flex gap-2">
+                         <div className="flex gap-2">
                           {step.buttons.map((button) => (
                             <Button 
                               key={button.id} 
@@ -973,16 +973,33 @@ const MyPage = () => {
                               {button.label}
                             </Button>
                           ))}
-        {/* Visa Info Modal */}
-        <VisaInfoModal 
-          isOpen={showVisaInfoModal} 
-          onClose={() => setShowVisaInfoModal(false)} 
-        />
-      </div>
+                        </div>
                       </div>
                     ))}
                   </CardContent>
                 </Card>
+                
+                {/* Mock Visa Interview */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5" />
+                      Visa Interview Preparation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground mb-4">
+                      Practice your visa interview with our AI-powered mock interview system. Get personalized feedback and improve your confidence.
+                    </p>
+                    <Button 
+                      onClick={() => setShowVisaInfoModal(true)}
+                      className="w-full flex items-center gap-2"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      Try Mock Visa Interview
+                    </Button>
+                  </CardContent>
+                 </Card>
               </div>
             </TabsContent>
 
@@ -1052,17 +1069,11 @@ const MyPage = () => {
           >
             <MessageSquare className="h-5 w-5" />
           </Button>
-        
-        {/* Visa Info Modal */}
-        <VisaInfoModal 
-          isOpen={showVisaInfoModal} 
-          onClose={() => setShowVisaInfoModal(false)} 
-        />
+        </div>
       </div>
-    </div>
 
       {/* Modals */}
-      <ChatbotModal 
+      <ChatbotModal
         isOpen={chatbotOpen}
         onClose={() => setChatbotOpen(false)}
       />
@@ -1092,6 +1103,12 @@ const MyPage = () => {
         }}
         selectedPrograms={applicationSteps.find(s => s.id === currentStepId)?.programSettings?.selectedPrograms || []}
         maxPrograms={applicationSteps.find(s => s.id === currentStepId)?.programSettings?.maxPrograms || 8}
+      />
+
+      {/* Visa Info Modal */}
+      <VisaInfoModal 
+        isOpen={showVisaInfoModal} 
+        onClose={() => setShowVisaInfoModal(false)} 
       />
     </div>
   );
