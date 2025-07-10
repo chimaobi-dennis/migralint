@@ -24,7 +24,8 @@ import {
   GraduationCap,
   FileCheck,
   UserCheck,
-  BarChart3
+  BarChart3,
+  Youtube
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,11 +43,13 @@ import VideoModal from "@/components/VideoModal";
 import FileManagerModal from "@/components/FileManagerModal";
 import ProgramSelectionModal from "@/components/ProgramSelectionModal";
 import { useStepsData, ApplicationStep } from "@/hooks/useStepsData";
+import { useScholarshipSteps, ScholarshipStep } from "@/hooks/useScholarshipSteps";
 import { useActivityLogger, ActivityLog } from "@/components/ActivityLogger";
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("application");
   const [selectedStep, setSelectedStep] = useState<string>("1");
+  const [selectedScholarshipStep, setSelectedScholarshipStep] = useState<string>("sch1");
   const [chatbotOpen, setChatbotOpen] = useState(false);
   const [videoModalOpen, setVideoModalOpen] = useState(false);
   const [currentVideoUrl, setCurrentVideoUrl] = useState("");
@@ -58,6 +61,7 @@ const MyPage = () => {
   const [emailNotifications, setEmailNotifications] = useState(true);
   
   const { steps: applicationSteps, updateStep } = useStepsData();
+  const { steps: scholarshipSteps, updateStep: updateScholarshipStep } = useScholarshipSteps();
   const { activities, logActivity } = useActivityLogger();
 
   // Handle program removal
@@ -567,14 +571,213 @@ const MyPage = () => {
             </TabsContent>
 
             {/* Scholarships Tab */}
-            <TabsContent value="scholarships" className="p-6">
+            <TabsContent value="scholarships" className="p-6 space-y-6">
+              {/* Progress Overview */}
               <Card>
-                <CardContent className="p-6 text-center">
-                  <GraduationCap className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Scholarship Information</h3>
-                  <p className="text-gray-600">Scholarship application steps will be available here.</p>
+                <CardContent className="p-6">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div className="space-y-2">
+                      <h3 className="text-lg font-semibold">Scholarship Progress</h3>
+                      <p className="text-gray-600">
+                        {scholarshipSteps.filter(s => s.status === 'completed').length} of {scholarshipSteps.length} steps completed
+                      </p>
+                    </div>
+                    <div className="w-full lg:w-64">
+                      <Progress value={(scholarshipSteps.filter(s => s.status === 'completed').length / scholarshipSteps.length) * 100} className="h-3" />
+                      <p className="text-right text-sm text-gray-500 mt-1">
+                        {Math.round((scholarshipSteps.filter(s => s.status === 'completed').length / scholarshipSteps.length) * 100)}%
+                      </p>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
+
+              {/* Scholarship Steps */}
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                {/* Steps List */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Scholarship Steps</h3>
+                  {scholarshipSteps.map((step, index) => (
+                    <Card 
+                      key={step.id}
+                      className={`cursor-pointer transition-all hover:shadow-md ${
+                        selectedScholarshipStep === step.id ? 'border-blue-500 bg-blue-50' : ''
+                      }`}
+                      onClick={() => setSelectedScholarshipStep(step.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-4">
+                          <div className="flex-shrink-0 mt-1">
+                            {getStepStatusIcon(step.status)}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <h4 className="font-medium">{step.title}</h4>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge variant="outline" className="text-xs">
+                                    Step {step.stepNumber}
+                                  </Badge>
+                                  <Badge 
+                                    variant={step.status === 'completed' ? 'default' : 'secondary'}
+                                    className="text-xs"
+                                  >
+                                    {step.status}
+                                  </Badge>
+                                </div>
+                                {step.deadline && (
+                                  <div className="flex items-center gap-1 mt-2 text-sm text-gray-500">
+                                    <Calendar className="h-3 w-3" />
+                                    Due: {step.deadline}
+                                  </div>
+                                )}
+                              </div>
+                              <ChevronRight className="h-4 w-4 text-gray-400" />
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {/* Step Details */}
+                <div className="space-y-4">
+                  {scholarshipSteps.find(step => step.id === selectedScholarshipStep) ? (
+                    (() => {
+                      const currentStep = scholarshipSteps.find(step => step.id === selectedScholarshipStep)!;
+                      return (
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                              {getStepStatusIcon(currentStep.status)}
+                              {currentStep.title}
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent className="space-y-6">
+                            {/* Video */}
+                            {currentStep.videoUrl && (
+                              <div className="space-y-2">
+                                <Label>Step Video</Label>
+                                <div 
+                                  className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
+                                  onClick={() => openVideoModal(currentStep.videoUrl!, currentStep.title)}
+                                >
+                                  <div className="text-center">
+                                    <Play className="h-12 w-12 mx-auto text-gray-500 mb-2" />
+                                    <p className="text-sm text-gray-600">Click to watch video</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Instructions */}
+                            <div className="space-y-4">
+                              {currentStep.instructions.header && (
+                                <div>
+                                  <h4 className="font-medium mb-2">{currentStep.instructions.header}</h4>
+                                </div>
+                              )}
+
+                              {currentStep.instructions.paragraphs?.map((paragraph, index) => (
+                                <p key={index} className="text-gray-600">{paragraph}</p>
+                              ))}
+
+                              {currentStep.instructions.bulletPoints && (
+                                <ul className="list-disc list-inside space-y-1 text-gray-600">
+                                  {currentStep.instructions.bulletPoints.map((point, index) => (
+                                    <li key={index}>{point}</li>
+                                  ))}
+                                </ul>
+                              )}
+
+                              {currentStep.instructions.footer && (
+                                <p className="text-sm text-gray-500 border-t pt-3">
+                                  {currentStep.instructions.footer}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Alerts */}
+                            {currentStep.alerts?.map((alert, index) => (
+                              <Alert key={index} className={`
+                                ${alert.type === 'error' ? 'border-red-200 bg-red-50' : ''}
+                                ${alert.type === 'warning' ? 'border-yellow-200 bg-yellow-50' : ''}
+                                ${alert.type === 'success' ? 'border-green-200 bg-green-50' : ''}
+                                ${alert.type === 'info' ? 'border-blue-200 bg-blue-50' : ''}
+                              `}>
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription>{alert.message}</AlertDescription>
+                              </Alert>
+                            ))}
+
+                            {/* Document Upload */}
+                            {currentStep.type === 'document' && currentStep.documents && (
+                              <div className="space-y-4 border-t pt-4">
+                                <Label>Required Documents</Label>
+                                <div className="space-y-3">
+                                  {currentStep.documents.required.map((doc, index) => {
+                                    const isUploaded = currentStep.documents?.uploaded.includes(doc);
+                                    return (
+                                      <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                                        <div className="flex items-center gap-3">
+                                          {isUploaded ? (
+                                            <CheckCircle className="h-5 w-5 text-green-500" />
+                                          ) : (
+                                            <Clock className="h-5 w-5 text-gray-400" />
+                                          )}
+                                          <span className="text-sm">{doc}</span>
+                                        </div>
+                                        <Button
+                                          size="sm"
+                                          variant={isUploaded ? "outline" : "default"}
+                                          onClick={() => handleFileUpload(currentStep.id)}
+                                        >
+                                          <Upload className="h-4 w-4 mr-2" />
+                                          {isUploaded ? 'Replace' : 'Upload'}
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex flex-wrap gap-2 border-t pt-4">
+                              {currentStep.buttons.map((button) => (
+                                <Button
+                                  key={button.id}
+                                  variant={button.variant || 'default'}
+                                  size="sm"
+                                >
+                                  {button.label}
+                                </Button>
+                              ))}
+                              
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setChatbotOpen(true)}
+                              >
+                                <HelpCircle className="h-4 w-4 mr-2" />
+                                Need Help?
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    })()
+                  ) : (
+                    <Card className="h-96 flex items-center justify-center">
+                      <div className="text-center text-gray-500">
+                        <GraduationCap className="h-12 w-12 mx-auto mb-4" />
+                        <p>Select a scholarship step to view details</p>
+                      </div>
+                    </Card>
+                  )}
+                </div>
+              </div>
             </TabsContent>
 
             {/* Admission Status Tab */}
@@ -589,12 +792,26 @@ const MyPage = () => {
             </TabsContent>
 
             {/* Visa Application Tab */}
-            <TabsContent value="visa" className="p-6">
+            <TabsContent value="visa" className="p-6 space-y-6">
               <Card>
-                <CardContent className="p-6 text-center">
-                  <UserCheck className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-lg font-medium mb-2">Visa Application</h3>
-                  <p className="text-gray-600">Visa application process will be guided here.</p>
+                <CardContent className="p-6">
+                  <div className="text-center space-y-4">
+                    <UserCheck className="h-16 w-16 mx-auto text-gray-300 mb-4" />
+                    <h3 className="text-lg font-medium mb-2">Visa Application</h3>
+                    <p className="text-gray-600 mb-4">Visa application process will be guided here.</p>
+                    
+                    {/* YouTube Video Button */}
+                    <div className="flex justify-center">
+                      <Button
+                        onClick={() => openVideoModal("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "Visa Application Guide")}
+                        className="flex items-center gap-2"
+                        variant="outline"
+                      >
+                        <Youtube className="h-4 w-4 text-red-500" />
+                        Watch Visa Guide Video
+                      </Button>
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
