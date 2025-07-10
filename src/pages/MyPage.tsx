@@ -188,68 +188,6 @@ const MyPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
-      {/* Floating Navigation Button */}
-      <Button
-        onClick={() => setSidebarExpanded(!sidebarExpanded)}
-        className="fixed left-4 top-1/2 transform -translate-y-1/2 z-50 rounded-full h-12 w-12 p-0 shadow-lg"
-        variant="default"
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
-
-      {/* Expandable Sidebar */}
-      <div className={`fixed left-0 top-0 h-full bg-white shadow-lg transform transition-all duration-300 z-40 ${
-        sidebarExpanded ? 'translate-x-0 w-80' : '-translate-x-full w-0'
-      }`}>
-        <div className="p-6 border-b">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold">Quick Settings</h3>
-            <Button variant="ghost" size="sm" onClick={() => setSidebarExpanded(false)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        
-        <div className="p-6 space-y-6">
-          {/* Email Notifications */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Label htmlFor="email-notifications">Email Notifications</Label>
-              <p className="text-sm text-gray-500">Receive updates via email</p>
-            </div>
-            <Switch
-              id="email-notifications"
-              checked={emailNotifications}
-              onCheckedChange={setEmailNotifications}
-            />
-          </div>
-
-          <Separator />
-
-          {/* Progress Overview */}
-          <div className="space-y-3">
-            <Label>Application Progress</Label>
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Overall Progress</span>
-                <span>{Math.round(getProgressValue())}%</span>
-              </div>
-              <Progress value={getProgressValue()} className="h-2" />
-              <p className="text-xs text-gray-500">
-                {applicationSteps.filter(s => s.status === 'completed').length} of {applicationSteps.length} steps completed
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Overlay */}
-      {sidebarExpanded && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-30"
-          onClick={() => setSidebarExpanded(false)}
-        />
-      )}
 
       <div className="max-w-7xl mx-auto p-6 space-y-6">
         {/* Header */}
