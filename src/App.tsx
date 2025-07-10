@@ -11,6 +11,7 @@ import ApplicationJourney from "./pages/ApplicationJourney";
 import PathwaySelection from "./pages/PathwaySelection";
 import SelfDirectedPath from "./pages/SelfDirectedPath";
 import PremiumService from "./pages/PremiumService";
+import MyPage from "./pages/MyPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/pathway-selection" element={<Layout><PathwaySelection /></Layout>} />
           <Route path="/self-directed" element={<Layout><SelfDirectedPath /></Layout>} />
           <Route path="/premium-service" element={<Layout><PremiumService /></Layout>} />
+          <Route path="/my-page" element={<Layout><MyPage /></Layout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>

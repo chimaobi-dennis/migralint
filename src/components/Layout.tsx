@@ -20,8 +20,8 @@ export function Layout({ children }: LayoutProps) {
       icon: Calendar,
     },
     {
-      title: "Analytics", 
-      url: "/analytics",
+      title: "My Page", 
+      url: "/my-page",
       icon: BarChart3,
     },
     {
