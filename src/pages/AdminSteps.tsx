@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { 
   Plus, 
   Edit, 
@@ -12,7 +12,24 @@ import {
   FileText,
   Upload,
   AlertCircle,
-  MessageSquare
+  MessageSquare,
+  Search,
+  ChevronDown,
+  Home,
+  User,
+  Mail,
+  Phone,
+  Calendar,
+  MapPin,
+  Globe,
+  Camera,
+  Heart,
+  Star,
+  Play,
+  Download,
+  Share,
+  Lock,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +50,8 @@ interface StepField {
   placeholder?: string;
   required?: boolean;
   value?: string;
+  jsId?: string;
+  wireModel?: string;
 }
 
 interface StepButton {
@@ -40,6 +59,9 @@ interface StepButton {
   label: string;
   url?: string;
   variant?: 'default' | 'outline' | 'secondary';
+  jsId?: string;
+  wireClick?: string;
+  icon?: string;
 }
 
 interface ApplicationStep {
@@ -161,7 +183,8 @@ const AdminSteps = () => {
     const newButton: StepButton = {
       id: Date.now().toString(),
       label: "",
-      variant: "default"
+      variant: "default",
+      icon: "Play"
     };
     setEditingStep({
       ...editingStep,
@@ -189,6 +212,21 @@ const AdminSteps = () => {
       ...editingStep,
       formFields: [...(editingStep.formFields || []), newField]
     });
+  };
+
+  const availableIcons = [
+    'Play', 'Download', 'Upload', 'Save', 'Edit', 'Trash2', 'Plus', 'X', 'Check', 
+    'Eye', 'Settings', 'Search', 'Home', 'User', 'Mail', 'Phone', 'Calendar', 
+    'MapPin', 'Globe', 'Camera', 'Heart', 'Star', 'Share', 'Lock', 'AlertCircle'
+  ];
+
+  const getIconComponent = (iconName: string) => {
+    const iconMap: { [key: string]: any } = {
+      Play, Download, Upload, Save, Edit, Trash2, Plus, X, Check, Eye, Settings, 
+      Search, Home, User, Mail, Phone, Calendar, MapPin, Globe, Camera, Heart, 
+      Star, Share, Lock, AlertCircle
+    };
+    return iconMap[iconName] || Play;
   };
 
   const removeFormField = (fieldId: string) => {
@@ -610,6 +648,42 @@ const AdminSteps = () => {
                             />
                           </div>
                           <div className="space-y-2">
+                            <Label>Button Icon</Label>
+                            <Select
+                              value={button.icon || 'Play'}
+                              onValueChange={(value: string) => {
+                                const newButtons = [...editingStep.buttons];
+                                newButtons[index] = { ...button, icon: value };
+                                setEditingStep({
+                                  ...editingStep,
+                                  buttons: newButtons
+                                });
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue>
+                                  <div className="flex items-center gap-2">
+                                    {React.createElement(getIconComponent(button.icon || 'Play'), { className: "h-4 w-4" })}
+                                    {button.icon || 'Play'}
+                                  </div>
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {availableIcons.map((iconName) => {
+                                  const IconComponent = getIconComponent(iconName);
+                                  return (
+                                    <SelectItem key={iconName} value={iconName}>
+                                      <div className="flex items-center gap-2">
+                                        <IconComponent className="h-4 w-4" />
+                                        {iconName}
+                                      </div>
+                                    </SelectItem>
+                                  );
+                                })}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
                             <Label>Button Variant</Label>
                             <Select
                               value={button.variant}
@@ -647,7 +721,37 @@ const AdminSteps = () => {
                               placeholder="Enter button URL"
                             />
                           </div>
-                          <div className="flex items-end">
+                          <div className="space-y-2">
+                            <Label>JS ID</Label>
+                            <Input
+                              value={button.jsId || ''}
+                              onChange={(e) => {
+                                const newButtons = [...editingStep.buttons];
+                                newButtons[index] = { ...button, jsId: e.target.value };
+                                setEditingStep({
+                                  ...editingStep,
+                                  buttons: newButtons
+                                });
+                              }}
+                              placeholder="Enter JS ID (e.g., myButton)"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Livewire Click</Label>
+                            <Input
+                              value={button.wireClick || ''}
+                              onChange={(e) => {
+                                const newButtons = [...editingStep.buttons];
+                                newButtons[index] = { ...button, wireClick: e.target.value };
+                                setEditingStep({
+                                  ...editingStep,
+                                  buttons: newButtons
+                                });
+                              }}
+                              placeholder="Enter wire:click method (e.g., submitForm)"
+                            />
+                          </div>
+                          <div className="col-span-2 flex justify-end">
                             <Button
                               variant="outline"
                               onClick={() => removeButton(button.id)}
@@ -725,6 +829,36 @@ const AdminSteps = () => {
                                 });
                               }}
                               placeholder="Enter placeholder text"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>JS ID</Label>
+                            <Input
+                              value={field.jsId || ''}
+                              onChange={(e) => {
+                                const newFields = [...(editingStep.formFields || [])];
+                                newFields[index] = { ...field, jsId: e.target.value };
+                                setEditingStep({
+                                  ...editingStep,
+                                  formFields: newFields
+                                });
+                              }}
+                              placeholder="Enter JS ID (e.g., firstName)"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Wire Model</Label>
+                            <Input
+                              value={field.wireModel || ''}
+                              onChange={(e) => {
+                                const newFields = [...(editingStep.formFields || [])];
+                                newFields[index] = { ...field, wireModel: e.target.value };
+                                setEditingStep({
+                                  ...editingStep,
+                                  formFields: newFields
+                                });
+                              }}
+                              placeholder="Enter wire:model (e.g., form.firstName)"
                             />
                           </div>
                           <div className="flex items-center justify-between">
