@@ -56,8 +56,11 @@ const AdminSteps = () => {
       title: "",
       type: "information",
       status: "pending",
+      deadline: "",
       instructions: {
-        paragraphs: [""]
+        header: "",
+        paragraphs: [""],
+        footer: ""
       },
       buttons: [],
       videoUrl: ""
@@ -378,8 +381,24 @@ const AdminSteps = () => {
                       />
                     </div>
 
+                    <div className="space-y-2">
+                      <Label>Step Description</Label>
+                      <Textarea
+                        value={editingStep.instructions?.header || ''}
+                        onChange={(e) => setEditingStep({
+                          ...editingStep,
+                          instructions: {
+                            ...editingStep.instructions,
+                            header: e.target.value
+                          }
+                        })}
+                        placeholder="Enter step description"
+                        rows={3}
+                      />
+                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
+                        <div className="space-y-2">
                         <Label>Status</Label>
                         <Select
                           value={editingStep.status}
