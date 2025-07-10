@@ -56,38 +56,42 @@ export function Layout({ children }: LayoutProps) {
         {children}
       </main>
 
-      {/* Floating Nav Toggle Button - Left Side */}
-      <Button
-        onClick={() => setIsNavExpanded(!isNavExpanded)}
-        className="fixed bottom-6 left-4 z-50 w-14 h-14 rounded-2xl bg-white/90 backdrop-blur-md shadow-lg border border-gray-200 hover:bg-white/95 transition-all duration-300"
-        variant="ghost"
-        size="icon"
-      >
-        <Menu className="h-6 w-6 text-gray-700" />
-      </Button>
-
       {/* Floating Bottom Navigation */}
-      <div className={`fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 transition-all duration-300 ${
-        isNavExpanded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8 pointer-events-none'
-      }`}>
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40">
         <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/60 px-2 py-3">
           <div className="flex items-center space-x-1">
-            {navigationItems.map((item) => (
-              <NavLink
-                key={item.title}
-                to={item.url}
-                className={({ isActive }) =>
-                  `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 min-w-[60px] ${
-                    isActive
-                      ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md scale-105"
-                      : "text-gray-600 hover:bg-gray-100 hover:scale-102"
-                  }`
-                }
-              >
-                <item.icon className="h-5 w-5 mb-1" />
-                <span className="text-xs font-medium">{item.title}</span>
-              </NavLink>
-            ))}
+            {/* Nav Toggle Button */}
+            <Button
+              onClick={() => setIsNavExpanded(!isNavExpanded)}
+              className="flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 min-w-[60px] text-gray-600 hover:bg-gray-100 hover:scale-102"
+              variant="ghost"
+              size="icon"
+            >
+              <Menu className="h-5 w-5 mb-1" />
+              <span className="text-xs font-medium">Menu</span>
+            </Button>
+
+            {/* Navigation Items - Only visible when expanded */}
+            <div className={`flex items-center space-x-1 transition-all duration-300 ${
+              isNavExpanded ? 'opacity-100 max-w-none' : 'opacity-0 max-w-0 overflow-hidden'
+            }`}>
+              {navigationItems.map((item) => (
+                <NavLink
+                  key={item.title}
+                  to={item.url}
+                  className={({ isActive }) =>
+                    `flex flex-col items-center justify-center p-3 rounded-xl transition-all duration-200 min-w-[60px] ${
+                      isActive
+                        ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md scale-105"
+                        : "text-gray-600 hover:bg-gray-100 hover:scale-102"
+                    }`
+                  }
+                >
+                  <item.icon className="h-5 w-5 mb-1" />
+                  <span className="text-xs font-medium">{item.title}</span>
+                </NavLink>
+              ))}
+            </div>
           </div>
         </div>
       </div>
