@@ -126,18 +126,62 @@ export default function AdminVisaSteps() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label htmlFor="header">Header</Label>
-                  <Input
-                    id="header"
-                    value={newStep.instructions?.header || ""}
-                    onChange={(e) => setNewStep({
-                      ...newStep,
-                      instructions: { ...newStep.instructions, header: e.target.value }
-                    })}
-                    placeholder="Step header"
-                  />
-                </div>
+                 <div>
+                   <Label htmlFor="header">Header</Label>
+                   <Input
+                     id="header"
+                     value={newStep.instructions?.header || ""}
+                     onChange={(e) => setNewStep({
+                       ...newStep,
+                       instructions: { ...newStep.instructions, header: e.target.value }
+                     })}
+                     placeholder="Step header"
+                   />
+                 </div>
+                 <div>
+                   <Label htmlFor="paragraphs">Instructions Paragraphs (one per line)</Label>
+                   <Textarea
+                     id="paragraphs"
+                     value={newStep.instructions?.paragraphs?.join('\n') || ""}
+                     onChange={(e) => setNewStep({
+                       ...newStep,
+                       instructions: { 
+                         ...newStep.instructions, 
+                         paragraphs: e.target.value.split('\n').filter(p => p.trim()) 
+                       }
+                     })}
+                     placeholder="Enter paragraphs, one per line"
+                     rows={3}
+                   />
+                 </div>
+                 <div>
+                   <Label htmlFor="bulletPoints">Instructions Bullet Points (one per line)</Label>
+                   <Textarea
+                     id="bulletPoints"
+                     value={newStep.instructions?.bulletPoints?.join('\n') || ""}
+                     onChange={(e) => setNewStep({
+                       ...newStep,
+                       instructions: { 
+                         ...newStep.instructions, 
+                         bulletPoints: e.target.value.split('\n').filter(p => p.trim()) 
+                       }
+                     })}
+                     placeholder="Enter bullet points, one per line"
+                     rows={3}
+                   />
+                 </div>
+                 <div>
+                   <Label htmlFor="footer">Footer</Label>
+                   <Input
+                     id="footer"
+                     value={newStep.instructions?.footer || ""}
+                     onChange={(e) => setNewStep({
+                       ...newStep,
+                       instructions: { ...newStep.instructions, footer: e.target.value }
+                     })}
+                     placeholder="Step footer"
+                   />
+                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setIsCreating(false)}>
                     Cancel
@@ -231,24 +275,72 @@ export default function AdminVisaSteps() {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label>Header</Label>
-                      <Input
-                        value={editingStep.instructions.header || ""}
-                        onChange={(e) => setEditingStep({
-                          ...editingStep,
-                          instructions: { ...editingStep.instructions, header: e.target.value }
-                        })}
-                      />
-                    </div>
-                    <div>
-                      <Label>Deadline</Label>
-                      <Input
-                        type="date"
-                        value={editingStep.deadline || ""}
-                        onChange={(e) => setEditingStep({ ...editingStep, deadline: e.target.value })}
-                      />
-                    </div>
+                     <div>
+                       <Label>Step Number</Label>
+                       <Input
+                         type="number"
+                         value={editingStep.stepNumber}
+                         onChange={(e) => setEditingStep({ ...editingStep, stepNumber: parseInt(e.target.value) || 1 })}
+                       />
+                     </div>
+                     <div>
+                       <Label>Header</Label>
+                       <Input
+                         value={editingStep.instructions.header || ""}
+                         onChange={(e) => setEditingStep({
+                           ...editingStep,
+                           instructions: { ...editingStep.instructions, header: e.target.value }
+                         })}
+                       />
+                     </div>
+                     <div>
+                       <Label>Instructions Paragraphs (one per line)</Label>
+                       <Textarea
+                         value={editingStep.instructions.paragraphs?.join('\n') || ""}
+                         onChange={(e) => setEditingStep({
+                           ...editingStep,
+                           instructions: { 
+                             ...editingStep.instructions, 
+                             paragraphs: e.target.value.split('\n').filter(p => p.trim()) 
+                           }
+                         })}
+                         placeholder="Enter paragraphs, one per line"
+                         rows={3}
+                       />
+                     </div>
+                     <div>
+                       <Label>Instructions Bullet Points (one per line)</Label>
+                       <Textarea
+                         value={editingStep.instructions.bulletPoints?.join('\n') || ""}
+                         onChange={(e) => setEditingStep({
+                           ...editingStep,
+                           instructions: { 
+                             ...editingStep.instructions, 
+                             bulletPoints: e.target.value.split('\n').filter(p => p.trim()) 
+                           }
+                         })}
+                         placeholder="Enter bullet points, one per line"
+                         rows={3}
+                       />
+                     </div>
+                     <div>
+                       <Label>Footer</Label>
+                       <Input
+                         value={editingStep.instructions.footer || ""}
+                         onChange={(e) => setEditingStep({
+                           ...editingStep,
+                           instructions: { ...editingStep.instructions, footer: e.target.value }
+                         })}
+                       />
+                     </div>
+                     <div>
+                       <Label>Deadline</Label>
+                       <Input
+                         type="date"
+                         value={editingStep.deadline || ""}
+                         onChange={(e) => setEditingStep({ ...editingStep, deadline: e.target.value })}
+                       />
+                     </div>
                   </div>
                 ) : (
                   <div className="space-y-2">
