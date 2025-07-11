@@ -58,7 +58,7 @@ export function Layout({ children }: LayoutProps) {
 
       {/* Floating Navigation - Left Side */}
       <div className="fixed bottom-6 left-6 z-40">
-        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/60 transition-all duration-300">
+        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200/60 transition-all duration-300 px-2">
           <div className="flex items-center">
             {/* Nav Toggle Button */}
             <Button
@@ -73,7 +73,7 @@ export function Layout({ children }: LayoutProps) {
             {/* Navigation Items - Only visible when expanded */}
             <div className={`flex items-center gap-2 transition-all duration-300 ease-in-out ${
               isNavExpanded 
-                ? 'opacity-100 max-w-none translate-x-0 ml-2' 
+                ? 'opacity-100 max-w-none translate-x-0 ml-4' 
                 : 'opacity-0 max-w-0 translate-x-[-10px] overflow-hidden'
             }`}>
               {navigationItems.map((item) => (
@@ -81,7 +81,7 @@ export function Layout({ children }: LayoutProps) {
                   key={item.title}
                   to={item.url}
                   className={({ isActive }) =>
-                    `flex flex-col items-center justify-center transition-all duration-200 h-12 w-12 rounded-xl sm:h-16 sm:w-16 sm:rounded-2xl ${
+                    `flex flex-col items-center justify-center transition-all duration-200 h-12 w-12 rounded-xl sm:h-16 sm:w-16 sm:rounded-2xl mx-1 ${
                       isActive
                         ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md scale-105"
                         : "text-gray-600 hover:bg-gray-100 hover:scale-105"
