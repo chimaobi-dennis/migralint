@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { 
   CheckCircle, 
@@ -200,27 +201,30 @@ const MyPage = () => {
   return (
     <div className="min-h-screen bg-gray-50 relative">
 
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl lg:text-3xl font-bold">My Application</h1>
-            <p className="text-gray-600 mt-1">Track your study abroad journey</p>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">My Application</h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">Track your study abroad journey</p>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setEmailNotifications(!emailNotifications)}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 text-xs sm:text-sm"
             >
-              {emailNotifications ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4" />}
+              {emailNotifications ? <Bell className="h-3 w-3 sm:h-4 sm:w-4" /> : <BellOff className="h-3 w-3 sm:h-4 sm:w-4" />}
               <span className="hidden sm:inline">
                 {emailNotifications ? 'Notifications On' : 'Notifications Off'}
               </span>
+              <span className="sm:hidden">
+                {emailNotifications ? 'On' : 'Off'}
+              </span>
             </Button>
-            <Badge variant="outline" className="text-sm">
+            <Badge variant="outline" className="text-xs sm:text-sm">
               {applicationSteps.filter(s => s.status === 'completed').length}/{applicationSteps.length} Complete
             </Badge>
           </div>
@@ -229,47 +233,42 @@ const MyPage = () => {
         {/* Horizontal Navigation */}
         <div className="bg-white rounded-lg border shadow-sm">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="border-b border-gray-200 px-6">
-              <TabsList className="h-auto p-0 bg-transparent">
+            <div className="border-b border-gray-200 overflow-x-auto">
+              <TabsList className="h-auto p-0 bg-transparent w-full min-w-max">
                 <TabsTrigger 
                   value="application" 
-                  className="flex-1 sm:flex-none px-6 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
+                  className="flex-shrink-0 px-3 sm:px-6 py-3 sm:py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none text-xs sm:text-sm"
                 >
-                  <FileText className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Program Application</span>
-                  <span className="sm:hidden">Application</span>
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="whitespace-nowrap">Application</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="scholarships" 
-                  className="flex-1 sm:flex-none px-6 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
+                  className="flex-shrink-0 px-3 sm:px-6 py-3 sm:py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none text-xs sm:text-sm"
                 >
-                  <GraduationCap className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Scholarships</span>
-                  <span className="sm:hidden">Scholarships</span>
+                  <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="whitespace-nowrap">Scholarships</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="admission" 
-                  className="flex-1 sm:flex-none px-6 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
+                  className="flex-shrink-0 px-3 sm:px-6 py-3 sm:py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none text-xs sm:text-sm"
                 >
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Admission Status</span>
-                  <span className="sm:hidden">Status</span>
+                  <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="whitespace-nowrap">Status</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="visa" 
-                  className="flex-1 sm:flex-none px-6 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
+                  className="flex-shrink-0 px-3 sm:px-6 py-3 sm:py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none text-xs sm:text-sm"
                 >
-                  <UserCheck className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Visa Application</span>
-                  <span className="sm:hidden">Visa</span>
+                  <UserCheck className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="whitespace-nowrap">Visa</span>
                 </TabsTrigger>
                 <TabsTrigger 
                   value="activity" 
-                  className="flex-1 sm:flex-none px-6 py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none"
+                  className="flex-shrink-0 px-3 sm:px-6 py-3 sm:py-4 data-[state=active]:bg-blue-50 data-[state=active]:text-blue-600 data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none text-xs sm:text-sm"
                 >
-                  <Activity className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Activity Log</span>
-                  <span className="sm:hidden">Activity</span>
+                  <Activity className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="whitespace-nowrap">Activity</span>
                 </TabsTrigger>
               </TabsList>
             </div>
