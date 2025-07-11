@@ -71,9 +71,9 @@ export function Layout({ children }: LayoutProps) {
             </Button>
 
             {/* Navigation Items - Only visible when expanded */}
-            <div className={`flex items-center transition-all duration-300 ease-in-out ${
+            <div className={`flex items-center gap-2 transition-all duration-300 ease-in-out ${
               isNavExpanded 
-                ? 'opacity-100 max-w-none translate-x-0 ml-1' 
+                ? 'opacity-100 max-w-none translate-x-0 ml-2' 
                 : 'opacity-0 max-w-0 translate-x-[-10px] overflow-hidden'
             }`}>
               {navigationItems.map((item) => (
