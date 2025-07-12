@@ -35,15 +35,53 @@ const Index = () => {
     },
     {
       id: 3,
-      university: "UC Berkeley",
-      program: "Data Science",
-      deadline: "2024-02-01",
-      status: "Not Started",
-      progress: 0,
-      requirements: ["Personal Statement", "Transcripts", "Letters of Rec"],
-      completed: []
-    },
     {
+      id: 3,
+      university: "University of California System",
+      deadline: "2024-02-01",
+      status: "In Progress",
+      progress: 45,
+      requirements: ["Personal Statement", "Transcripts", "Letters of Rec", "Test Scores"],
+      completed: ["Transcripts"],
+      isGroup: true,
+      groupData: {
+        id: 3,
+        groupName: "UC System Applications",
+        university: "University of California System",
+        programs: [
+          {
+            id: 31,
+            name: "Computer Science - UC Berkeley",
+            university: "UC Berkeley",
+            deadline: "2024-02-01",
+            status: "In Progress",
+            progress: 60,
+            requirements: ["Personal Statement", "Transcripts", "Letters of Rec"],
+            completed: ["Transcripts"]
+          },
+          {
+            id: 32,
+            name: "Data Science - UCLA",
+            university: "UCLA",
+            deadline: "2024-02-01",
+            status: "Not Started",
+            progress: 30,
+            requirements: ["Personal Statement", "Transcripts", "Letters of Rec"],
+            completed: ["Transcripts"]
+          },
+          {
+            id: 33,
+            name: "Software Engineering - UC San Diego",
+            university: "UC San Diego",
+            deadline: "2024-02-01",
+            status: "In Progress",
+            progress: 45,
+            requirements: ["Personal Statement", "Transcripts", "Letters of Rec"],
+            completed: ["Transcripts"]
+          }
+        ],
+        deadline: "2024-02-01"
+      }
       id: 4,
       university: "Harvard University",
       program: "Business Administration",
@@ -51,6 +89,41 @@ const Index = () => {
       status: "Under Review",
       progress: 100,
       requirements: ["Personal Statement", "Transcripts", "Letters of Rec", "Interview"],
+        university: "Swedish Universities",
+        programs: [
+          {
+            id: 51,
+            name: "Computer Science - KTH Royal Institute",
+            university: "KTH Royal Institute of Technology",
+            deadline: "2024-01-15",
+            status: "Submitted",
+            progress: 100,
+            requirements: ["Personal Statement", "Transcripts", "Letters of Rec"],
+            completed: ["Personal Statement", "Transcripts", "Letters of Rec"]
+          },
+          {
+            id: 52,
+            name: "Data Science - Uppsala University",
+            university: "Uppsala University",
+            deadline: "2024-01-15",
+            status: "In Progress",
+            progress: 80,
+            requirements: ["Personal Statement", "Transcripts", "Letters of Rec"],
+            completed: ["Transcripts", "Letters of Rec"]
+          },
+          {
+            id: 53,
+            name: "AI & Machine Learning - Chalmers",
+            university: "Chalmers University of Technology",
+            deadline: "2024-01-15",
+            status: "In Progress",
+            progress: 45,
+            requirements: ["Personal Statement", "Transcripts", "Letters of Rec"],
+            completed: ["Transcripts"]
+          }
+        ],
+        deadline: "2024-01-15"
+      }
       completed: ["Personal Statement", "Transcripts", "Letters of Rec", "Interview"]
     }
   ];
