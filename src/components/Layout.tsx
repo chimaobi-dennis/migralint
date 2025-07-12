@@ -27,11 +27,6 @@ export function Layout({ children }: LayoutProps) {
       url: "/my-page",
       icon: BarChart3,
     },
-    {
-      title: "Admin Steps",
-      url: "/admin/steps",
-      icon: Settings,
-    },
   ];
 
   return (
