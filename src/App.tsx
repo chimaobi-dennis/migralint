@@ -16,6 +16,7 @@ import MyPage from "./pages/MyPage";
 import AdminScholarshipSteps from "./pages/AdminScholarshipSteps";
 import AdminVisaSteps from "./pages/AdminVisaSteps";
 import AdminSteps from "./pages/AdminSteps";
+import Documents from "./pages/Documents";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/pathway-selection" element={<Layout><PathwaySelection /></Layout>} />
           <Route path="/self-directed" element={<Layout><SelfDirectedPath /></Layout>} />
           <Route path="/premium-service" element={<Layout><PremiumService /></Layout>} />
+          <Route path="/documents" element={<Layout><Documents /></Layout>} />
           <Route path="/my-page" element={<Layout><MyPage /></Layout>} />
           <Route path="/admin/scholarship-steps" element={<AdminLayout><AdminScholarshipSteps /></AdminLayout>} />
           <Route path="/admin/visa-steps" element={<AdminLayout><AdminVisaSteps /></AdminLayout>} />

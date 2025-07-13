@@ -58,6 +58,8 @@ const Index = () => {
         id: 3,
         groupName: "UC System Applications",
         university: "University of California System",
+        status: "In Progress",
+        progress: 45,
         programs: [
           {
             id: 31,
@@ -117,6 +119,8 @@ const Index = () => {
         id: 5,
         groupName: "Swedish Master's Programs",
         university: "Swedish Universities",
+        status: "In Progress",
+        progress: 75,
         programs: [
           {
             id: 51,
