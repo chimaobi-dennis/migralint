@@ -1,4 +1,4 @@
-import { Calendar, MapPin, CheckCircle, Clock, AlertCircle, Eye, ChevronDown, ChevronRight } from "lucide-react";
+import { Calendar, MapPin, CheckCircle, Clock, AlertCircle, Eye, ChevronDown, ChevronRight, Building } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
@@ -162,9 +162,14 @@ export const ApplicationCard = ({ application, onClick, isSelected }: Applicatio
       } ${isUrgent(application.deadline) ? 'bg-red-50' : ''}`}>
         {/* Group Header */}
         <div 
-          className="p-6 hover:bg-gray-50 transition-all duration-200 cursor-pointer"
+          className="p-6 hover:bg-gray-50 transition-all duration-200 cursor-pointer relative"
           onClick={handleCardClick}
         >
+          {/* Group Indicator */}
+          <div className="absolute top-4 right-4 bg-gradient-to-r from-purple-500 to-indigo-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+            GROUP
+          </div>
+          
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center">
@@ -174,19 +179,22 @@ export const ApplicationCard = ({ application, onClick, isSelected }: Applicatio
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="ml-2 p-1 h-6 w-6"
+                  className="ml-2 p-1 h-8 w-8 hover:bg-blue-100 rounded-full transition-colors"
                   onClick={handleExpandClick}
                 >
                   {isExpanded ? (
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="h-5 w-5 text-blue-600" />
                   ) : (
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-5 w-5 text-gray-500" />
                   )}
                 </Button>
               </div>
               <div className="flex items-center text-sm text-gray-600 mb-2">
                 <MapPin className="h-4 w-4 mr-1" />
-                <span>{groupData.groupName} ({groupData.programs.length} programs)</span>
+                <span className="font-medium">{groupData.groupName}</span>
+                <span className="ml-2 bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+                  {groupData.programs.length} programs
+                </span>
               </div>
             </div>
             
@@ -228,39 +236,66 @@ export const ApplicationCard = ({ application, onClick, isSelected }: Applicatio
 
         {/* Expanded Programs List */}
         {isExpanded && (
-          <div className="border-t border-gray-200 bg-gray-50">
+          <div className="border-t-2 border-blue-100 bg-gradient-to-r from-blue-50/50 to-indigo-50/50">
+            <div className="px-6 py-3 bg-blue-100/50 border-b border-blue-200">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span className="text-sm font-semibold text-blue-800">Programs in this group:</span>
+              </div>
+            </div>
             {groupData.programs.map((program, index) => (
               <div 
                 key={program.id}
-                className="px-6 py-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-100 transition-colors duration-200"
+                className="relative px-8 py-4 border-b border-blue-100 last:border-b-0 hover:bg-white/70 transition-all duration-200 group"
               >
+                {/* Connection Line */}
+                <div className="absolute left-6 top-0 bottom-0 w-px bg-blue-200"></div>
+                <div className="absolute left-5 top-6 w-3 h-px bg-blue-300"></div>
+                
+                {/* Program Number Badge */}
+                <div className="absolute left-4 top-4 w-4 h-4 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                  {index + 1}
+                </div>
+                
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-md font-medium text-gray-800 mb-1 truncate">
+                    <h4 className="text-md font-semibold text-gray-900 mb-1 truncate group-hover:text-blue-700 transition-colors">
                       {program.name}
                     </h4>
-                    <div className="flex items-center text-sm text-gray-500">
+                    <div className="flex items-center text-sm text-gray-600 mb-2">
+                      <Building className="h-3 w-3 mr-1" />
+                      <span className="font-medium">{program.university}</span>
+                    </div>
+                    <div className="flex items-center text-xs text-gray-500">
                       <Calendar className="h-3 w-3 mr-1" />
-                      {formatDeadline(program.deadline)}
+                      <span>Deadline: {formatDeadline(program.deadline)}</span>
                     </div>
                   </div>
                   
-                  <Badge className={`${getStatusColor(program.status)} flex items-center gap-1 px-2 py-1 text-xs`}>
+                  <Badge className={`${getStatusColor(program.status)} flex items-center gap-1 px-3 py-1 text-xs font-medium shadow-sm`}>
                     {getStatusIcon(program.status)}
                     {program.status}
                   </Badge>
                 </div>
 
-                <div className="mb-2">
+                <div className="mb-3">
                   <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="text-gray-500">Progress</span>
-                    <span className="font-medium text-gray-700">{program.progress}%</span>
+                    <span className="text-gray-600 font-medium">Progress</span>
+                    <span className="font-bold text-gray-800">{program.progress}%</span>
                   </div>
-                  <Progress value={program.progress} className="h-1.5" />
+                  <Progress value={program.progress} className="h-2" />
                 </div>
 
-                <div className="text-xs text-gray-500">
-                  {program.completed.length} of {program.requirements.length} requirements completed
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-gray-600">
+                    <span className="font-medium">{program.completed.length}</span> of <span className="font-medium">{program.requirements.length}</span> requirements completed
+                  </div>
+                  {program.progress === 100 && (
+                    <div className="flex items-center text-xs text-green-600 font-medium">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Complete
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
