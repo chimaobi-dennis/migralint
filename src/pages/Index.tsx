@@ -10,7 +10,18 @@ import { ApplicationSteps } from "@/components/ApplicationSteps";
 
 const Index = () => {
   const [selectedApplication, setSelectedApplication] = useState(null);
+  const [selectedProgram, setSelectedProgram] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const handleProgramClick = (program) => {
+    setSelectedProgram(program);
+    setSelectedApplication(null); // Clear application selection when program is selected
+  };
+
+  const handleApplicationClick = (application) => {
+    setSelectedApplication(application);
+    setSelectedProgram(null); // Clear program selection when application is selected
+  };
 
   const applications = [
     {
@@ -186,8 +197,10 @@ const Index = () => {
                 <ApplicationCard
                   key={application.id}
                   application={application}
-                  onClick={() => setSelectedApplication(application)}
+                  onClick={() => handleApplicationClick(application)}
+                  onProgramClick={handleProgramClick}
                   isSelected={selectedApplication?.id === application.id}
+                  selectedProgramId={selectedProgram?.id}
                 />
               ))}
             </div>
@@ -198,7 +211,7 @@ const Index = () => {
         <div className="xl:col-span-1">
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden sticky top-6">
             <ApplicationSteps 
-              application={selectedApplication || applications[0]} 
+              application={selectedProgram || selectedApplication || applications[0]} 
             />
           </div>
         </div>

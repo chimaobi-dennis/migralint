@@ -41,10 +41,12 @@ interface Application {
 interface ApplicationCardProps {
   application: Application;
   onClick: () => void;
+  onProgramClick?: (program: Program) => void;
   isSelected: boolean;
+  selectedProgramId?: number;
 }
 
-export const ApplicationCard = ({ application, onClick, isSelected }: ApplicationCardProps) => {
+export const ApplicationCard = ({ application, onClick, isSelected, onProgramClick, selectedProgramId }: ApplicationCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const getStatusColor = (status: string) => {
@@ -96,6 +98,11 @@ export const ApplicationCard = ({ application, onClick, isSelected }: Applicatio
   const handleExpandClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsExpanded(!isExpanded);
+  };
+
+  const handleProgramClick = (e: React.MouseEvent, program: Program) => {
+    e.stopPropagation();
+    onProgramClick?.(program);
   };
 
   const renderSingleProgram = () => (
@@ -246,20 +253,27 @@ export const ApplicationCard = ({ application, onClick, isSelected }: Applicatio
             {groupData.programs.map((program, index) => (
               <div 
                 key={program.id}
-                className="relative px-8 py-4 border-b border-blue-100 last:border-b-0 hover:bg-white/70 transition-all duration-200 group"
+                className={`relative px-8 py-4 border-b border-blue-100 last:border-b-0 hover:bg-white/70 transition-all duration-200 group cursor-pointer ${
+                  selectedProgramId === program.id ? 'bg-blue-100 border-l-4 border-l-blue-500' : ''
+                }`}
+                onClick={(e) => handleProgramClick(e, program)}
               >
                 {/* Connection Line */}
                 <div className="absolute left-6 top-0 bottom-0 w-px bg-blue-200"></div>
                 <div className="absolute left-5 top-6 w-3 h-px bg-blue-300"></div>
                 
                 {/* Program Number Badge */}
-                <div className="absolute left-4 top-4 w-4 h-4 bg-blue-500 text-white rounded-full flex items-center justify-center text-xs font-bold">
+                <div className={`absolute left-4 top-4 w-4 h-4 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                  selectedProgramId === program.id ? 'bg-blue-600 text-white' : 'bg-blue-500 text-white'
+                }`}>
                   {index + 1}
                 </div>
                 
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-md font-semibold text-gray-900 mb-1 truncate group-hover:text-blue-700 transition-colors">
+                    <h4 className={`text-md font-semibold mb-1 truncate group-hover:text-blue-700 transition-colors ${
+                      selectedProgramId === program.id ? 'text-blue-800' : 'text-gray-900'
+                    }`}>
                       {program.name}
                     </h4>
                     <div className="flex items-center text-sm text-gray-600 mb-2">
