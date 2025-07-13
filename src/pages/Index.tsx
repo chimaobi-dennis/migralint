@@ -35,9 +35,8 @@ const Index = () => {
     },
     {
       id: 3,
-    {
-      id: 3,
       university: "University of California System",
+      program: "Multiple Programs",
       deadline: "2024-02-01",
       status: "In Progress",
       progress: 45,
@@ -82,6 +81,8 @@ const Index = () => {
         ],
         deadline: "2024-02-01"
       }
+    },
+    {
       id: 4,
       university: "Harvard University",
       program: "Business Administration",
@@ -89,6 +90,21 @@ const Index = () => {
       status: "Under Review",
       progress: 100,
       requirements: ["Personal Statement", "Transcripts", "Letters of Rec", "Interview"],
+      completed: ["Personal Statement", "Transcripts", "Letters of Rec", "Interview"]
+    },
+    {
+      id: 5,
+      university: "Swedish Universities",
+      program: "Multiple Programs",
+      deadline: "2024-01-15",
+      status: "In Progress",
+      progress: 75,
+      requirements: ["Personal Statement", "Transcripts", "Letters of Rec"],
+      completed: ["Transcripts", "Letters of Rec"],
+      isGroup: true,
+      groupData: {
+        id: 5,
+        groupName: "Swedish Master's Programs",
         university: "Swedish Universities",
         programs: [
           {
@@ -124,7 +140,6 @@ const Index = () => {
         ],
         deadline: "2024-01-15"
       }
-      completed: ["Personal Statement", "Transcripts", "Letters of Rec", "Interview"]
     }
   ];
 
