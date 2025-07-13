@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   FileText, 
   Plus, 
@@ -22,8 +23,12 @@ import {
   Wand2,
   BookOpen,
   GraduationCap,
-  Target
+  Target,
+  User,
+  Briefcase,
+  Award
 } from 'lucide-react';
+import { useAdmissionSteps } from '@/hooks/useAdmissionSteps';
 
 interface Document {
   id: string;
@@ -43,13 +48,26 @@ const Documents = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [aiFormData, setAiFormData] = useState({
     documentType: '',
+    program: '',
+    programBackground: '',
     subject: '',
     level: '',
     deadline: '',
     requirements: '',
     tone: '',
-    pages: ''
+    pages: '',
+    // Academic background questions
+    currentDegree: '',
+    gpa: '',
+    workExperience: '',
+    researchExperience: '',
+    careerGoals: '',
+    whyThisProgram: '',
+    achievements: '',
+    challenges: ''
   });
+
+  const { applications } = useAdmissionSteps();
 
   // Mock data
   const userStats = {
@@ -130,7 +148,7 @@ const Documents = () => {
   });
 
   const handleAIServiceNext = () => {
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -138,6 +156,46 @@ const Documents = () => {
   const handleAIServiceBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Get all available programs including those from applications
+  const getAllPrograms = () => {
+    const programsFromApplications = applications.map(app => ({
+      id: app.id,
+      name: `${app.programName} - ${app.universityName}`,
+      university: app.universityName,
+      program: app.programName,
+      degree: app.degree,
+      description: `${app.degree} program in ${app.programName} at ${app.universityName}`,
+      requirements: app.requirements || [],
+      isFromApplication: true
+    }));
+
+    const otherPrograms = [
+      { id: 'p1', name: 'Computer Science - KTH', university: 'KTH', program: 'Computer Science', degree: "Master's", description: 'Advanced CS program focusing on AI and machine learning', requirements: ['Bachelor in CS'], isFromApplication: false },
+      { id: 'p2', name: 'Business Administration - Stockholm School of Economics', university: 'SSE', program: 'Business Administration', degree: "Master's", description: 'Top-ranked business program with global perspective', requirements: ['Bachelor degree', 'GMAT/GRE'], isFromApplication: false },
+      { id: 'p3', name: 'Engineering Physics - Chalmers', university: 'Chalmers', program: 'Engineering Physics', degree: "Master's", description: 'Interdisciplinary program combining physics and engineering', requirements: ['Bachelor in Physics/Engineering'], isFromApplication: false },
+      { id: 'p4', name: 'Data Science - Uppsala University', university: 'Uppsala', program: 'Data Science', degree: "Master's", description: 'Comprehensive data science with ML and statistics focus', requirements: ['Bachelor in CS/Math/Statistics'], isFromApplication: false },
+    ];
+
+    // Filter out duplicates and put user's applications first
+    const userApplicationPrograms = programsFromApplications.filter(app => 
+      !otherPrograms.some(p => p.program === app.program && p.university === app.university)
+    );
+
+    return [...userApplicationPrograms, ...otherPrograms];
+  };
+
+  const handleProgramSelect = (programId: string) => {
+    const programs = getAllPrograms();
+    const selectedProgram = programs.find(p => p.id === programId);
+    if (selectedProgram) {
+      setAiFormData({
+        ...aiFormData, 
+        program: programId,
+        programBackground: `Program: ${selectedProgram.program} at ${selectedProgram.university}. Description: ${selectedProgram.description}. Requirements: ${selectedProgram.requirements.join(', ')}`
+      });
     }
   };
 
@@ -151,15 +209,22 @@ const Documents = () => {
               <p className="text-muted-foreground">Select the type of academic document you want to create</p>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              {['Essay', 'Research Paper', 'Report', 'Thesis', 'Assignment', 'Other'].map((type) => (
+              {[
+                { type: 'Statement of Purpose', icon: <Target className="h-5 w-5" /> },
+                { type: 'Motivation Letter', icon: <Award className="h-5 w-5" /> },
+                { type: 'Personal Statement', icon: <User className="h-5 w-5" /> },
+                { type: 'Research Proposal', icon: <BookOpen className="h-5 w-5" /> },
+                { type: 'Cover Letter', icon: <Briefcase className="h-5 w-5" /> },
+                { type: 'Essay', icon: <FileText className="h-5 w-5" /> }
+              ].map(({ type, icon }) => (
                 <Button
                   key={type}
                   variant={aiFormData.documentType === type ? 'default' : 'outline'}
                   className="h-16 flex flex-col items-center justify-center"
                   onClick={() => setAiFormData({...aiFormData, documentType: type})}
                 >
-                  {getDocumentIcon(type.toLowerCase())}
-                  <span className="mt-2">{type}</span>
+                  {icon}
+                  <span className="mt-2 text-sm">{type}</span>
                 </Button>
               ))}
             </div>
@@ -169,36 +234,57 @@ const Documents = () => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Tell us about your assignment</h3>
-              <p className="text-muted-foreground">Provide details to help us create the perfect document</p>
+              <h3 className="text-lg font-semibold mb-2">Which program are you applying to?</h3>
+              <p className="text-muted-foreground">Select the program to help us tailor your document</p>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Subject/Topic</label>
-                <Input
-                  placeholder="e.g., Environmental Science, Business Management"
-                  value={aiFormData.subject}
-                  onChange={(e) => setAiFormData({...aiFormData, subject: e.target.value})}
-                />
+                <label className="block text-sm font-medium mb-2">Program</label>
+                <Select value={aiFormData.program} onValueChange={handleProgramSelect}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a program" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {applications.length > 0 && (
+                      <>
+                        <div className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50">Your Applications</div>
+                        {applications.map((app) => (
+                          <SelectItem key={app.id} value={app.id}>
+                            <div className="flex items-center space-x-2">
+                              <GraduationCap className="h-4 w-4 text-blue-500" />
+                              <span>{app.programName} - {app.universityName}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                        <div className="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-50">Other Programs</div>
+                      </>
+                    )}
+                    {getAllPrograms().filter(p => !p.isFromApplication).map((program) => (
+                      <SelectItem key={program.id} value={program.id}>
+                        <span>{program.name}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Academic Level</label>
-                <select 
-                  className="w-full p-2 border rounded-md"
-                  value={aiFormData.level}
-                  onChange={(e) => setAiFormData({...aiFormData, level: e.target.value})}
-                >
-                  <option value="">Select level</option>
-                  <option value="undergraduate">Undergraduate</option>
-                  <option value="graduate">Graduate</option>
-                  <option value="phd">PhD</option>
-                </select>
+                <Select value={aiFormData.level} onValueChange={(value) => setAiFormData({...aiFormData, level: value})}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="undergraduate">Undergraduate</SelectItem>
+                    <SelectItem value="graduate">Graduate/Masters</SelectItem>
+                    <SelectItem value="phd">PhD</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Page Count</label>
                 <Input
                   type="number"
-                  placeholder="e.g., 5-10 pages"
+                  placeholder="e.g., 1-2 pages"
                   value={aiFormData.pages}
                   onChange={(e) => setAiFormData({...aiFormData, pages: e.target.value})}
                 />
@@ -210,39 +296,42 @@ const Documents = () => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Additional Requirements</h3>
-              <p className="text-muted-foreground">Help us understand your specific needs</p>
+              <h3 className="text-lg font-semibold mb-2">Tell us about your academic background</h3>
+              <p className="text-muted-foreground">This helps us write a more personalized and compelling document</p>
             </div>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Deadline</label>
+                <label className="block text-sm font-medium mb-2">Current Degree</label>
                 <Input
-                  type="date"
-                  value={aiFormData.deadline}
-                  onChange={(e) => setAiFormData({...aiFormData, deadline: e.target.value})}
+                  placeholder="e.g., Bachelor's in Computer Science"
+                  value={aiFormData.currentDegree}
+                  onChange={(e) => setAiFormData({...aiFormData, currentDegree: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Writing Tone</label>
-                <select 
-                  className="w-full p-2 border rounded-md"
-                  value={aiFormData.tone}
-                  onChange={(e) => setAiFormData({...aiFormData, tone: e.target.value})}
-                >
-                  <option value="">Select tone</option>
-                  <option value="academic">Academic</option>
-                  <option value="formal">Formal</option>
-                  <option value="persuasive">Persuasive</option>
-                  <option value="analytical">Analytical</option>
-                </select>
+                <label className="block text-sm font-medium mb-2">GPA/Grades</label>
+                <Input
+                  placeholder="e.g., 3.8/4.0 or First Class Honours"
+                  value={aiFormData.gpa}
+                  onChange={(e) => setAiFormData({...aiFormData, gpa: e.target.value})}
+                />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">Specific Requirements</label>
+                <label className="block text-sm font-medium mb-2">Work Experience (if any)</label>
                 <textarea
-                  className="w-full p-2 border rounded-md h-24"
-                  placeholder="Any specific instructions, citation style, or requirements..."
-                  value={aiFormData.requirements}
-                  onChange={(e) => setAiFormData({...aiFormData, requirements: e.target.value})}
+                  className="w-full p-2 border rounded-md h-20"
+                  placeholder="Describe relevant work experience, internships, or part-time jobs..."
+                  value={aiFormData.workExperience}
+                  onChange={(e) => setAiFormData({...aiFormData, workExperience: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Research Experience</label>
+                <textarea
+                  className="w-full p-2 border rounded-md h-20"
+                  placeholder="Any research projects, publications, or academic work..."
+                  value={aiFormData.researchExperience}
+                  onChange={(e) => setAiFormData({...aiFormData, researchExperience: e.target.value})}
                 />
               </div>
             </div>
@@ -252,22 +341,70 @@ const Documents = () => {
         return (
           <div className="space-y-6">
             <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2">Career goals & motivation</h3>
+              <p className="text-muted-foreground">Help us understand your aspirations and motivation</p>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">Career Goals</label>
+                <textarea
+                  className="w-full p-2 border rounded-md h-20"
+                  placeholder="What are your long-term career goals? How does this program fit?"
+                  value={aiFormData.careerGoals}
+                  onChange={(e) => setAiFormData({...aiFormData, careerGoals: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Why this program?</label>
+                <textarea
+                  className="w-full p-2 border rounded-md h-20"
+                  placeholder="Why are you interested in this specific program and university?"
+                  value={aiFormData.whyThisProgram}
+                  onChange={(e) => setAiFormData({...aiFormData, whyThisProgram: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Key Achievements</label>
+                <textarea
+                  className="w-full p-2 border rounded-md h-20"
+                  placeholder="Academic awards, projects, leadership roles, extracurricular activities..."
+                  value={aiFormData.achievements}
+                  onChange={(e) => setAiFormData({...aiFormData, achievements: e.target.value})}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Challenges overcome</label>
+                <textarea
+                  className="w-full p-2 border rounded-md h-20"
+                  placeholder="Any challenges you've overcome that shaped your academic journey (optional)..."
+                  value={aiFormData.challenges}
+                  onChange={(e) => setAiFormData({...aiFormData, challenges: e.target.value})}
+                />
+              </div>
+            </div>
+          </div>
+        );
+      case 5:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
               <h3 className="text-lg font-semibold mb-2">Review & Generate</h3>
               <p className="text-muted-foreground">Confirm your details and start generating your document</p>
             </div>
-            <div className="bg-muted p-4 rounded-lg space-y-3">
+            <div className="bg-muted p-4 rounded-lg space-y-3 max-h-64 overflow-y-auto">
               <div className="flex justify-between"><span className="font-medium">Document Type:</span><span>{aiFormData.documentType}</span></div>
-              <div className="flex justify-between"><span className="font-medium">Subject:</span><span>{aiFormData.subject}</span></div>
+              <div className="flex justify-between"><span className="font-medium">Program:</span><span className="text-right">{getAllPrograms().find(p => p.id === aiFormData.program)?.name || 'Not selected'}</span></div>
               <div className="flex justify-between"><span className="font-medium">Level:</span><span>{aiFormData.level}</span></div>
               <div className="flex justify-between"><span className="font-medium">Pages:</span><span>{aiFormData.pages}</span></div>
-              <div className="flex justify-between"><span className="font-medium">Tone:</span><span>{aiFormData.tone}</span></div>
+              <div className="flex justify-between"><span className="font-medium">Current Degree:</span><span className="text-right">{aiFormData.currentDegree}</span></div>
+              <div className="flex justify-between"><span className="font-medium">GPA:</span><span>{aiFormData.gpa}</span></div>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
               <div className="flex items-center space-x-2 mb-2">
                 <CreditCard className="h-5 w-5 text-blue-600" />
-                <span className="font-medium">Credits Required: 25</span>
+                <span className="font-medium">Credits Required: 35</span>
               </div>
-              <p className="text-sm text-muted-foreground">This will create a comprehensive document based on your requirements.</p>
+              <p className="text-sm text-muted-foreground">This will create a comprehensive academic document tailored to your background and the selected program.</p>
             </div>
           </div>
         );
@@ -465,7 +602,7 @@ const Documents = () => {
             <div className="space-y-6">
               {/* Progress Indicator */}
               <div className="flex items-center space-x-2">
-                {[1, 2, 3, 4].map((step) => (
+                {[1, 2, 3, 4, 5].map((step) => (
                   <div
                     key={step}
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -489,12 +626,44 @@ const Documents = () => {
                   Back
                 </Button>
                 <div className="flex space-x-2">
-                  {currentStep < 4 ? (
-                    <Button onClick={handleAIServiceNext}>
+                  {currentStep < 5 ? (
+                    <Button 
+                      onClick={handleAIServiceNext}
+                      disabled={
+                        (currentStep === 1 && !aiFormData.documentType) ||
+                        (currentStep === 2 && (!aiFormData.program || !aiFormData.level))
+                      }
+                    >
                       Next
                     </Button>
                   ) : (
-                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500">
+                    <Button 
+                      className="bg-gradient-to-r from-purple-500 to-pink-500"
+                      onClick={() => {
+                        // Generate document logic here
+                        setShowAIService(false);
+                        setCurrentStep(1);
+                        setAiFormData({
+                          documentType: '',
+                          program: '',
+                          programBackground: '',
+                          subject: '',
+                          level: '',
+                          deadline: '',
+                          requirements: '',
+                          tone: '',
+                          pages: '',
+                          currentDegree: '',
+                          gpa: '',
+                          workExperience: '',
+                          researchExperience: '',
+                          careerGoals: '',
+                          whyThisProgram: '',
+                          achievements: '',
+                          challenges: ''
+                        });
+                      }}
+                    >
                       <Wand2 className="h-4 w-4 mr-2" />
                       Generate Document
                     </Button>
