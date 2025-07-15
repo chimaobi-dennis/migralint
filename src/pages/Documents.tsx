@@ -47,9 +47,11 @@ const Documents = () => {
   const [showAIService, setShowAIService] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [aiFormData, setAiFormData] = useState({
+    writingFor: '', // 'program' or 'general'
     documentType: '',
     program: '',
     programBackground: '',
+    requiredDocuments: [],
     subject: '',
     level: '',
     deadline: '',
@@ -205,93 +207,161 @@ const Documents = () => {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">What type of document do you need?</h3>
-              <p className="text-muted-foreground">Select the type of academic document you want to create</p>
+              <h3 className="text-lg font-semibold mb-2">What are you writing for?</h3>
+              <p className="text-muted-foreground">Choose whether you're writing for a specific program or general use</p>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { type: 'Statement of Purpose', icon: <Target className="h-5 w-5" /> },
-                { type: 'Motivation Letter', icon: <Award className="h-5 w-5" /> },
-                { type: 'Personal Statement', icon: <User className="h-5 w-5" /> },
-                { type: 'Research Proposal', icon: <BookOpen className="h-5 w-5" /> },
-                { type: 'Cover Letter', icon: <Briefcase className="h-5 w-5" /> },
-                { type: 'Essay', icon: <FileText className="h-5 w-5" /> }
-              ].map(({ type, icon }) => (
-                <Button
-                  key={type}
-                  variant={aiFormData.documentType === type ? 'default' : 'outline'}
-                  className="h-16 flex flex-col items-center justify-center"
-                  onClick={() => setAiFormData({...aiFormData, documentType: type})}
-                >
-                  {icon}
-                  <span className="mt-2 text-sm">{type}</span>
-                </Button>
-              ))}
+            <div className="grid grid-cols-1 gap-4">
+              <Button
+                variant={aiFormData.writingFor === 'program' ? 'default' : 'outline'}
+                className="h-20 flex flex-col items-center justify-center"
+                onClick={() => setAiFormData({...aiFormData, writingFor: 'program'})}
+              >
+                <GraduationCap className="h-6 w-6 mb-2" />
+                <span className="font-medium">Program Application</span>
+                <span className="text-sm text-muted-foreground">Writing for a specific university program</span>
+              </Button>
+              <Button
+                variant={aiFormData.writingFor === 'general' ? 'default' : 'outline'}
+                className="h-20 flex flex-col items-center justify-center"
+                onClick={() => setAiFormData({...aiFormData, writingFor: 'general'})}
+              >
+                <FileText className="h-6 w-6 mb-2" />
+                <span className="font-medium">General Document</span>
+                <span className="text-sm text-muted-foreground">Writing for general academic purposes</span>
+              </Button>
             </div>
           </div>
         );
       case 2:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Which program are you applying to?</h3>
-              <p className="text-muted-foreground">Select the program to help us tailor your document</p>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Program</label>
-                <Select value={aiFormData.program} onValueChange={handleProgramSelect}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a program" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {applications.length > 0 && (
-                      <>
-                        <div className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50">Your Applications</div>
-                        {applications.map((app) => (
-                          <SelectItem key={app.id} value={app.id}>
-                            <div className="flex items-center space-x-2">
-                              <GraduationCap className="h-4 w-4 text-blue-500" />
-                              <span>{app.programName} - {app.universityName}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                        <div className="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-50">Other Programs</div>
-                      </>
-                    )}
-                    {getAllPrograms().filter(p => !p.isFromApplication).map((program) => (
-                      <SelectItem key={program.id} value={program.id}>
-                        <span>{program.name}</span>
-                      </SelectItem>
+        if (aiFormData.writingFor === 'program') {
+          return (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-2">Which program are you applying to?</h3>
+                <p className="text-muted-foreground">Select the program to help us tailor your document</p>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Program</label>
+                  <Select value={aiFormData.program} onValueChange={handleProgramSelect}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a program" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {applications.length > 0 && (
+                        <>
+                          <div className="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-50">Your Applications</div>
+                          {applications.map((app) => (
+                            <SelectItem key={app.id} value={app.id}>
+                              <div className="flex items-center space-x-2">
+                                <GraduationCap className="h-4 w-4 text-blue-500" />
+                                <span>{app.programName} - {app.universityName}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                          <div className="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-50">Other Programs</div>
+                        </>
+                      )}
+                      {getAllPrograms().filter(p => !p.isFromApplication).map((program) => (
+                        <SelectItem key={program.id} value={program.id}>
+                          <span>{program.name}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {aiFormData.program && (
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h4 className="font-medium mb-2">Required Documents for this Program:</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['Statement of Purpose', 'CV/Resume', 'Motivation Letter', 'Recommendation Letters'].map((doc) => (
+                        <div key={doc} className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm">{doc}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div>
+                  <label className="block text-sm font-medium mb-2">Document Type</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { type: 'Statement of Purpose', icon: <Target className="h-4 w-4" /> },
+                      { type: 'Motivation Letter', icon: <Award className="h-4 w-4" /> },
+                      { type: 'Personal Statement', icon: <User className="h-4 w-4" /> },
+                      { type: 'Cover Letter', icon: <Briefcase className="h-4 w-4" /> }
+                    ].map(({ type, icon }) => (
+                      <Button
+                        key={type}
+                        variant={aiFormData.documentType === type ? 'default' : 'outline'}
+                        className="h-12 flex items-center justify-start space-x-2"
+                        onClick={() => setAiFormData({...aiFormData, documentType: type})}
+                      >
+                        {icon}
+                        <span className="text-sm">{type}</span>
+                      </Button>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Academic Level</label>
-                <Select value={aiFormData.level} onValueChange={(value) => setAiFormData({...aiFormData, level: value})}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="undergraduate">Undergraduate</SelectItem>
-                    <SelectItem value="graduate">Graduate/Masters</SelectItem>
-                    <SelectItem value="phd">PhD</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Page Count</label>
-                <Input
-                  type="number"
-                  placeholder="e.g., 1-2 pages"
-                  value={aiFormData.pages}
-                  onChange={(e) => setAiFormData({...aiFormData, pages: e.target.value})}
-                />
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        );
+          );
+        } else {
+          // General document writing
+          return (
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold mb-2">What type of document do you need?</h3>
+                <p className="text-muted-foreground">Select the type of academic document you want to create</p>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { type: 'Essay', icon: <FileText className="h-5 w-5" /> },
+                  { type: 'Research Proposal', icon: <BookOpen className="h-5 w-5" /> },
+                  { type: 'Report', icon: <FileCheck className="h-5 w-5" /> },
+                  { type: 'Thesis Chapter', icon: <GraduationCap className="h-5 w-5" /> },
+                  { type: 'Literature Review', icon: <BookOpen className="h-5 w-5" /> },
+                  { type: 'Case Study', icon: <Target className="h-5 w-5" /> }
+                ].map(({ type, icon }) => (
+                  <Button
+                    key={type}
+                    variant={aiFormData.documentType === type ? 'default' : 'outline'}
+                    className="h-16 flex flex-col items-center justify-center"
+                    onClick={() => setAiFormData({...aiFormData, documentType: type})}
+                  >
+                    {icon}
+                    <span className="mt-2 text-sm">{type}</span>
+                  </Button>
+                ))}
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Academic Level</label>
+                  <Select value={aiFormData.level} onValueChange={(value) => setAiFormData({...aiFormData, level: value})}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="undergraduate">Undergraduate</SelectItem>
+                      <SelectItem value="graduate">Graduate/Masters</SelectItem>
+                      <SelectItem value="phd">PhD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Page Count</label>
+                  <Input
+                    type="number"
+                    placeholder="e.g., 5-10 pages"
+                    value={aiFormData.pages}
+                    onChange={(e) => setAiFormData({...aiFormData, pages: e.target.value})}
+                  />
+                </div>
+              </div>
+            </div>
+          );
+        }
       case 3:
         return (
           <div className="space-y-6">
@@ -591,7 +661,7 @@ const Documents = () => {
 
         {/* AI Service Modal */}
         <Dialog open={showAIService} onOpenChange={setShowAIService}>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle className="flex items-center space-x-2">
                 <Wand2 className="h-5 w-5" />
@@ -630,8 +700,10 @@ const Documents = () => {
                     <Button 
                       onClick={handleAIServiceNext}
                       disabled={
-                        (currentStep === 1 && !aiFormData.documentType) ||
-                        (currentStep === 2 && (!aiFormData.program || !aiFormData.level))
+                        (currentStep === 1 && !aiFormData.writingFor) ||
+                        (currentStep === 2 && !aiFormData.documentType) ||
+                        (currentStep === 2 && aiFormData.writingFor === 'program' && !aiFormData.program) ||
+                        (currentStep === 2 && aiFormData.writingFor === 'general' && !aiFormData.level)
                       }
                     >
                       Next
@@ -644,9 +716,11 @@ const Documents = () => {
                         setShowAIService(false);
                         setCurrentStep(1);
                         setAiFormData({
+                          writingFor: '',
                           documentType: '',
                           program: '',
                           programBackground: '',
+                          requiredDocuments: [],
                           subject: '',
                           level: '',
                           deadline: '',
