@@ -336,27 +336,53 @@ const Documents = () => {
                     </div>
                   </div>
                 )}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Document Type</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { type: 'Statement of Purpose', icon: <Target className="h-4 w-4" /> },
-                      { type: 'Motivation Letter', icon: <Award className="h-4 w-4" /> },
-                      { type: 'Personal Statement', icon: <User className="h-4 w-4" /> },
-                      { type: 'Cover Letter', icon: <Briefcase className="h-4 w-4" /> }
-                    ].map(({ type, icon }) => (
-                      <Button
-                        key={type}
-                        variant={aiFormData.documentType === type ? 'default' : 'outline'}
-                        className="h-12 flex items-center justify-start space-x-2"
-                        onClick={() => setAiFormData({...aiFormData, documentType: type})}
-                      >
-                        {icon}
-                        <span className="text-sm">{type}</span>
-                      </Button>
-                    ))}
-                  </div>
-                </div>
+                 <div>
+                   <label className="block text-sm font-medium mb-2">Document Type</label>
+                   <div className="grid grid-cols-2 gap-3">
+                     {[
+                       { type: 'Statement of Purpose', icon: <Target className="h-4 w-4" /> },
+                       { type: 'Motivation Letter', icon: <Award className="h-4 w-4" /> },
+                       { type: 'Personal Statement', icon: <User className="h-4 w-4" /> },
+                       { type: 'Cover Letter', icon: <Briefcase className="h-4 w-4" /> }
+                     ].map(({ type, icon }) => (
+                       <Button
+                         key={type}
+                         variant={aiFormData.documentType === type ? 'default' : 'outline'}
+                         className="h-12 flex items-center justify-start space-x-2"
+                         onClick={() => setAiFormData({...aiFormData, documentType: type})}
+                       >
+                         {icon}
+                         <span className="text-sm">{type}</span>
+                       </Button>
+                     ))}
+                   </div>
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <label className="block text-sm font-medium mb-2">Tone</label>
+                     <Select value={aiFormData.tone} onValueChange={(value) => setAiFormData({...aiFormData, tone: value})}>
+                       <SelectTrigger className="w-full">
+                         <SelectValue placeholder="Select tone" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="professional">Professional</SelectItem>
+                         <SelectItem value="casual">Casual</SelectItem>
+                         <SelectItem value="technical">Technical</SelectItem>
+                         <SelectItem value="academic">Academic</SelectItem>
+                         <SelectItem value="creative">Creative</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+                   <div>
+                     <label className="block text-sm font-medium mb-2">Page Count</label>
+                     <Input
+                       type="number"
+                       placeholder="e.g., 5"
+                       value={aiFormData.pages}
+                       onChange={(e) => setAiFormData({...aiFormData, pages: e.target.value})}
+                     />
+                   </div>
+                 </div>
               </div>
             </div>
           );
@@ -390,15 +416,17 @@ const Documents = () => {
               </div>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Academic Level</label>
-                  <Select value={aiFormData.level} onValueChange={(value) => setAiFormData({...aiFormData, level: value})}>
+                  <label className="block text-sm font-medium mb-2">Tone</label>
+                  <Select value={aiFormData.tone} onValueChange={(value) => setAiFormData({...aiFormData, tone: value})}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select level" />
+                      <SelectValue placeholder="Select tone" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="undergraduate">Undergraduate</SelectItem>
-                      <SelectItem value="graduate">Graduate/Masters</SelectItem>
-                      <SelectItem value="phd">PhD</SelectItem>
+                      <SelectItem value="professional">Professional</SelectItem>
+                      <SelectItem value="casual">Casual</SelectItem>
+                      <SelectItem value="technical">Technical</SelectItem>
+                      <SelectItem value="academic">Academic</SelectItem>
+                      <SelectItem value="creative">Creative</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -505,7 +533,7 @@ const Documents = () => {
             <div className="bg-muted p-4 rounded-lg space-y-3 max-h-64 overflow-y-auto">
               <div className="flex justify-between"><span className="font-medium">Document Type:</span><span>{aiFormData.documentType}</span></div>
               <div className="flex justify-between"><span className="font-medium">Program:</span><span className="text-right">{getAllPrograms().find(p => p.id === aiFormData.program)?.name || 'Not selected'}</span></div>
-              <div className="flex justify-between"><span className="font-medium">Level:</span><span>{aiFormData.level}</span></div>
+              <div className="flex justify-between"><span className="font-medium">Tone:</span><span>{aiFormData.tone}</span></div>
               <div className="flex justify-between"><span className="font-medium">Pages:</span><span>{aiFormData.pages}</span></div>
               <div className="flex justify-between"><span className="font-medium">Current Degree:</span><span className="text-right">{aiFormData.currentDegree}</span></div>
               <div className="flex justify-between"><span className="font-medium">GPA:</span><span>{aiFormData.gpa}</span></div>
@@ -744,7 +772,7 @@ const Documents = () => {
                         (currentStep === 1 && !aiFormData.writingFor) ||
                         (currentStep === 2 && !aiFormData.documentType) ||
                         (currentStep === 2 && aiFormData.writingFor === 'program' && !aiFormData.program) ||
-                        (currentStep === 2 && aiFormData.writingFor === 'general' && !aiFormData.level)
+                        (currentStep === 2 && aiFormData.writingFor === 'general' && !aiFormData.tone)
                       }
                     >
                       {currentStep === 3 && currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Next'}
