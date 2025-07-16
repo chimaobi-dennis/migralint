@@ -1,6 +1,5 @@
 
 import { Home, Calendar, BarChart3, Settings, Menu, FileText } from "lucide-react";
-import { User } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -32,11 +31,6 @@ export function Layout({ children }: LayoutProps) {
       title: "My Page", 
       url: "/my-page",
       icon: BarChart3,
-    },
-    {
-      title: "Profile", 
-      url: "/my-profile",
-      icon: User,
     },
   ];
 
