@@ -196,6 +196,21 @@ const Documents = () => {
         "Bachelor's in Engineering with specialization in Software Development",
         "Bachelor's in Information Technology with honors"
       ],
+      gpa: [
+        "3.8/4.0 GPA with Dean's List recognition for 3 consecutive semesters",
+        "First Class Honours (85% average) in Computer Science program",
+        "3.9/4.0 cumulative GPA, ranked top 10% of graduating class"
+      ],
+      workExperience: [
+        "Software Developer Intern at Tech Startup - Developed mobile applications using React Native and contributed to core product features",
+        "Research Assistant at University Lab - Collaborated on machine learning research projects and co-authored 2 published papers",
+        "Part-time Web Developer - Built responsive websites for local businesses while maintaining full academic workload"
+      ],
+      researchExperience: [
+        "Conducted independent research on natural language processing, resulting in a thesis that received departmental recognition",
+        "Collaborated with faculty on AI ethics research, contributing to 2 peer-reviewed publications",
+        "Led undergraduate research team investigating sustainable computing solutions, presented findings at national conference"
+      ],
       careerGoals: [
         "To become a leading researcher in artificial intelligence and contribute to breakthrough innovations",
         "To work in product management at a tech company, bridging technology and business strategy",
@@ -205,6 +220,16 @@ const Documents = () => {
         "The program's emphasis on practical application and industry collaboration aligns with my career goals",
         "The opportunity to work with renowned faculty in cutting-edge research areas",
         "The program's international perspective and diverse student body will broaden my worldview"
+      ],
+      achievements: [
+        "Recipient of Academic Excellence Scholarship for maintaining top 5% GPA throughout undergraduate studies",
+        "Founded and led university's AI club, organizing workshops and hackathons for 200+ students",
+        "Won first place in national programming competition and published mobile app with 10,000+ downloads"
+      ],
+      challenges: [
+        "Overcame financial hardship by working part-time while maintaining academic excellence, developing strong time management skills",
+        "Successfully transitioned from non-technical background to computer science, demonstrating adaptability and determination",
+        "Led team through complex group project despite initial conflicts, improving collaborative leadership abilities"
       ]
     };
 
