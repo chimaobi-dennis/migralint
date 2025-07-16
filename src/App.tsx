@@ -13,7 +13,6 @@ import PathwaySelection from "./pages/PathwaySelection";
 import SelfDirectedPath from "./pages/SelfDirectedPath";
 import PremiumService from "./pages/PremiumService";
 import MyPage from "./pages/MyPage";
-import MyProfile from "./pages/MyProfile";
 import AdminScholarshipSteps from "./pages/AdminScholarshipSteps";
 import AdminVisaSteps from "./pages/AdminVisaSteps";
 import AdminSteps from "./pages/AdminSteps";
@@ -37,7 +36,6 @@ const App = () => (
           <Route path="/premium-service" element={<Layout><PremiumService /></Layout>} />
           <Route path="/documents" element={<Layout><Documents /></Layout>} />
           <Route path="/my-page" element={<Layout><MyPage /></Layout>} />
-          <Route path="/my-profile" element={<Layout><MyProfile /></Layout>} />
           <Route path="/admin/scholarship-steps" element={<AdminLayout><AdminScholarshipSteps /></AdminLayout>} />
           <Route path="/admin/visa-steps" element={<AdminLayout><AdminVisaSteps /></AdminLayout>} />
           <Route path="/admin/steps" element={<AdminLayout><AdminSteps /></AdminLayout>} />
