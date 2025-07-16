@@ -68,6 +68,9 @@ const Documents = () => {
     achievements: '',
     challenges: ''
   });
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [aiSuggestions, setAiSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { applications } = useAdmissionSteps();
 
@@ -150,15 +153,65 @@ const Documents = () => {
   });
 
   const handleAIServiceNext = () => {
-    if (currentStep < 5) {
+    if (currentStep === 3) {
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+      } else {
+        setCurrentStep(currentStep + 1);
+      }
+    } else if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
 
   const handleAIServiceBack = () => {
-    if (currentStep > 1) {
+    if (currentStep === 3 && currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    } else if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const questions = [
+    { key: 'currentDegree', label: 'Current Degree', placeholder: 'e.g., Bachelor\'s in Computer Science', type: 'text' },
+    { key: 'gpa', label: 'GPA/Grades', placeholder: 'e.g., 3.8/4.0 or First Class Honours', type: 'text' },
+    { key: 'workExperience', label: 'Work Experience', placeholder: 'Describe relevant work experience, internships, or part-time jobs...', type: 'textarea' },
+    { key: 'researchExperience', label: 'Research Experience', placeholder: 'Any research projects, publications, or academic work...', type: 'textarea' },
+    { key: 'careerGoals', label: 'Career Goals', placeholder: 'What are your long-term career aspirations?', type: 'textarea' },
+    { key: 'whyThisProgram', label: 'Why This Program?', placeholder: 'What draws you to this specific program?', type: 'textarea' },
+    { key: 'achievements', label: 'Key Achievements', placeholder: 'Academic achievements, awards, leadership roles...', type: 'textarea' },
+    { key: 'challenges', label: 'Challenges Overcome', placeholder: 'Significant challenges you\'ve faced and how you overcame them...', type: 'textarea' }
+  ];
+
+  const generateAISuggestions = async (inputValue: string, questionKey: string) => {
+    if (inputValue.length < 3) {
+      setShowSuggestions(false);
+      return;
+    }
+
+    // Mock AI suggestions - in a real app, this would call an AI API
+    const mockSuggestions = {
+      currentDegree: [
+        "Bachelor's degree in Computer Science with focus on AI and Machine Learning",
+        "Bachelor's in Engineering with specialization in Software Development",
+        "Bachelor's in Information Technology with honors"
+      ],
+      careerGoals: [
+        "To become a leading researcher in artificial intelligence and contribute to breakthrough innovations",
+        "To work in product management at a tech company, bridging technology and business strategy",
+        "To pursue a career in data science and help organizations make data-driven decisions"
+      ],
+      whyThisProgram: [
+        "The program's emphasis on practical application and industry collaboration aligns with my career goals",
+        "The opportunity to work with renowned faculty in cutting-edge research areas",
+        "The program's international perspective and diverse student body will broaden my worldview"
+      ]
+    };
+
+    setTimeout(() => {
+      setAiSuggestions(mockSuggestions[questionKey] || []);
+      setShowSuggestions(true);
+    }, 300);
   };
 
   // Get all available programs including those from applications
@@ -363,98 +416,86 @@ const Documents = () => {
           );
         }
       case 3:
+        const currentQuestion = questions[currentQuestionIndex];
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Tell us about your academic background</h3>
-              <p className="text-muted-foreground">This helps us write a more personalized and compelling document</p>
+              <h3 className="text-lg font-semibold mb-2">Tell us about yourself</h3>
+              <p className="text-muted-foreground">Question {currentQuestionIndex + 1} of {questions.length}</p>
             </div>
+            
+            {/* Progress dots */}
+            <div className="flex justify-center space-x-2 mb-6">
+              {questions.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full ${
+                    index <= currentQuestionIndex ? 'bg-primary' : 'bg-muted'
+                  }`}
+                />
+              ))}
+            </div>
+
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">Current Degree</label>
-                <Input
-                  placeholder="e.g., Bachelor's in Computer Science"
-                  value={aiFormData.currentDegree}
-                  onChange={(e) => setAiFormData({...aiFormData, currentDegree: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">GPA/Grades</label>
-                <Input
-                  placeholder="e.g., 3.8/4.0 or First Class Honours"
-                  value={aiFormData.gpa}
-                  onChange={(e) => setAiFormData({...aiFormData, gpa: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Work Experience (if any)</label>
-                <textarea
-                  className="w-full p-2 border rounded-md h-20"
-                  placeholder="Describe relevant work experience, internships, or part-time jobs..."
-                  value={aiFormData.workExperience}
-                  onChange={(e) => setAiFormData({...aiFormData, workExperience: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Research Experience</label>
-                <textarea
-                  className="w-full p-2 border rounded-md h-20"
-                  placeholder="Any research projects, publications, or academic work..."
-                  value={aiFormData.researchExperience}
-                  onChange={(e) => setAiFormData({...aiFormData, researchExperience: e.target.value})}
-                />
+                <label className="block text-sm font-medium mb-2">{currentQuestion.label}</label>
+                <div className="relative">
+                  {currentQuestion.type === 'textarea' ? (
+                    <textarea
+                      className="w-full p-3 border rounded-md h-24 resize-none"
+                      placeholder={currentQuestion.placeholder}
+                      value={aiFormData[currentQuestion.key]}
+                      onChange={(e) => {
+                        setAiFormData({...aiFormData, [currentQuestion.key]: e.target.value});
+                        generateAISuggestions(e.target.value, currentQuestion.key);
+                      }}
+                    />
+                  ) : (
+                    <Input
+                      placeholder={currentQuestion.placeholder}
+                      value={aiFormData[currentQuestion.key]}
+                      onChange={(e) => {
+                        setAiFormData({...aiFormData, [currentQuestion.key]: e.target.value});
+                        generateAISuggestions(e.target.value, currentQuestion.key);
+                      }}
+                    />
+                  )}
+                  
+                  {/* AI Suggestions */}
+                  {showSuggestions && aiSuggestions.length > 0 && (
+                    <div className="absolute top-full left-0 w-full bg-white border border-gray-200 rounded-md shadow-lg z-10 mt-1">
+                      <div className="p-2 border-b bg-blue-50">
+                        <div className="flex items-center space-x-2">
+                          <Sparkles className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium text-blue-700">AI Suggestions</span>
+                        </div>
+                      </div>
+                      {aiSuggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          className="w-full text-left p-3 hover:bg-gray-50 border-b last:border-b-0 text-sm"
+                          onClick={() => {
+                            setAiFormData({...aiFormData, [currentQuestion.key]: suggestion});
+                            setShowSuggestions(false);
+                          }}
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                      <button
+                        className="w-full text-center p-2 text-xs text-gray-500 hover:bg-gray-50"
+                        onClick={() => setShowSuggestions(false)}
+                      >
+                        Close suggestions
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         );
       case 4:
-        return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h3 className="text-lg font-semibold mb-2">Career goals & motivation</h3>
-              <p className="text-muted-foreground">Help us understand your aspirations and motivation</p>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2">Career Goals</label>
-                <textarea
-                  className="w-full p-2 border rounded-md h-20"
-                  placeholder="What are your long-term career goals? How does this program fit?"
-                  value={aiFormData.careerGoals}
-                  onChange={(e) => setAiFormData({...aiFormData, careerGoals: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Why this program?</label>
-                <textarea
-                  className="w-full p-2 border rounded-md h-20"
-                  placeholder="Why are you interested in this specific program and university?"
-                  value={aiFormData.whyThisProgram}
-                  onChange={(e) => setAiFormData({...aiFormData, whyThisProgram: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Key Achievements</label>
-                <textarea
-                  className="w-full p-2 border rounded-md h-20"
-                  placeholder="Academic awards, projects, leadership roles, extracurricular activities..."
-                  value={aiFormData.achievements}
-                  onChange={(e) => setAiFormData({...aiFormData, achievements: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Challenges overcome</label>
-                <textarea
-                  className="w-full p-2 border rounded-md h-20"
-                  placeholder="Any challenges you've overcome that shaped your academic journey (optional)..."
-                  value={aiFormData.challenges}
-                  onChange={(e) => setAiFormData({...aiFormData, challenges: e.target.value})}
-                />
-              </div>
-            </div>
-          </div>
-        );
-      case 5:
         return (
           <div className="space-y-6">
             <div className="text-center">
@@ -672,7 +713,7 @@ const Documents = () => {
             <div className="space-y-6">
               {/* Progress Indicator */}
               <div className="flex items-center space-x-2">
-                {[1, 2, 3, 4, 5].map((step) => (
+                {[1, 2, 3, 4].map((step) => (
                   <div
                     key={step}
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
@@ -696,7 +737,7 @@ const Documents = () => {
                   Back
                 </Button>
                 <div className="flex space-x-2">
-                  {currentStep < 5 ? (
+                  {currentStep < 4 ? (
                     <Button 
                       onClick={handleAIServiceNext}
                       disabled={
@@ -706,7 +747,7 @@ const Documents = () => {
                         (currentStep === 2 && aiFormData.writingFor === 'general' && !aiFormData.level)
                       }
                     >
-                      Next
+                      {currentStep === 3 && currentQuestionIndex < questions.length - 1 ? 'Next Question' : 'Next'}
                     </Button>
                   ) : (
                     <Button 
