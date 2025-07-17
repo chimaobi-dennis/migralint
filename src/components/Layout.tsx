@@ -32,6 +32,11 @@ export function Layout({ children }: LayoutProps) {
       url: "/my-page",
       icon: BarChart3,
     },
+    {
+      title: "My Profile", 
+      url: "/my-profile",
+      icon: Settings,
+    },
   ];
 
   return (
