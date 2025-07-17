@@ -1,17 +1,19 @@
 
 import { useState } from "react";
-import { Filter, Search } from "lucide-react";
+import { Filter, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ApplicationCard } from "@/components/ApplicationCard";
 import { StatsOverview } from "@/components/StatsOverview";
 import { DeadlineAlert } from "@/components/DeadlineAlert";
 import { ApplicationSteps } from "@/components/ApplicationSteps";
+import NewApplicationModal from "@/components/NewApplicationModal";
 
 const Index = () => {
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [showNewApplicationModal, setShowNewApplicationModal] = useState(false);
 
   const handleProgramClick = (program) => {
     setSelectedProgram(program);
@@ -163,6 +165,12 @@ const Index = () => {
     app.program.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleSaveNewApplication = (data) => {
+    console.log('New application data:', data);
+    // Here you would typically save to your backend/state management
+    // For now, we'll just log it
+  };
+
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
@@ -170,6 +178,20 @@ const Index = () => {
 
       {/* Deadline Alerts */}
       <DeadlineAlert applications={applications} />
+
+      {/* Start New Application Button */}
+      <div className="flex justify-center">
+        <Button
+          onClick={() => setShowNewApplicationModal(true)}
+          className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-8 py-4 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+        >
+          <Plus className="h-6 w-6 mr-3" />
+          Start New Application
+          <div className="ml-3 px-2 py-1 bg-white/20 rounded-full text-sm">
+            Free
+          </div>
+        </Button>
+      </div>
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -220,6 +242,13 @@ const Index = () => {
           </div>
         </div>
       </div>
+
+      {/* New Application Modal */}
+      <NewApplicationModal
+        isOpen={showNewApplicationModal}
+        onClose={() => setShowNewApplicationModal(false)}
+        onSave={handleSaveNewApplication}
+      />
     </div>
   );
 };
