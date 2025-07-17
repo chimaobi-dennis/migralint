@@ -5,9 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ApplicationFormModal } from "@/components/ApplicationFormModal";
 
 const ApplicationJourney = () => {
   const [completedSteps, setCompletedSteps] = useState<number[]>([1]);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
   const navigate = useNavigate();
 
   const journeySteps = [
@@ -172,7 +174,7 @@ const ApplicationJourney = () => {
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8"
-              onClick={() => navigate("/pathway-selection")}
+              onClick={() => setShowApplicationForm(true)}
             >
               Start Application
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -197,6 +199,12 @@ const ApplicationJourney = () => {
           </div>
         </div>
       </div>
+
+      {/* Application Form Modal */}
+      <ApplicationFormModal 
+        open={showApplicationForm} 
+        onOpenChange={setShowApplicationForm} 
+      />
     </div>
   );
 };
