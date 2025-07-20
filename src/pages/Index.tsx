@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Filter, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { StatsOverview } from "@/components/StatsOverview";
 import { DeadlineAlert } from "@/components/DeadlineAlert";
 import { ApplicationSteps } from "@/components/ApplicationSteps";
 import NewApplicationModal from "@/components/NewApplicationModal";
+import { toast } from "sonner";
 
 const Index = () => {
   const [selectedApplication, setSelectedApplication] = useState(null);
@@ -23,6 +24,21 @@ const Index = () => {
   const handleApplicationClick = (application) => {
     setSelectedApplication(application);
     setSelectedProgram(null); // Clear program selection when application is selected
+    
+    // Show mobile guidance toast and auto-scroll
+    if (window.innerWidth < 1280) {
+      toast("Scroll down to view step details ↓", {
+        duration: 2000,
+        position: "top-center",
+      });
+      
+      setTimeout(() => {
+        const detailsSection = document.querySelector('.xl\\:col-span-1');
+        if (detailsSection) {
+          detailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    }
   };
 
   const applications = [
