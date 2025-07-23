@@ -10,7 +10,6 @@ import { Trash2, Plus, Edit, Save, X } from "lucide-react";
 import { useScholarshipSteps, ScholarshipStep } from "@/hooks/useScholarshipSteps";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { toast as sonnerToast } from "sonner";
 
 export default function AdminScholarshipSteps() {
   const { steps, updateStep, addStep, deleteStep } = useScholarshipSteps();
@@ -226,23 +225,7 @@ export default function AdminScholarshipSteps() {
                       </>
                     ) : (
                       <>
-                         <Button size="sm" variant="outline" onClick={() => {
-                          setEditingStep({ ...step });
-                          // Show mobile guidance toast and auto-scroll
-                          if (window.innerWidth < 1280) {
-                            sonnerToast("Scroll down to view step details ↓", {
-                              duration: 2000,
-                              position: "top-center",
-                            });
-                            
-                            setTimeout(() => {
-                              const cardContent = document.querySelector(`[data-step-id="${step.id}"]`);
-                              if (cardContent) {
-                                cardContent.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                              }
-                            }, 100);
-                          }
-                        }}>
+                        <Button size="sm" variant="outline" onClick={() => setEditingStep({ ...step })}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="destructive" onClick={() => handleDeleteStep(step.id)}>
@@ -253,7 +236,7 @@ export default function AdminScholarshipSteps() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent data-step-id={step.id}>
+              <CardContent>
                 {editingStep?.id === step.id ? (
                   <div className="space-y-4">
                     <div>

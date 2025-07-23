@@ -3,7 +3,6 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
-import { toast } from "sonner";
 
 interface Program {
   id: number;
@@ -104,21 +103,6 @@ export const ApplicationCard = ({ application, onClick, isSelected, onProgramCli
   const handleProgramClick = (e: React.MouseEvent, program: Program) => {
     e.stopPropagation();
     onProgramClick?.(program);
-    
-    // Show mobile guidance toast and auto-scroll
-    if (window.innerWidth < 1280) {
-      toast("Scroll down to view step details ↓", {
-        duration: 2000,
-        position: "top-center",
-      });
-      
-      setTimeout(() => {
-        const detailsSection = document.querySelector('.xl\\:col-span-1');
-        if (detailsSection) {
-          detailsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
-    }
   };
 
   const renderSingleProgram = () => (
