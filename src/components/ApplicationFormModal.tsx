@@ -1,28 +1,25 @@
-
-import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Progress } from '@/components/ui/progress';
-import { ChevronLeft, ChevronRight, User, Phone, MapPin, GraduationCap, Briefcase, DollarSign, CheckCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, ArrowRight, CheckCircle, User, Phone, Globe, Languages, Briefcase, DollarSign, FileText } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface ApplicationFormModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 interface FormData {
   fullName: string;
   phoneNumber: string;
   citizenship: string;
+  hasEnglishTest: string;
   englishTest: string;
-  testType: string;
   testYear: string;
   testScore: string;
   workExperience: string;
@@ -32,31 +29,28 @@ interface FormData {
 }
 
 const countries = [
-  'Afghanistan', 'Albania', 'Algeria', 'Argentina', 'Australia', 'Austria', 'Bangladesh',
-  'Belgium', 'Brazil', 'Canada', 'China', 'Denmark', 'Egypt', 'Finland', 'France',
-  'Germany', 'India', 'Indonesia', 'Iran', 'Iraq', 'Italy', 'Japan', 'Kenya',
-  'Malaysia', 'Mexico', 'Netherlands', 'Nigeria', 'Norway', 'Pakistan', 'Philippines',
-  'Poland', 'Russia', 'Saudi Arabia', 'South Africa', 'South Korea', 'Spain',
-  'Sweden', 'Thailand', 'Turkey', 'Ukraine', 'United Kingdom', 'United States', 'Vietnam'
+  "Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Austria", "Bangladesh", "Belgium", "Brazil", "Canada", 
+  "Chile", "China", "Colombia", "Denmark", "Egypt", "Finland", "France", "Germany", "Ghana", "Greece", "India", 
+  "Indonesia", "Iran", "Iraq", "Ireland", "Italy", "Japan", "Jordan", "Kenya", "South Korea", "Malaysia", "Mexico", 
+  "Netherlands", "Nigeria", "Norway", "Pakistan", "Philippines", "Poland", "Portugal", "Russia", "Saudi Arabia", 
+  "South Africa", "Spain", "Sweden", "Switzerland", "Thailand", "Turkey", "Ukraine", "United Kingdom", "United States", "Vietnam"
 ];
 
-const englishTests = [
-  'IELTS', 'TOEFL', 'PTE Academic', 'Cambridge English', 'Duolingo English Test'
-];
+const englishTests = ["IELTS", "TOEFL", "PTE Academic", "Cambridge English", "Duolingo English Test"];
 
-const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({ isOpen, onClose }) => {
+export const ApplicationFormModal = ({ open, onOpenChange }: ApplicationFormModalProps) => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
-    fullName: 'John Doe', // Pre-filled from user profile
-    phoneNumber: '+1 234 567 8900', // Pre-filled from user profile
-    citizenship: '',
-    englishTest: '',
-    testType: '',
-    testYear: '',
-    testScore: '',
-    workExperience: '',
-    tuitionPreference: '',
+    fullName: "John Doe", // Mock user data
+    phoneNumber: "+1234567890", // Mock user data
+    citizenship: "",
+    hasEnglishTest: "",
+    englishTest: "",
+    testYear: "",
+    testScore: "",
+    workExperience: "",
+    tuitionPreference: "",
     acceptTerms: false,
     acceptDataProcessing: false,
   });
@@ -68,105 +62,52 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({ isOpen, onC
   };
 
   const nextStep = () => {
-    if (validateCurrentStep()) {
-      setCurrentStep(prev => prev + 1);
-      toast.success(`Step ${currentStep} completed!`);
+    if (currentStep < totalSteps) {
+      setCurrentStep(currentStep + 1);
     }
   };
 
   const prevStep = () => {
-    setCurrentStep(prev => prev - 1);
-  };
-
-  const validateCurrentStep = (): boolean => {
-    switch (currentStep) {
-      case 1:
-        if (!formData.fullName.trim()) {
-          toast.error('Full name is required');
-          return false;
-        }
-        return true;
-      case 2:
-        if (!formData.phoneNumber.trim()) {
-          toast.error('Phone number is required');
-          return false;
-        }
-        return true;
-      case 3:
-        if (!formData.citizenship) {
-          toast.error('Please select your citizenship');
-          return false;
-        }
-        return true;
-      case 4:
-        if (!formData.englishTest) {
-          toast.error('Please answer the English test question');
-          return false;
-        }
-        if (formData.englishTest === 'yes') {
-          if (!formData.testType || !formData.testYear || !formData.testScore) {
-            toast.error('Please provide all English test details');
-            return false;
-          }
-        }
-        return true;
-      case 5:
-        if (!formData.workExperience) {
-          toast.error('Please select your work experience');
-          return false;
-        }
-        return true;
-      case 6:
-        if (!formData.tuitionPreference) {
-          toast.error('Please select your tuition preference');
-          return false;
-        }
-        return true;
-      case 7:
-        if (!formData.acceptTerms || !formData.acceptDataProcessing) {
-          toast.error('Please accept all terms and conditions');
-          return false;
-        }
-        return true;
-      default:
-        return true;
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
     }
   };
 
   const handleSubmit = () => {
-    if (validateCurrentStep()) {
-      toast.success('Application form submitted successfully!');
-      toast.info('Redirecting to pathway selection...');
-      onClose();
-      setTimeout(() => {
-        navigate('/pathway-selection');
-      }, 1000);
-    }
+    // Save form data (would normally save to backend)
+    console.log("Form submitted:", formData);
+    onOpenChange(false);
+    navigate("/pathway-selection");
   };
 
   const getStepIcon = (step: number) => {
-    switch (step) {
-      case 1: return <User className="h-4 w-4" />;
-      case 2: return <Phone className="h-4 w-4" />;
-      case 3: return <MapPin className="h-4 w-4" />;
-      case 4: return <GraduationCap className="h-4 w-4" />;
-      case 5: return <Briefcase className="h-4 w-4" />;
-      case 6: return <DollarSign className="h-4 w-4" />;
-      case 7: return <CheckCircle className="h-4 w-4" />;
-      default: return null;
+    const icons = [User, Phone, Globe, Languages, Briefcase, DollarSign, FileText];
+    const Icon = icons[step - 1];
+    return <Icon className="h-5 w-5" />;
+  };
+
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 1: return formData.fullName.trim() !== "";
+      case 2: return formData.phoneNumber.trim() !== "";
+      case 3: return formData.citizenship !== "";
+      case 4: return formData.hasEnglishTest !== "";
+      case 5: return formData.hasEnglishTest === "no" || (formData.englishTest && formData.testYear && formData.testScore);
+      case 6: return formData.workExperience !== "";
+      case 7: return formData.tuitionPreference !== "" && formData.acceptTerms && formData.acceptDataProcessing;
+      default: return false;
     }
   };
 
-  const renderStep = () => {
+  const renderStepContent = () => {
     switch (currentStep) {
       case 1:
         return (
           <div className="space-y-4">
-            <div className="text-center mb-4">
-              <User className="h-12 w-12 mx-auto text-blue-500 mb-2" />
-              <h3 className="text-lg font-semibold">Personal Information</h3>
-              <p className="text-sm text-gray-600">Let's start with your basic details</p>
-            </div>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              {getStepIcon(1)}
+              Personal Information
+            </h3>
             <div>
               <Label htmlFor="fullName">Full Name</Label>
               <Input
@@ -175,7 +116,9 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({ isOpen, onC
                 disabled
                 className="bg-gray-50"
               />
-              <p className="text-xs text-gray-500 mt-1">This information is from your profile</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                This information is from your profile
+              </p>
             </div>
           </div>
         );
@@ -183,29 +126,30 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({ isOpen, onC
       case 2:
         return (
           <div className="space-y-4">
-            <div className="text-center mb-4">
-              <Phone className="h-12 w-12 mx-auto text-blue-500 mb-2" />
-              <h3 className="text-lg font-semibold">Contact Information</h3>
-              <p className="text-sm text-gray-600">Verify your contact details</p>
-            </div>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              {getStepIcon(2)}
+              Contact Information
+            </h3>
             <div>
               <Label htmlFor="phoneNumber">Phone Number</Label>
-              <Input
-                id="phoneNumber"
-                value={formData.phoneNumber}
-                disabled
-                className="bg-gray-50"
-              />
-              <Button
-                variant="link"
-                className="p-0 h-auto text-xs text-blue-500"
-                onClick={() => {
-                  toast.info('Redirecting to profile to update phone number...');
-                  // This would navigate to profile
-                }}
-              >
-                Update in profile
-              </Button>
+              <div className="flex gap-2">
+                <Input
+                  id="phoneNumber"
+                  value={formData.phoneNumber}
+                  disabled
+                  className="bg-gray-50 flex-1"
+                />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate("/my-profile")}
+                >
+                  Update
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Click update to change your phone number in your profile
+              </p>
             </div>
           </div>
         );
@@ -213,18 +157,20 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({ isOpen, onC
       case 3:
         return (
           <div className="space-y-4">
-            <div className="text-center mb-4">
-              <MapPin className="h-12 w-12 mx-auto text-blue-500 mb-2" />
-              <h3 className="text-lg font-semibold">Citizenship</h3>
-              <p className="text-sm text-gray-600">Select your country of citizenship</p>
-            </div>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              {getStepIcon(3)}
+              Citizenship
+            </h3>
             <div>
-              <Label htmlFor="citizenship">Country of Citizenship</Label>
-              <Select value={formData.citizenship} onValueChange={(value) => updateFormData('citizenship', value)}>
+              <Label htmlFor="citizenship">Select your citizenship</Label>
+              <Select 
+                value={formData.citizenship} 
+                onValueChange={(value) => updateFormData("citizenship", value)}
+              >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select your country" />
+                  <SelectValue placeholder="Choose your country" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-60">
                   {countries.map((country) => (
                     <SelectItem key={country} value={country}>
                       {country}
@@ -239,172 +185,224 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({ isOpen, onC
       case 4:
         return (
           <div className="space-y-4">
-            <div className="text-center mb-4">
-              <GraduationCap className="h-12 w-12 mx-auto text-blue-500 mb-2" />
-              <h3 className="text-lg font-semibold">English Proficiency</h3>
-              <p className="text-sm text-gray-600">Tell us about your English test experience</p>
-            </div>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              {getStepIcon(4)}
+              English Proficiency
+            </h3>
             <div>
               <Label>Have you taken any English test in the past 5 years?</Label>
-              <RadioGroup 
-                value={formData.englishTest} 
-                onValueChange={(value) => updateFormData('englishTest', value)}
-                className="mt-2"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="yes" id="yes" />
-                  <Label htmlFor="yes">Yes</Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="no" id="no" />
-                  <Label htmlFor="no">No</Label>
-                </div>
-              </RadioGroup>
-            </div>
-
-            {formData.englishTest === 'yes' && (
-              <div className="space-y-4 border-t pt-4">
-                <div>
-                  <Label htmlFor="testType">Which test did you take?</Label>
-                  <Select value={formData.testType} onValueChange={(value) => updateFormData('testType', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select test type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {englishTests.map((test) => (
-                        <SelectItem key={test} value={test}>
-                          {test}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="testYear">Test Year</Label>
-                  <Input
-                    id="testYear"
-                    type="number"
-                    placeholder="e.g., 2023"
-                    value={formData.testYear}
-                    onChange={(e) => updateFormData('testYear', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="testScore">Test Score</Label>
-                  <Input
-                    id="testScore"
-                    placeholder="e.g., 7.5 (IELTS) or 100 (TOEFL)"
-                    value={formData.testScore}
-                    onChange={(e) => updateFormData('testScore', e.target.value)}
-                  />
-                </div>
+              <div className="flex gap-4 mt-2">
+                <Button
+                  variant={formData.hasEnglishTest === "yes" ? "default" : "outline"}
+                  onClick={() => updateFormData("hasEnglishTest", "yes")}
+                  className="flex-1"
+                >
+                  Yes
+                </Button>
+                <Button
+                  variant={formData.hasEnglishTest === "no" ? "default" : "outline"}
+                  onClick={() => updateFormData("hasEnglishTest", "no")}
+                  className="flex-1"
+                >
+                  No
+                </Button>
               </div>
-            )}
+            </div>
           </div>
         );
 
       case 5:
+        if (formData.hasEnglishTest === "no") {
+          return (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                {getStepIcon(4)}
+                English Test Details
+              </h3>
+              <div className="text-center py-8">
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
+                <p className="text-gray-600">No English test required for this step.</p>
+              </div>
+            </div>
+          );
+        }
+
         return (
           <div className="space-y-4">
-            <div className="text-center mb-4">
-              <Briefcase className="h-12 w-12 mx-auto text-blue-500 mb-2" />
-              <h3 className="text-lg font-semibold">Work Experience</h3>
-              <p className="text-sm text-gray-600">How many years of work experience do you have?</p>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              {getStepIcon(4)}
+              English Test Details
+            </h3>
+            <div>
+              <Label>Which test did you take?</Label>
+              <Select 
+                value={formData.englishTest} 
+                onValueChange={(value) => updateFormData("englishTest", value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select test" />
+                </SelectTrigger>
+                <SelectContent>
+                  {englishTests.map((test) => (
+                    <SelectItem key={test} value={test}>
+                      {test}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <RadioGroup 
-              value={formData.workExperience} 
-              onValueChange={(value) => updateFormData('workExperience', value)}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="0-1" id="0-1" />
-                <Label htmlFor="0-1">0-1 years</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="testYear">Test Year</Label>
+                <Input
+                  id="testYear"
+                  placeholder="e.g., 2023"
+                  value={formData.testYear}
+                  onChange={(e) => updateFormData("testYear", e.target.value)}
+                />
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="2-3" id="2-3" />
-                <Label htmlFor="2-3">2-3 years</Label>
+              <div>
+                <Label htmlFor="testScore">Test Score</Label>
+                <Input
+                  id="testScore"
+                  placeholder="e.g., 7.5"
+                  value={formData.testScore}
+                  onChange={(e) => updateFormData("testScore", e.target.value)}
+                />
               </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="4-6" id="4-6" />
-                <Label htmlFor="4-6">4-6 years</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="7+" id="7+" />
-                <Label htmlFor="7+">7+ years</Label>
-              </div>
-            </RadioGroup>
+            </div>
           </div>
         );
 
       case 6:
         return (
           <div className="space-y-4">
-            <div className="text-center mb-4">
-              <DollarSign className="h-12 w-12 mx-auto text-blue-500 mb-2" />
-              <h3 className="text-lg font-semibold">Tuition Preference</h3>
-              <p className="text-sm text-gray-600">What's your preference for tuition fees?</p>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              {getStepIcon(5)}
+              Work Experience
+            </h3>
+            <div>
+              <Label>How many years of work experience do you have?</Label>
+              <div className="grid grid-cols-3 gap-3 mt-2">
+                {["0-1", "2-3", "4-6"].map((years) => (
+                  <Button
+                    key={years}
+                    variant={formData.workExperience === years ? "default" : "outline"}
+                    onClick={() => updateFormData("workExperience", years)}
+                    className="h-20 flex flex-col"
+                  >
+                    <span className="text-lg font-bold">{years}</span>
+                    <span className="text-xs">years</span>
+                  </Button>
+                ))}
+              </div>
             </div>
-            <RadioGroup 
-              value={formData.tuitionPreference} 
-              onValueChange={(value) => updateFormData('tuitionPreference', value)}
-            >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="low" id="low" />
-                <Label htmlFor="low">Low cost programs</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="no-matter" id="no-matter" />
-                <Label htmlFor="no-matter">Cost doesn't matter</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="high-quality" id="high-quality" />
-                <Label htmlFor="high-quality">High cost with quality education</Label>
-              </div>
-            </RadioGroup>
           </div>
         );
 
       case 7:
         return (
           <div className="space-y-6">
-            <div className="text-center mb-4">
-              <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-2" />
-              <h3 className="text-lg font-semibold">Review & Accept</h3>
-              <p className="text-sm text-gray-600">Please review your information and accept our terms</p>
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              {getStepIcon(6)}
+              Tuition Fee Preference
+            </h3>
+            <div>
+              <Label>What is your tuition fee preference?</Label>
+              <div className="grid grid-cols-3 gap-3 mt-2">
+                <Button
+                  variant={formData.tuitionPreference === "low" ? "default" : "outline"}
+                  onClick={() => updateFormData("tuitionPreference", "low")}
+                  className="h-20 flex flex-col"
+                >
+                  <DollarSign className="h-6 w-6 mb-1" />
+                  <span className="text-sm">Low Cost</span>
+                </Button>
+                <Button
+                  variant={formData.tuitionPreference === "no-matter" ? "default" : "outline"}
+                  onClick={() => updateFormData("tuitionPreference", "no-matter")}
+                  className="h-20 flex flex-col"
+                >
+                  <span className="text-lg">⚖️</span>
+                  <span className="text-sm">Doesn't Matter</span>
+                </Button>
+                <Button
+                  variant={formData.tuitionPreference === "high-quality" ? "default" : "outline"}
+                  onClick={() => updateFormData("tuitionPreference", "high-quality")}
+                  className="h-20 flex flex-col"
+                >
+                  <span className="text-lg">⭐</span>
+                  <span className="text-sm">High Quality</span>
+                </Button>
+              </div>
             </div>
 
-            {/* Summary */}
-            <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-              <h4 className="font-medium">Application Summary:</h4>
-              <div className="text-sm space-y-1">
-                <p><span className="font-medium">Name:</span> {formData.fullName}</p>
-                <p><span className="font-medium">Phone:</span> {formData.phoneNumber}</p>
-                <p><span className="font-medium">Citizenship:</span> {formData.citizenship}</p>
-                <p><span className="font-medium">English Test:</span> {formData.englishTest === 'yes' ? `${formData.testType} (${formData.testYear}) - Score: ${formData.testScore}` : 'Not taken'}</p>
-                <p><span className="font-medium">Work Experience:</span> {formData.workExperience} years</p>
-                <p><span className="font-medium">Tuition Preference:</span> {formData.tuitionPreference}</p>
-              </div>
+            {/* Summary Section */}
+            <div className="border-t pt-6">
+              <h4 className="font-semibold mb-4">Review Your Information</h4>
+              <Card>
+                <CardContent className="space-y-3 pt-4">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Full Name:</span>
+                    <span>{formData.fullName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Phone:</span>
+                    <span>{formData.phoneNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Citizenship:</span>
+                    <span>{formData.citizenship}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">English Test:</span>
+                    <span>
+                      {formData.hasEnglishTest === "no" 
+                        ? "No test taken" 
+                        : `${formData.englishTest} (${formData.testYear}) - ${formData.testScore}`
+                      }
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Work Experience:</span>
+                    <span>{formData.workExperience} years</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tuition Preference:</span>
+                    <Badge variant="outline">
+                      {formData.tuitionPreference === "low" && "Low Cost"}
+                      {formData.tuitionPreference === "no-matter" && "Doesn't Matter"}
+                      {formData.tuitionPreference === "high-quality" && "High Quality Education"}
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Terms and Conditions */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div className="flex items-start space-x-2">
-                <Checkbox
+                <input
+                  type="checkbox"
                   id="terms"
                   checked={formData.acceptTerms}
-                  onCheckedChange={(checked) => updateFormData('acceptTerms', checked as boolean)}
+                  onChange={(e) => updateFormData("acceptTerms", e.target.checked)}
+                  className="mt-1"
                 />
                 <Label htmlFor="terms" className="text-sm leading-relaxed">
-                  I accept the Terms and Conditions and understand the application process requirements.
+                  I accept the <span className="text-blue-600 hover:underline cursor-pointer">Terms and Conditions</span>
                 </Label>
               </div>
               <div className="flex items-start space-x-2">
-                <Checkbox
-                  id="data"
+                <input
+                  type="checkbox"
+                  id="dataProcessing"
                   checked={formData.acceptDataProcessing}
-                  onCheckedChange={(checked) => updateFormData('acceptDataProcessing', checked as boolean)}
+                  onChange={(e) => updateFormData("acceptDataProcessing", e.target.checked)}
+                  className="mt-1"
                 />
-                <Label htmlFor="data" className="text-sm leading-relaxed">
-                  I consent to the processing of my personal data for the purpose of this application and future communications.
+                <Label htmlFor="dataProcessing" className="text-sm leading-relaxed">
+                  I consent to the processing of my personal data for application purposes
                 </Label>
               </div>
             </div>
@@ -417,49 +415,58 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({ isOpen, onC
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            {getStepIcon(currentStep)}
-            Application Form - Step {currentStep} of {totalSteps}
+          <DialogTitle className="flex items-center justify-between">
+            <span>Application Form</span>
+            <span className="text-sm font-normal text-muted-foreground">
+              Step {currentStep} of {totalSteps}
+            </span>
           </DialogTitle>
         </DialogHeader>
 
         {/* Progress Bar */}
-        <div className="mb-6">
-          <Progress value={(currentStep / totalSteps) * 100} className="h-2" />
-          <p className="text-xs text-gray-500 mt-1 text-center">
-            Step {currentStep} of {totalSteps}
-          </p>
+        <div className="w-full bg-gray-200 rounded-full h-2 mb-6">
+          <div 
+            className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+          />
         </div>
 
         {/* Step Content */}
         <div className="min-h-[300px]">
-          {renderStep()}
+          {renderStepContent()}
         </div>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between pt-4 border-t">
-          <Button
-            variant="outline"
+        {/* Navigation */}
+        <div className="flex justify-between pt-6 border-t">
+          <Button 
+            variant="outline" 
             onClick={prevStep}
             disabled={currentStep === 1}
-            className="flex items-center gap-2"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Previous
           </Button>
-
-          {currentStep < totalSteps ? (
-            <Button onClick={nextStep} className="flex items-center gap-2">
-              Next
-              <ChevronRight className="h-4 w-4" />
+          
+          {currentStep === totalSteps ? (
+            <Button 
+              onClick={handleSubmit}
+              disabled={!isStepValid()}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              Submit Application
+              <CheckCircle className="h-4 w-4 ml-2" />
             </Button>
           ) : (
-            <Button onClick={handleSubmit} className="flex items-center gap-2">
-              Submit Application
-              <CheckCircle className="h-4 w-4" />
+            <Button 
+              onClick={nextStep}
+              disabled={!isStepValid()}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            >
+              Next
+              <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           )}
         </div>
@@ -467,5 +474,3 @@ const ApplicationFormModal: React.FC<ApplicationFormModalProps> = ({ isOpen, onC
     </Dialog>
   );
 };
-
-export default ApplicationFormModal;

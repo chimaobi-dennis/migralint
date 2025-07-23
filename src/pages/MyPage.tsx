@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from "react";
+
+import { useState } from "react";
 import { 
   CheckCircle, 
   Clock, 
@@ -48,7 +49,6 @@ import { useAdmissionSteps } from "@/hooks/useAdmissionSteps";
 import { useVisaSteps } from "@/hooks/useVisaSteps";
 import VisaInfoModal from "@/components/VisaInfoModal";
 import { useActivityLogger, ActivityLog } from "@/components/ActivityLogger";
-import { toast } from 'sonner';
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("application");
@@ -72,51 +72,6 @@ const MyPage = () => {
   const [showVisaInfoModal, setShowVisaInfoModal] = useState(false);
   const { activities, logActivity } = useActivityLogger();
 
-  // Mobile UX improvements
-  const detailsRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 1280); // xl breakpoint
-    };
-    
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    return () => window.removeEventListener('resize', checkIsMobile);
-  }, []);
-
-  // Handle step selection with mobile UX improvements
-  const handleStepSelection = (stepId: string) => {
-    setSelectedStep(stepId);
-    
-    if (isMobile) {
-      // Show toast notification for mobile users
-      toast.info('Scroll down to view step details ↓', {
-        duration: 3000,
-      });
-      
-      // Auto-scroll to details section after a short delay
-      setTimeout(() => {
-        detailsRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'start' 
-        });
-      }, 500);
-    }
-    
-    const step = applicationSteps.find(s => s.id === stepId);
-    if (step) {
-      logActivity({
-        action: 'view_step',
-        description: `Viewed step: "${step.title}"`,
-        stepId,
-        stepTitle: step.title,
-        type: 'other'
-      });
-    }
-  };
-
   // Handle program removal
   const removeProgram = (stepId: string, programToRemove: string) => {
     const step = applicationSteps.find(s => s.id === stepId);
@@ -128,8 +83,6 @@ const MyPage = () => {
           selectedPrograms: updatedPrograms
         }
       });
-      
-      toast.success(`Removed "${programToRemove}" from program selection`);
       
       logActivity({
         action: 'remove_program',
@@ -153,8 +106,6 @@ const MyPage = () => {
         }
       });
       
-      toast.success('External account credentials saved successfully');
-      
       logActivity({
         action: 'save_account',
         description: 'Saved external account credentials',
@@ -177,8 +128,6 @@ const MyPage = () => {
         }
       });
       
-      toast.success(`Added "${program.name}" to program selection`);
-      
       logActivity({
         action: 'add_program',
         description: `Added "${program.name}" to program selection`,
@@ -193,14 +142,12 @@ const MyPage = () => {
   const handleFileUpload = (stepId: string) => {
     setCurrentStepId(stepId);
     setFileManagerOpen(true);
-    toast.info('Opening file manager...');
   };
 
   // Handle program selection
   const handleProgramSelection = (stepId: string) => {
     setCurrentStepId(stepId);
     setProgramSelectionOpen(true);
-    toast.info('Opening program selection...');
   };
 
   const openVideoModal = (videoUrl: string, title: string) => {
@@ -208,39 +155,11 @@ const MyPage = () => {
     setCurrentVideoTitle(title);
     setVideoModalOpen(true);
     
-    toast.success(`Opening video: "${title}"`);
-    
     logActivity({
       action: 'view_video',
       description: `Watched video: "${title}"`,
       type: 'other'
     });
-  };
-
-  // Handle notification toggle
-  const toggleNotifications = () => {
-    setEmailNotifications(!emailNotifications);
-    toast.success(`Email notifications ${!emailNotifications ? 'enabled' : 'disabled'}`);
-  };
-
-  // Handle admission actions
-  const handleAcceptAdmission = (appId: string) => {
-    acceptAdmission(appId);
-    toast.success('Admission accepted successfully!');
-  };
-
-  const handleDeclineAdmission = (appId: string) => {
-    declineAdmission(appId);
-    toast.info('Admission declined');
-  };
-
-  // Handle step completion
-  const handleStepCompletion = (stepId: string) => {
-    const step = applicationSteps.find(s => s.id === stepId);
-    if (step) {
-      updateStep(stepId, { status: 'completed' });
-      toast.success(`Step "${step.title}" marked as completed!`);
-    }
   };
 
   const getStepStatusIcon = (status: string) => {
@@ -294,7 +213,7 @@ const MyPage = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={toggleNotifications}
+              onClick={() => setEmailNotifications(!emailNotifications)}
               className="flex items-center gap-2 text-xs sm:text-sm"
             >
               {emailNotifications ? <Bell className="h-3 w-3 sm:h-4 sm:w-4" /> : <BellOff className="h-3 w-3 sm:h-4 sm:w-4" />}
@@ -387,7 +306,7 @@ const MyPage = () => {
                       className={`cursor-pointer transition-all hover:shadow-md ${
                         selectedStep === step.id ? 'border-blue-500 bg-blue-50' : ''
                       }`}
-                      onClick={() => handleStepSelection(step.id)}
+                      onClick={() => setSelectedStep(step.id)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-start gap-4">
@@ -426,7 +345,7 @@ const MyPage = () => {
                 </div>
 
                 {/* Step Details */}
-                <div className="space-y-4" ref={detailsRef}>
+                <div className="space-y-4">
                   {applicationSteps.find(step => step.id === selectedStep) ? (
                     (() => {
                       const currentStep = applicationSteps.find(step => step.id === selectedStep)!;
@@ -650,9 +569,6 @@ const MyPage = () => {
                       <div className="text-center text-gray-500">
                         <FileText className="h-12 w-12 mx-auto mb-4" />
                         <p>Select a step to view details</p>
-                        {isMobile && (
-                          <p className="text-sm mt-2">Tap any step above to see details here</p>
-                        )}
                       </div>
                     </Card>
                   )}
@@ -908,14 +824,14 @@ const MyPage = () => {
                           {app.admissionStatus === 'pending' ? (
                             <div className="flex gap-2 mt-3">
                               <Button 
-                                onClick={() => handleAcceptAdmission(app.id)}
+                                onClick={() => acceptAdmission(app.id)}
                                 size="sm"
                                 className="flex-1"
                               >
                                 Accept Admission
                               </Button>
                               <Button 
-                                onClick={() => handleDeclineAdmission(app.id)}
+                                onClick={() => declineAdmission(app.id)}
                                 variant="outline" 
                                 size="sm"
                                 className="flex-1"
