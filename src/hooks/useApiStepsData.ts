@@ -85,7 +85,7 @@ const transformApiStep = (apiStep: ApiApplicationStep): ApplicationStep => {
     id: apiStep.id,
     stepNumber: apiStep.stepNumber,
     title: apiStep.title,
-    type: apiStep.type as 'form' | 'document' | 'information' | 'verification' | 'program',
+    type: apiStep.type as 'registration' | 'program' | 'document' | 'payment' | 'admission' | 'information',
     status: apiStep.status as 'completed' | 'current' | 'pending' | 'overdue',
     deadline: apiStep.deadline,
     videoUrl: apiStep.videoUrl,
