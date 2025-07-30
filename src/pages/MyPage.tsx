@@ -42,7 +42,8 @@ import ChatbotModal from "@/components/ChatbotModal";
 import VideoModal from "@/components/VideoModal";
 import FileManagerModal from "@/components/FileManagerModal";
 import ProgramSelectionModal from "@/components/ProgramSelectionModal";
-import { useStepsData, ApplicationStep } from "@/hooks/useStepsData";
+import { useApiStepsData } from "@/hooks/useApiStepsData";
+import { ApplicationStep } from "@/hooks/useStepsData";
 import { useScholarshipSteps, ScholarshipStep } from "@/hooks/useScholarshipSteps";
 import { useAdmissionSteps } from "@/hooks/useAdmissionSteps";
 import { useVisaSteps } from "@/hooks/useVisaSteps";
@@ -64,7 +65,7 @@ const MyPage = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   
-  const { steps: applicationSteps, updateStep } = useStepsData();
+  const { steps: applicationSteps, updateStep, loading, error, applicationData } = useApiStepsData();
   const { steps: scholarshipSteps, updateStep: updateScholarshipStep } = useScholarshipSteps();
   const { applications, acceptAdmission, declineAdmission } = useAdmissionSteps();
   const { steps: visaSteps, updateStep: updateVisaStep } = useVisaSteps();
@@ -356,6 +357,56 @@ const MyPage = () => {
 
             {/* Program Application Tab */}
             <TabsContent value="application" className="p-6 space-y-6">
+              {/* Loading State */}
+              {loading && (
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                      <span>Loading application data...</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Error State */}
+              {error && (
+                <Alert className="border-red-200 bg-red-50">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    Failed to load application data: {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Application Info from API */}
+              {applicationData && !loading && (
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Application</h4>
+                        <p className="text-sm text-gray-600">{applicationData.name}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Destination</h4>
+                        <p className="text-sm text-gray-600">{applicationData.destination}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Degree</h4>
+                        <p className="text-sm text-gray-600">{applicationData.degree}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">Deadline</h4>
+                        <p className="text-sm text-gray-600">{new Date(applicationData.deadline).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+               {!loading && !error && (
+                 <div className="space-y-6">
               {/* Progress Overview */}
               <Card>
                 <CardContent className="p-6">
@@ -656,9 +707,11 @@ const MyPage = () => {
                       </div>
                     </Card>
                   )}
-                </div>
-              </div>
-            </TabsContent>
+                 </div>
+               </div>
+                 </div>
+               )}
+             </TabsContent>
 
             {/* Scholarships Tab */}
             <TabsContent value="scholarships" className="p-6 space-y-6">
