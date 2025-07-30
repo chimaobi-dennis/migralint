@@ -241,7 +241,7 @@ const MyPage = () => {
       }
     } catch (error) {
       console.error('Error saving external account details:', error);
-      toast.error('Failed to save portal details. Please try again.', error);
+      toast.error('Failed to save portal details. Please try again. error', error);
     }
   };
 
