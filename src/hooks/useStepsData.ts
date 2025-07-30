@@ -25,7 +25,7 @@ export interface ApplicationStep {
   id: string;
   stepNumber: number;
   title: string;
-  type: 'form' | 'document' | 'information' | 'verification' | 'program';
+  type: 'form' | 'document' | 'information' | 'verification' | 'program' | 'registration' | 'payment' | 'admission';
   status: 'completed' | 'current' | 'pending' | 'overdue';
   deadline?: string;
   videoUrl?: string;

@@ -26,7 +26,9 @@ import {
   UserCheck,
   BarChart3,
   Youtube,
-  Check
+  Check,
+  Save,
+  Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -39,6 +41,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import ChatbotModal from "@/components/ChatbotModal";
 import VideoModal from "@/components/VideoModal";
 import FileManagerModal from "@/components/FileManagerModal";
@@ -66,6 +69,8 @@ const MyPage = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [externalAccountData, setExternalAccountData] = useState<{[key: string]: {username: string, password: string}}>({});
+  const [showSaveButton, setShowSaveButton] = useState<{[key: string]: boolean}>({});
   
   const { steps: applicationSteps, updateStep, loading, error, applicationData, refetch: refetchApplicationData } = useApiStepsData();
   const { steps: scholarshipSteps, updateStep: updateScholarshipStep } = useScholarshipSteps();
@@ -172,6 +177,47 @@ const MyPage = () => {
         stepTitle: step.title,
         type: 'account'
       });
+      
+      // Hide save button and clear temp data
+      setShowSaveButton(prev => ({ ...prev, [stepId]: false }));
+      setExternalAccountData(prev => ({ ...prev, [stepId]: { username: '', password: '' } }));
+    }
+  };
+
+  // Handle input change for external account
+  const handleExternalAccountChange = (stepId: string, field: 'username' | 'password', value: string) => {
+    setExternalAccountData(prev => ({
+      ...prev,
+      [stepId]: {
+        ...prev[stepId],
+        [field]: value
+      }
+    }));
+    
+    // Show save button when user starts typing
+    if (value.trim() !== '') {
+      setShowSaveButton(prev => ({ ...prev, [stepId]: true }));
+    }
+  };
+
+  // Handle save and continue
+  const handleSaveAndContinue = (stepId: string) => {
+    const accountData = externalAccountData[stepId];
+    if (accountData) {
+      saveExternalAccount(stepId, accountData.username || '', accountData.password || '');
+      
+      // Mark step as completed and move to next step
+      updateStep(stepId, { status: 'completed' });
+      
+      // Find next step and mark as current
+      const currentStepIndex = applicationSteps.findIndex(s => s.id === stepId);
+      if (currentStepIndex < applicationSteps.length - 1) {
+        const nextStep = applicationSteps[currentStepIndex + 1];
+        updateStep(nextStep.id, { status: 'current' });
+        setSelectedStep(nextStep.id);
+        
+        toast.success('Portal details saved! Moving to next step.');
+      }
     }
   };
 
@@ -594,7 +640,7 @@ const MyPage = () => {
                                     <Input
                                       placeholder="Enter username"
                                       defaultValue={currentStep.externalAccount.username}
-                                      onBlur={(e) => saveExternalAccount(currentStep.id, e.target.value, currentStep.externalAccount?.password || '')}
+                                      onChange={(e) => handleExternalAccountChange(currentStep.id, 'username', e.target.value)}
                                     />
                                   </div>
                                   <div>
@@ -603,7 +649,7 @@ const MyPage = () => {
                                       type="password"
                                       placeholder="Enter password"
                                       defaultValue={currentStep.externalAccount.password}
-                                      onBlur={(e) => saveExternalAccount(currentStep.id, currentStep.externalAccount?.username || '', e.target.value)}
+                                      onChange={(e) => handleExternalAccountChange(currentStep.id, 'password', e.target.value)}
                                     />
                                   </div>
                                 </div>
@@ -612,6 +658,30 @@ const MyPage = () => {
                                     Portal: <a href={currentStep.externalAccount.portalUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
                                       {currentStep.externalAccount.portalUrl}
                                     </a>
+                                  </div>
+                                )}
+                                
+                                {/* Save and Continue Button */}
+                                {showSaveButton[currentStep.id] && (
+                                  <div className="flex items-center gap-2 pt-2">
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <Button
+                                            onClick={() => handleSaveAndContinue(currentStep.id)}
+                                            className="flex items-center gap-2"
+                                            size="sm"
+                                          >
+                                            <Save className="h-4 w-4" />
+                                            Save and Continue
+                                          </Button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                          <p>Click to save portal detail and proceed to next step</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                    <Info className="h-4 w-4 text-gray-400" />
                                   </div>
                                 )}
                               </div>
