@@ -201,23 +201,47 @@ const MyPage = () => {
   };
 
   // Handle save and continue
-  const handleSaveAndContinue = (stepId: string) => {
+  const handleSaveAndContinue = async (stepId: string) => {
     const accountData = externalAccountData[stepId];
-    if (accountData) {
-      saveExternalAccount(stepId, accountData.username || '', accountData.password || '');
-      
-      // Mark step as completed and move to next step
-      updateStep(stepId, { status: 'completed' });
-      
-      // Find next step and mark as current
-      const currentStepIndex = applicationSteps.findIndex(s => s.id === stepId);
-      if (currentStepIndex < applicationSteps.length - 1) {
-        const nextStep = applicationSteps[currentStepIndex + 1];
-        updateStep(nextStep.id, { status: 'current' });
-        setSelectedStep(nextStep.id);
+    if (!accountData || !applicationData) return;
+
+    try {
+      const response = await fetch(`https://uniplanr.com/api/v1/update-application/${applicationData.id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          application_login: accountData.username || '',
+          application_password: accountData.password || '',
+          stage: 2
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Update local state
+        saveExternalAccount(stepId, accountData.username || '', accountData.password || '');
         
-        toast.success('Portal details saved! Moving to next step.');
+        // Mark step as completed and move to next step
+        updateStep(stepId, { status: 'completed' });
+        
+        // Find next step and mark as current
+        const currentStepIndex = applicationSteps.findIndex(s => s.id === stepId);
+        if (currentStepIndex < applicationSteps.length - 1) {
+          const nextStep = applicationSteps[currentStepIndex + 1];
+          updateStep(nextStep.id, { status: 'current' });
+          setSelectedStep(nextStep.id);
+        }
+
+        toast.success(result.message || 'Portal details saved! Moving to next step.');
+      } else {
+        toast.error(result.message || 'Failed to save portal details.');
       }
+    } catch (error) {
+      console.error('Error saving external account details:', error);
+      toast.error('Failed to save portal details. Please try again.');
     }
   };
 
