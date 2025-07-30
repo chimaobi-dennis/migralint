@@ -206,7 +206,10 @@ const MyPage = () => {
     if (!accountData || !applicationData) return;
 
     try {
-      const response = await fetch(`https://uniplanr.com/api/v1/update-application/23`, {
+      // Use CORS proxy for the API call
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://uniplanr.com/api/v1/update-application/${applicationData.id}`)}`;
+      
+      const response = await fetch(proxyUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,9 +221,13 @@ const MyPage = () => {
         }),
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const result = await response.json();
 
-      if (result.success) {
+      if (result.success !== false) {
         // Update local state
         saveExternalAccount(stepId, accountData.username || '', accountData.password || '');
         
@@ -241,7 +248,7 @@ const MyPage = () => {
       }
     } catch (error) {
       console.error('Error saving external account details:', error);
-      toast.error('Failed to save portal details. Please try again. error', error);
+      toast.error('Failed to save portal details. Please try again.');
     }
   };
 
