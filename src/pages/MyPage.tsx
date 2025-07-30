@@ -65,7 +65,7 @@ const MyPage = () => {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
   
-  const { steps: applicationSteps, updateStep, loading, error, applicationData } = useApiStepsData();
+  const { steps: applicationSteps, updateStep, loading, error, applicationData, refetch: refetchApplicationData } = useApiStepsData();
   const { steps: scholarshipSteps, updateStep: updateScholarshipStep } = useScholarshipSteps();
   const { applications, acceptAdmission, declineAdmission } = useAdmissionSteps();
   const { steps: visaSteps, updateStep: updateVisaStep } = useVisaSteps();
@@ -314,7 +314,10 @@ const MyPage = () => {
 
         {/* Horizontal Navigation */}
         <div className="bg-white rounded-lg border shadow-sm">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <Tabs value={activeTab} onValueChange={(value) => {
+            setActiveTab(value);
+            refetchApplicationData();
+          }} className="w-full">
             <div className="border-b border-gray-200 overflow-x-auto">
               <TabsList className="h-auto p-0 bg-transparent w-full min-w-max">
                 <TabsTrigger 

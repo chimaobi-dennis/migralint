@@ -126,39 +126,39 @@ export const useApiStepsData = () => {
   const [error, setError] = useState<string | null>(null);
   const [applicationData, setApplicationData] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchStepsData = async () => {
-      try {
-        setLoading(true);
-        // Using CORS proxy to bypass CORS restrictions for development
-        const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://uniplanr.com/api/v1/user-application/5/23'));
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const proxyResponse = await response.json();
-        const data: ApiResponse = JSON.parse(proxyResponse.contents);
-        
-        if (data.status === 'success' && data.data.length > 0) {
-          const applicationInfo = data.data[0];
-          setApplicationData(applicationInfo);
-          
-          if (applicationInfo.applicationSteps) {
-            const transformedSteps = applicationInfo.applicationSteps.map(transformApiStep);
-            setSteps(transformedSteps);
-          }
-        } else {
-          throw new Error('No application data found');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch application data');
-        console.error('Error fetching application steps:', err);
-      } finally {
-        setLoading(false);
+  const fetchStepsData = async () => {
+    try {
+      setLoading(true);
+      // Using CORS proxy to bypass CORS restrictions for development
+      const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://uniplanr.com/api/v1/user-application/5/23'));
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
+      
+      const proxyResponse = await response.json();
+      const data: ApiResponse = JSON.parse(proxyResponse.contents);
+      
+      if (data.status === 'success' && data.data.length > 0) {
+        const applicationInfo = data.data[0];
+        setApplicationData(applicationInfo);
+        
+        if (applicationInfo.applicationSteps) {
+          const transformedSteps = applicationInfo.applicationSteps.map(transformApiStep);
+          setSteps(transformedSteps);
+        }
+      } else {
+        throw new Error('No application data found');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch application data');
+      console.error('Error fetching application steps:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchStepsData();
   }, []);
 
@@ -182,6 +182,10 @@ export const useApiStepsData = () => {
     setSteps(prevSteps => prevSteps.filter(step => step.id !== stepId));
   };
 
+  const refetch = () => {
+    fetchStepsData();
+  };
+
   return {
     steps,
     loading,
@@ -191,5 +195,6 @@ export const useApiStepsData = () => {
     updateSteps,
     addStep,
     deleteStep,
+    refetch,
   };
 };
