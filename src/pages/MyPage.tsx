@@ -25,7 +25,8 @@ import {
   FileCheck,
   UserCheck,
   BarChart3,
-  Youtube
+  Youtube,
+  Check
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -64,6 +65,7 @@ const MyPage = () => {
   const [currentStepId, setCurrentStepId] = useState<string>("");
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [emailNotifications, setEmailNotifications] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   
   const { steps: applicationSteps, updateStep, loading, error, applicationData, refetch: refetchApplicationData } = useApiStepsData();
   const { steps: scholarshipSteps, updateStep: updateScholarshipStep } = useScholarshipSteps();
@@ -86,6 +88,13 @@ const MyPage = () => {
     window.addEventListener('resize', checkIsMobile);
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
+
+  // Update lastUpdated when application data is loaded
+  useEffect(() => {
+    if (applicationData && !loading) {
+      setLastUpdated(new Date());
+    }
+  }, [applicationData, loading]);
 
   // Handle step selection with mobile UX improvements
   const handleStepSelection = (stepId: string) => {
@@ -316,7 +325,10 @@ const MyPage = () => {
         <div className="bg-white rounded-lg border shadow-sm">
           <Tabs value={activeTab} onValueChange={(value) => {
             setActiveTab(value);
-            refetchApplicationData();
+            if (value === 'application') {
+              refetchApplicationData();
+              setLastUpdated(new Date());
+            }
           }} className="w-full">
             <div className="border-b border-gray-200 overflow-x-auto">
               <TabsList className="h-auto p-0 bg-transparent w-full min-w-max">
@@ -360,6 +372,29 @@ const MyPage = () => {
 
             {/* Program Application Tab */}
             <TabsContent value="application" className="p-6 space-y-6">
+              {/* Update Timestamp */}
+              {lastUpdated && !loading && (
+                <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 rounded-lg px-3 py-2 border">
+                  <Check className="h-4 w-4 text-green-500" />
+                  <span>
+                    Updated {(() => {
+                      const now = new Date();
+                      const diffInMs = now.getTime() - lastUpdated.getTime();
+                      const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+                      const diffInHours = Math.floor(diffInMinutes / 60);
+                      
+                      if (diffInMinutes < 1) return 'just now';
+                      if (diffInMinutes < 60) return `${diffInMinutes} ${diffInMinutes === 1 ? 'minute' : 'minutes'} ago`;
+                      if (diffInHours < 24) {
+                        const remainingMinutes = diffInMinutes % 60;
+                        return `${diffInHours} ${diffInHours === 1 ? 'hour' : 'hours'}${remainingMinutes > 0 ? ` ${remainingMinutes} ${remainingMinutes === 1 ? 'minute' : 'minutes'}` : ''} ago`;
+                      }
+                      return lastUpdated.toLocaleDateString();
+                    })()}
+                  </span>
+                </div>
+              )}
+              
               {/* Loading State */}
               {loading && (
                 <Card>
