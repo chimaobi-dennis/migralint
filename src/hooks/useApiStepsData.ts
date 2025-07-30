@@ -130,13 +130,15 @@ export const useApiStepsData = () => {
     const fetchStepsData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://uniplanr.com/api/v1/user-application/5/23');
+        // Using CORS proxy to bypass CORS restrictions for development
+        const response = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://uniplanr.com/api/v1/user-application/5/23'));
         
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        const data: ApiResponse = await response.json();
+        const proxyResponse = await response.json();
+        const data: ApiResponse = JSON.parse(proxyResponse.contents);
         
         if (data.status === 'success' && data.data.length > 0) {
           const applicationInfo = data.data[0];
