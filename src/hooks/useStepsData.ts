@@ -48,7 +48,7 @@ export interface ApplicationStep {
   adminMessage?: string;
   programSettings?: {
     maxPrograms: number;
-    selectedPrograms: string[];
+    selectedPrograms: number[];
   };
   externalAccount?: {
     username?: string;
@@ -123,7 +123,7 @@ const defaultSteps: ApplicationStep[] = [
     ],
     programSettings: {
       maxPrograms: 8,
-      selectedPrograms: ["Computer Science - KTH", "Data Science - Uppsala"]
+      selectedPrograms: [40, 124]
     },
     alerts: [
       {

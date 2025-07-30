@@ -49,7 +49,7 @@ interface ApiApplicationStep {
   adminMessage?: string;
   programSettings?: {
     maxPrograms: number;
-    selectedPrograms: string[];
+    selectedPrograms: number[];
   };
   externalAccount?: {
     username?: string;
@@ -115,7 +115,10 @@ const transformApiStep = (apiStep: ApiApplicationStep): ApplicationStep => {
       message: alert.message,
     })),
     adminMessage: apiStep.adminMessage,
-    programSettings: apiStep.programSettings,
+    programSettings: apiStep.programSettings ? {
+      maxPrograms: apiStep.programSettings.maxPrograms,
+      selectedPrograms: apiStep.programSettings.selectedPrograms
+    } : undefined,
     externalAccount: apiStep.externalAccount,
   };
 };

@@ -133,10 +133,13 @@ const MyPage = () => {
   };
 
   // Handle program removal
-  const removeProgram = (stepId: string, programToRemove: string) => {
+  const removeProgram = (stepId: string, programId: number) => {
     const step = applicationSteps.find(s => s.id === stepId);
     if (step?.programSettings) {
-      const updatedPrograms = step.programSettings.selectedPrograms.filter(p => p !== programToRemove);
+      const updatedPrograms = step.programSettings.selectedPrograms.filter(p => p !== programId);
+      // Find program name for toast message
+      const programName = applicationData?.recommendedPrograms?.find(p => p.id === programId)?.program_name || 'Program';
+      
       updateStep(stepId, {
         programSettings: {
           ...step.programSettings,
@@ -144,11 +147,11 @@ const MyPage = () => {
         }
       });
       
-      toast.success(`Removed "${programToRemove}" from program selection`);
+      toast.success(`Removed "${programName}" from program selection`);
       
       logActivity({
         action: 'remove_program',
-        description: `Removed "${programToRemove}" from program selection`,
+        description: `Removed "${programName}" from program selection`,
         stepId,
         stepTitle: step.title,
         type: 'program'
@@ -256,7 +259,7 @@ const MyPage = () => {
   const addProgram = (stepId: string, program: any) => {
     const step = applicationSteps.find(s => s.id === stepId);
     if (step?.programSettings) {
-      const updatedPrograms = [...step.programSettings.selectedPrograms, program.name];
+      const updatedPrograms = [...step.programSettings.selectedPrograms, program.id];
       updateStep(stepId, {
         programSettings: {
           ...step.programSettings,
@@ -264,7 +267,7 @@ const MyPage = () => {
         }
       });
       
-      toast.success(`Added "${program.name}" to program selection`);
+      toast.success(`Added "${program.program_name}" to program selection`);
       
       logActivity({
         action: 'add_program',
@@ -726,19 +729,22 @@ const MyPage = () => {
                                 </div>
                                 
                                 <div className="space-y-2">
-                                  {currentStep.programSettings.selectedPrograms.map((program, index) => (
-                                    <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                      <span className="text-sm font-medium">{program}</span>
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => removeProgram(currentStep.id, program)}
-                                        className="text-red-500 hover:text-red-700"
-                                      >
-                                        <X className="h-4 w-4" />
-                                      </Button>
-                                    </div>
-                                  ))}
+                                  {currentStep.programSettings.selectedPrograms.map((programId, index) => {
+                                    const program = applicationData?.recommendedPrograms?.find(p => p.id === programId);
+                                    return (
+                                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <span className="text-sm font-medium">{program?.program_name || 'Unknown Program'}</span>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => removeProgram(currentStep.id, programId)}
+                                          className="text-red-500 hover:text-red-700"
+                                        >
+                                          <X className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                    );
+                                  })}
                                   
                                   {currentStep.programSettings.selectedPrograms.length < currentStep.programSettings.maxPrograms && (
                                     <Button
@@ -1378,6 +1384,7 @@ const MyPage = () => {
         }}
         selectedPrograms={applicationSteps.find(s => s.id === currentStepId)?.programSettings?.selectedPrograms || []}
         maxPrograms={applicationSteps.find(s => s.id === currentStepId)?.programSettings?.maxPrograms || 8}
+        recommendedPrograms={applicationData?.recommendedPrograms || []}
       />
 
       {/* Visa Info Modal */}

@@ -18,26 +18,47 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Program {
-  id: string;
-  name: string;
+  id: number;
+  title?: string;
   university: string;
-  location: string;
+  city: string;
+  country: string;
+  degree: string;
+  program_name: string;
+  field: string;
+  matchPercentage: number;
+  matchingKeywords: Record<string, string>;
   duration: string;
-  startDate: string;
-  tuitionFee: string;
-  ranking: number;
-  description: string;
-  requirements: string[];
+  first_tuition: string;
+  total_tuition: string;
+  currency: string;
   deadline: string;
-  type: 'masters' | 'bachelors' | 'phd';
+  language: string;
+  image: string;
+  level: string;
+  end_date: string;
+  start_date: string;
+  application_type: string;
+  application_period_from: string;
+  application_period_to: string;
+  application_portal: string;
+  study_destination_id: number;
+  application_exist: string;
+  requirements: Array<{
+    id: number;
+    name: string;
+    tag: string;
+    instruction: string | null;
+  }>;
 }
 
 interface ProgramSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onProgramSelect: (program: Program) => void;
-  selectedPrograms: string[];
+  selectedPrograms: number[];
   maxPrograms: number;
+  recommendedPrograms: Program[];
 }
 
 const ProgramSelectionModal: React.FC<ProgramSelectionModalProps> = ({
@@ -45,96 +66,27 @@ const ProgramSelectionModal: React.FC<ProgramSelectionModalProps> = ({
   onClose,
   onProgramSelect,
   selectedPrograms,
-  maxPrograms
+  maxPrograms,
+  recommendedPrograms
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterLocation, setFilterLocation] = useState<string>('all');
 
-  // Mock program data
-  const programs: Program[] = [
-    {
-      id: '1',
-      name: 'Computer Science and Engineering',
-      university: 'KTH Royal Institute of Technology',
-      location: 'Stockholm',
-      duration: '2 years',
-      startDate: 'September 2024',
-      tuitionFee: 'SEK 310,000',
-      ranking: 1,
-      description: 'Advanced computer science program with focus on AI and machine learning',
-      requirements: ['Bachelor in CS/Engineering', 'IELTS 6.5+', 'GRE recommended'],
-      deadline: '2024-03-15',
-      type: 'masters'
-    },
-    {
-      id: '2',
-      name: 'Data Science',
-      university: 'Uppsala University',
-      location: 'Uppsala',
-      duration: '2 years',
-      startDate: 'September 2024',
-      tuitionFee: 'SEK 290,000',
-      ranking: 2,
-      description: 'Comprehensive data science program covering statistics, ML, and big data',
-      requirements: ['Bachelor in Math/CS/Statistics', 'TOEFL 90+', 'Portfolio'],
-      deadline: '2024-03-01',
-      type: 'masters'
-    },
-    {
-      id: '3',
-      name: 'Software Engineering',
-      university: 'Lund University',
-      location: 'Lund',
-      duration: '2 years',
-      startDate: 'September 2024',
-      tuitionFee: 'SEK 295,000',
-      ranking: 3,
-      description: 'Focus on large-scale software development and system architecture',
-      requirements: ['Bachelor in CS/Engineering', 'IELTS 6.5+'],
-      deadline: '2024-02-28',
-      type: 'masters'
-    },
-    {
-      id: '4',
-      name: 'Artificial Intelligence',
-      university: 'Chalmers University',
-      location: 'Gothenburg',
-      duration: '2 years',
-      startDate: 'September 2024',
-      tuitionFee: 'SEK 320,000',
-      ranking: 1,
-      description: 'Cutting-edge AI program with research opportunities',
-      requirements: ['Bachelor in CS/Engineering/Math', 'TOEFL 90+', 'Strong math background'],
-      deadline: '2024-03-10',
-      type: 'masters'
-    },
-    {
-      id: '5',
-      name: 'Cybersecurity',
-      university: 'Stockholm University',
-      location: 'Stockholm',
-      duration: '2 years',
-      startDate: 'September 2024',
-      tuitionFee: 'SEK 285,000',
-      ranking: 4,
-      description: 'Comprehensive cybersecurity program with industry partnerships',
-      requirements: ['Bachelor in CS/IT', 'IELTS 6.5+', 'Security background preferred'],
-      deadline: '2024-03-05',
-      type: 'masters'
-    }
-  ];
+  // Use recommended programs from API
+  const programs = recommendedPrograms || [];
 
   const filteredPrograms = programs.filter(program => {
-    const matchesSearch = program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         program.university.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesType = filterType === 'all' || program.type === filterType;
-    const matchesLocation = filterLocation === 'all' || program.location === filterLocation;
+    const matchesSearch = program.program_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         program.university.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         program.field.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesType = filterType === 'all' || program.level.toLowerCase() === filterType;
+    const matchesLocation = filterLocation === 'all' || program.city === filterLocation;
     
     return matchesSearch && matchesType && matchesLocation;
   });
 
-  const uniqueLocations = [...new Set(programs.map(p => p.location))];
+  const uniqueLocations = [...new Set(programs.map(p => p.city))];
 
   if (!isOpen) return null;
 
@@ -203,7 +155,7 @@ const ProgramSelectionModal: React.FC<ProgramSelectionModalProps> = ({
         <div className="flex-1 p-6 overflow-y-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredPrograms.map((program) => {
-              const isSelected = selectedPrograms.includes(program.name);
+              const isSelected = selectedPrograms.includes(program.id);
               const canSelect = selectedPrograms.length < maxPrograms || isSelected;
               
               return (
@@ -224,15 +176,15 @@ const ProgramSelectionModal: React.FC<ProgramSelectionModalProps> = ({
                       {/* Header */}
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-lg line-clamp-2">{program.name}</h3>
+                          <h3 className="font-semibold text-lg line-clamp-2">{program.program_name}</h3>
                           <div className="flex items-center gap-2 mt-2">
                             <Building className="h-4 w-4 text-gray-500" />
                             <span className="text-sm text-gray-600">{program.university}</span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded-full">
-                          <Star className="h-3 w-3 text-yellow-600 fill-current" />
-                          <span className="text-xs font-medium text-yellow-700">#{program.ranking}</span>
+                        <div className="flex items-center gap-1 bg-green-100 px-2 py-1 rounded-full">
+                          <Star className="h-3 w-3 text-green-600 fill-current" />
+                          <span className="text-xs font-medium text-green-700">{program.matchPercentage}% match</span>
                         </div>
                       </div>
 
@@ -240,7 +192,7 @@ const ProgramSelectionModal: React.FC<ProgramSelectionModalProps> = ({
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-gray-400" />
-                          <span>{program.location}</span>
+                          <span>{program.city}, {program.country}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock className="h-4 w-4 text-gray-400" />
@@ -248,16 +200,16 @@ const ProgramSelectionModal: React.FC<ProgramSelectionModalProps> = ({
                         </div>
                         <div className="flex items-center gap-2">
                           <Calendar className="h-4 w-4 text-gray-400" />
-                          <span>{program.startDate}</span>
+                          <span>{program.start_date || 'Not specified'}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <GraduationCap className="h-4 w-4 text-gray-400" />
-                          <span className="capitalize">{program.type}</span>
+                          <span className="capitalize">{program.level}</span>
                         </div>
                       </div>
 
                       {/* Description */}
-                      <p className="text-sm text-gray-600 line-clamp-2">{program.description}</p>
+                      <p className="text-sm text-gray-600 line-clamp-2">{program.degree}</p>
 
                       {/* Requirements */}
                       <div className="space-y-2">
@@ -265,7 +217,7 @@ const ProgramSelectionModal: React.FC<ProgramSelectionModalProps> = ({
                         <div className="flex flex-wrap gap-1">
                           {program.requirements.slice(0, 2).map((req, index) => (
                             <Badge key={index} variant="outline" className="text-xs">
-                              {req}
+                              {req.name}
                             </Badge>
                           ))}
                           {program.requirements.length > 2 && (
@@ -279,7 +231,7 @@ const ProgramSelectionModal: React.FC<ProgramSelectionModalProps> = ({
                       {/* Footer */}
                       <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                         <div>
-                          <p className="text-sm font-medium">{program.tuitionFee}</p>
+                          <p className="text-sm font-medium">{program.currency} {program.total_tuition}</p>
                           <p className="text-xs text-gray-500">Total tuition</p>
                         </div>
                         <div className="text-right">
