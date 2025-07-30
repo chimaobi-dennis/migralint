@@ -585,7 +585,7 @@ const MyPage = () => {
                             ))}
 
                             {/* External Account Form */}
-                            {currentStep.type === 'verification' && currentStep.externalAccount && (
+                            {currentStep.type === 'registration' && currentStep.externalAccount && (
                               <div className="space-y-4 border-t pt-4">
                                 <Label>Save External Account Details</Label>
                                 <div className="grid grid-cols-2 gap-4">
