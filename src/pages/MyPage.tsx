@@ -206,7 +206,7 @@ const MyPage = () => {
     if (!accountData || !applicationData) return;
 
     try {
-      const response = await fetch(`https://uniplanr.com/api/v1/update-application/${applicationData.id}`, {
+      const response = await fetch(`https://uniplanr.com/api/v1/update-application/23`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
