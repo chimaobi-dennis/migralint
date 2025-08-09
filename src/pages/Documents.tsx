@@ -3,31 +3,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   FileText, 
-  Plus, 
   Search, 
   Download, 
   Edit3, 
   Sparkles, 
-  CreditCard, 
   Upload,
-  Brain,
   Calendar,
   Clock,
   FileCheck,
-  Wand2,
-  BookOpen,
-  GraduationCap,
-  Target,
   User,
-  Briefcase,
-  Award
+  Briefcase
 } from 'lucide-react';
+import { ResumeBuilder } from '@/components/ResumeWizard/ResumeBuilder';
+import { DocumentTypeStep } from '@/components/OtherDocumentService/DocumentTypeStep';
+import { TemplateStep } from '@/components/OtherDocumentService/TemplateStep';
+import { FormStep } from '@/components/OtherDocumentService/FormStep';
+import { EditorStep } from '@/components/OtherDocumentService/EditorStep';
+import { ReviewStep } from '@/components/OtherDocumentService/ReviewStep';
 import { useAdmissionSteps } from '@/hooks/useAdmissionSteps';
 
 interface Document {
@@ -44,9 +40,13 @@ interface Document {
 const Documents = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const [showAIService, setShowAIService] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [aiFormData, setAiFormData] = useState({
+  const [activeTab, setActiveTab] = useState('resume');
+  
+  // Other Document Service State
+  const [otherDocCurrentStep, setOtherDocCurrentStep] = useState(1);
+  const [selectedDocType, setSelectedDocType] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [documentFormData, setDocumentFormData] = useState({
     writingFor: '', // 'program' or 'general'
     documentType: '',
     program: '',
