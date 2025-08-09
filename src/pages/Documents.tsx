@@ -79,6 +79,8 @@ const Documents = () => {
   });
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [aiSuggestions, setAiSuggestions] = useState([]);
+
+  const [ShowAIService, setShowAIService] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const { applications } = useAdmissionSteps();
