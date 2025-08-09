@@ -16,7 +16,8 @@ import {
   Clock,
   FileCheck,
   User,
-  Briefcase
+  Briefcase,
+  Brain
 } from 'lucide-react';
 import { ResumeBuilder } from '@/components/ResumeWizard/ResumeBuilder';
 import { DocumentTypeStep } from '@/components/OtherDocumentService/DocumentTypeStep';
