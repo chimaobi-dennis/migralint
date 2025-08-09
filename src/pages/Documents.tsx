@@ -82,6 +82,7 @@ const Documents = () => {
 
   const [showAIService, setShowAIService] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
 
   const { applications } = useAdmissionSteps();
 
