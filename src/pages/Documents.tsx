@@ -17,7 +17,8 @@ import {
   FileCheck,
   User,
   Briefcase,
-  Brain
+  Brain,
+  CreditCard
 } from 'lucide-react';
 import { ResumeBuilder } from '@/components/ResumeWizard/ResumeBuilder';
 import { DocumentTypeStep } from '@/components/OtherDocumentService/DocumentTypeStep';
