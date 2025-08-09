@@ -20,7 +20,11 @@ import {
   Briefcase,
   Brain,
   CreditCard,
-  Wand2
+  Wand2,
+  BookOpen,
+  GraduationCap,
+  Target,
+  Award
 } from 'lucide-react';
 import { ResumeBuilder } from '@/components/ResumeWizard/ResumeBuilder';
 import { DocumentTypeStep } from '@/components/OtherDocumentService/DocumentTypeStep';
@@ -29,6 +33,7 @@ import { FormStep } from '@/components/OtherDocumentService/FormStep';
 import { EditorStep } from '@/components/OtherDocumentService/EditorStep';
 import { ReviewStep } from '@/components/OtherDocumentService/ReviewStep';
 import { useAdmissionSteps } from '@/hooks/useAdmissionSteps';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Document {
   id: string;
