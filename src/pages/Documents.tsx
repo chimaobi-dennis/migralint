@@ -19,7 +19,8 @@ import {
   User,
   Briefcase,
   Brain,
-  CreditCard
+  CreditCard,
+  Wand2
 } from 'lucide-react';
 import { ResumeBuilder } from '@/components/ResumeWizard/ResumeBuilder';
 import { DocumentTypeStep } from '@/components/OtherDocumentService/DocumentTypeStep';
