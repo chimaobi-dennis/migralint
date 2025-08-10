@@ -9,6 +9,7 @@ import { PersonalInfoStep } from './PersonalInfoStep';
 import { ExperienceStep } from './ExperienceStep';
 import { EducationStep } from './EducationStep';
 import { SkillsStep } from './SkillsStep';
+import { EditableResumePreview } from './EditableResumePreview';
 
 interface ResumeData {
   template: any;
@@ -129,122 +130,11 @@ export const ResumeBuilder: React.FC = () => {
         );
       case 7:
         return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">Review Your Resume</h2>
-              <p className="text-muted-foreground">
-                Review your resume and make any final adjustments before downloading
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Resume Preview */}
-              <Card className="col-span-1">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Eye className="h-5 w-5" />
-                    Resume Preview
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="aspect-[8.5/11] bg-white border rounded-lg p-6 text-sm overflow-hidden">
-                    {/* Mock Resume Preview */}
-                    <div className="space-y-4">
-                      <div className="text-center">
-                        <h1 className="text-2xl font-bold text-gray-900">
-                          {resumeData.personalInfo.firstName} {resumeData.personalInfo.lastName}
-                        </h1>
-                        <div className="text-gray-600 space-y-1">
-                          <p>{resumeData.personalInfo.email} • {resumeData.personalInfo.phone}</p>
-                          <p>{resumeData.personalInfo.location}</p>
-                        </div>
-                      </div>
-                      
-                      {resumeData.personalInfo.summary && (
-                        <div>
-                          <h2 className="text-lg font-semibold border-b border-gray-300 pb-1">
-                            Professional Summary
-                          </h2>
-                          <p className="text-gray-700 mt-2">{resumeData.personalInfo.summary}</p>
-                        </div>
-                      )}
-
-                      {resumeData.experiences.length > 0 && (
-                        <div>
-                          <h2 className="text-lg font-semibold border-b border-gray-300 pb-1">
-                            Experience
-                          </h2>
-                          <div className="space-y-2 mt-2">
-                            {resumeData.experiences.slice(0, 2).map((exp, index) => (
-                              <div key={index}>
-                                <div className="flex justify-between">
-                                  <h3 className="font-medium">{exp.jobTitle}</h3>
-                                  <span className="text-xs text-gray-500">
-                                    {exp.startDate} - {exp.isCurrentRole ? 'Present' : exp.endDate}
-                                  </span>
-                                </div>
-                                <p className="text-sm text-gray-600">{exp.company} • {exp.location}</p>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="text-center text-gray-400 text-xs">
-                        [Full resume content will be generated]
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Resume Actions */}
-              <Card className="col-span-1">
-                <CardHeader>
-                  <CardTitle>Resume Actions</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button className="w-full" size="lg">
-                    <Download className="h-4 w-4 mr-2" />
-                    Download as PDF
-                  </Button>
-                  
-                  <Button variant="outline" className="w-full" size="lg">
-                    <Edit3 className="h-4 w-4 mr-2" />
-                    Continue Editing
-                  </Button>
-                  
-                  <Button variant="outline" className="w-full" size="lg">
-                    <Share2 className="h-4 w-4 mr-2" />
-                    Share Resume
-                  </Button>
-
-                  <div className="pt-4 border-t">
-                    <h4 className="font-medium mb-3">Resume Summary</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Template:</span>
-                        <Badge variant="secondary">{resumeData.template?.name}</Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Target:</span>
-                        <Badge variant="secondary">
-                          {resumeData.resumeType === 'job' ? 'Job Application' : 
-                           resumeData.resumeType === 'program' ? 'Program Application' : 'General'}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Sections:</span>
-                        <span className="text-muted-foreground">
-                          {2 + resumeData.experiences.length + resumeData.educations.length} sections
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <EditableResumePreview
+            resumeData={resumeData}
+            onUpdateData={setResumeData}
+            onStepChange={setCurrentStep}
+          />
         );
       default:
         return null;
