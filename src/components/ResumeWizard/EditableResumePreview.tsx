@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { 
@@ -18,9 +15,7 @@ import {
   MapPin,
   Mail,
   Phone,
-  Globe,
-  Save,
-  X
+  Globe
 } from 'lucide-react';
 import { TemplateSelection } from './TemplateSelection';
 
@@ -52,64 +47,24 @@ export const EditableResumePreview: React.FC<EditableResumePreviewProps> = ({
 }) => {
   const [editingSection, setEditingSection] = useState<EditingSection>({ type: null });
   const [templateModalOpen, setTemplateModalOpen] = useState(false);
-  const [editingData, setEditingData] = useState<any>(null);
 
   const handleSectionClick = (type: EditingSection['type'], index?: number) => {
     setEditingSection({ type, index });
-    
-    // Set editing data based on section type
+    // Navigate to the appropriate step
     switch (type) {
       case 'personal':
-        setEditingData({ ...resumeData.personalInfo });
+        onStepChange(3);
         break;
       case 'experience':
-        if (index !== undefined && resumeData.experiences[index]) {
-          setEditingData({ ...resumeData.experiences[index] });
-        }
+        onStepChange(4);
         break;
       case 'education':
-        if (index !== undefined && resumeData.educations[index]) {
-          setEditingData({ ...resumeData.educations[index] });
-        }
+        onStepChange(5);
         break;
       case 'skills':
-        setEditingData({ ...resumeData.skills });
+        onStepChange(6);
         break;
     }
-  };
-
-  const handleSaveEdit = () => {
-    if (!editingSection.type || !editingData) return;
-
-    const updatedResumeData = { ...resumeData };
-    
-    switch (editingSection.type) {
-      case 'personal':
-        updatedResumeData.personalInfo = editingData;
-        break;
-      case 'experience':
-        if (editingSection.index !== undefined) {
-          updatedResumeData.experiences[editingSection.index] = editingData;
-        }
-        break;
-      case 'education':
-        if (editingSection.index !== undefined) {
-          updatedResumeData.educations[editingSection.index] = editingData;
-        }
-        break;
-      case 'skills':
-        updatedResumeData.skills = editingData;
-        break;
-    }
-    
-    onUpdateData(updatedResumeData);
-    setEditingSection({ type: null });
-    setEditingData(null);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingSection({ type: null });
-    setEditingData(null);
   };
 
   const handleTemplateChange = (template: any) => {
@@ -238,14 +193,7 @@ export const EditableResumePreview: React.FC<EditableResumePreviewProps> = ({
                 <div className="space-y-3 mt-3">
                   {resumeData.experiences.length > 0 ? (
                     resumeData.experiences.slice(0, 2).map((exp, index) => (
-                      <div 
-                        key={index} 
-                        className="hover:bg-gray-50 rounded p-1 transition-colors cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSectionClick('experience', index);
-                        }}
-                      >
+                      <div key={index} className="hover:bg-gray-50 rounded p-1 transition-colors">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
                             <h3 className="font-medium text-gray-900">{exp.jobTitle}</h3>
@@ -289,14 +237,7 @@ export const EditableResumePreview: React.FC<EditableResumePreviewProps> = ({
                 <div className="space-y-2 mt-3">
                   {resumeData.educations.length > 0 ? (
                     resumeData.educations.slice(0, 2).map((edu, index) => (
-                      <div 
-                        key={index} 
-                        className="hover:bg-gray-50 rounded p-1 transition-colors cursor-pointer"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSectionClick('education', index);
-                        }}
-                      >
+                      <div key={index} className="hover:bg-gray-50 rounded p-1 transition-colors">
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-medium text-gray-900">{edu.degree}</h3>
@@ -365,208 +306,86 @@ export const EditableResumePreview: React.FC<EditableResumePreviewProps> = ({
             <CardTitle>Resume Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {editingSection.type ? (
-              // Live Edit Mode
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-medium capitalize">Edit {editingSection.type}</h4>
-                  <Button variant="ghost" size="sm" onClick={handleCancelEdit}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                {editingSection.type === 'personal' && editingData && (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">First Name</Label>
-                        <Input
-                          value={editingData.firstName || ''}
-                          onChange={(e) => setEditingData({ ...editingData, firstName: e.target.value })}
-                          className="h-8 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Last Name</Label>
-                        <Input
-                          value={editingData.lastName || ''}
-                          onChange={(e) => setEditingData({ ...editingData, lastName: e.target.value })}
-                          className="h-8 text-sm"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs">Email</Label>
-                      <Input
-                        value={editingData.email || ''}
-                        onChange={(e) => setEditingData({ ...editingData, email: e.target.value })}
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Phone</Label>
-                      <Input
-                        value={editingData.phone || ''}
-                        onChange={(e) => setEditingData({ ...editingData, phone: e.target.value })}
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Location</Label>
-                      <Input
-                        value={editingData.location || ''}
-                        onChange={(e) => setEditingData({ ...editingData, location: e.target.value })}
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Professional Summary</Label>
-                      <Textarea
-                        value={editingData.summary || ''}
-                        onChange={(e) => setEditingData({ ...editingData, summary: e.target.value })}
-                        className="text-sm resize-none"
-                        rows={4}
-                      />
-                    </div>
-                  </div>
-                )}
-                
-                {editingSection.type === 'experience' && editingData && (
-                  <div className="space-y-3">
-                    <div>
-                      <Label className="text-xs">Job Title</Label>
-                      <Input
-                        value={editingData.jobTitle || ''}
-                        onChange={(e) => setEditingData({ ...editingData, jobTitle: e.target.value })}
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Company</Label>
-                      <Input
-                        value={editingData.company || ''}
-                        onChange={(e) => setEditingData({ ...editingData, company: e.target.value })}
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Location</Label>
-                      <Input
-                        value={editingData.location || ''}
-                        onChange={(e) => setEditingData({ ...editingData, location: e.target.value })}
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div>
-                        <Label className="text-xs">Start Date</Label>
-                        <Input
-                          type="month"
-                          value={editingData.startDate || ''}
-                          onChange={(e) => setEditingData({ ...editingData, startDate: e.target.value })}
-                          className="h-8 text-sm"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs">End Date</Label>
-                        <Input
-                          type="month"
-                          value={editingData.endDate || ''}
-                          onChange={(e) => setEditingData({ ...editingData, endDate: e.target.value })}
-                          className="h-8 text-sm"
-                          disabled={editingData.isCurrentRole}
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label className="text-xs">Description</Label>
-                      <Textarea
-                        value={editingData.description || ''}
-                        onChange={(e) => setEditingData({ ...editingData, description: e.target.value })}
-                        className="text-sm resize-none"
-                        rows={4}
-                      />
-                    </div>
-                  </div>
-                )}
+            <Button className="w-full" size="lg">
+              <Download className="h-4 w-4 mr-2" />
+              Download as PDF
+            </Button>
+            
+            <Button variant="outline" className="w-full" size="lg">
+              <Edit3 className="h-4 w-4 mr-2" />
+              Continue Editing
+            </Button>
+            
+            <Button variant="outline" className="w-full" size="lg">
+              <Share2 className="h-4 w-4 mr-2" />
+              Share Resume
+            </Button>
 
-                <div className="flex gap-2 pt-2">
-                  <Button onClick={handleSaveEdit} size="sm" className="flex-1">
-                    <Save className="h-3 w-3 mr-1" />
-                    Save
-                  </Button>
-                  <Button variant="outline" onClick={handleCancelEdit} size="sm" className="flex-1">
-                    Cancel
-                  </Button>
+            <div className="pt-4 border-t">
+              <h4 className="font-medium mb-3">Resume Summary</h4>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Template:</span>
+                  <Badge variant="secondary">{resumeData.template?.name || 'None'}</Badge>
                 </div>
-            {!editingSection.type && (
-              <>
-                <div className="pt-4 border-t">
-                  <h4 className="font-medium mb-3">Resume Summary</h4>
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Template:</span>
-                      <Badge variant="secondary">{resumeData.template?.name || 'None'}</Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Target:</span>
-                      <Badge variant="secondary">
-                        {resumeData.resumeType === 'job' ? 'Job Application' : 
-                         resumeData.resumeType === 'program' ? 'Program Application' : 'General'}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Sections:</span>
-                      <span className="text-muted-foreground">
-                        {2 + resumeData.experiences.length + resumeData.educations.length} sections
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Completion:</span>
-                      <Badge variant="outline">
-                        {Math.round(((resumeData.personalInfo.firstName ? 1 : 0) + 
-                                     (resumeData.experiences.length > 0 ? 1 : 0) + 
-                                     (resumeData.educations.length > 0 ? 1 : 0) + 
-                                     (resumeData.skills.technicalSkills?.length > 0 ? 1 : 0)) / 4 * 100)}%
-                      </Badge>
-                    </div>
-                  </div>
+                <div className="flex justify-between">
+                  <span>Target:</span>
+                  <Badge variant="secondary">
+                    {resumeData.resumeType === 'job' ? 'Job Application' : 
+                     resumeData.resumeType === 'program' ? 'Program Application' : 'General'}
+                  </Badge>
                 </div>
-                <div className="pt-4 border-t">
-                  <h4 className="font-medium mb-3">Quick Actions</h4>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleSectionClick('personal')}
-                    >
-                      Edit Info
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleSectionClick('experience')}
-                    >
-                      Add Experience
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleSectionClick('education')}
-                    >
-                      Add Education
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleSectionClick('skills')}
-                    >
-                      Edit Skills
-                    </Button>
-                  </div>
+                <div className="flex justify-between">
+                  <span>Sections:</span>
+                  <span className="text-muted-foreground">
+                    {2 + resumeData.experiences.length + resumeData.educations.length} sections
+                  </span>
                 </div>
-              </>
-            )}
+                <div className="flex justify-between">
+                  <span>Completion:</span>
+                  <Badge variant="outline">
+                    {Math.round(((resumeData.personalInfo.firstName ? 1 : 0) + 
+                                 (resumeData.experiences.length > 0 ? 1 : 0) + 
+                                 (resumeData.educations.length > 0 ? 1 : 0) + 
+                                 (resumeData.skills.technicalSkills?.length > 0 ? 1 : 0)) / 4 * 100)}%
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t">
+              <h4 className="font-medium mb-3">Quick Actions</h4>
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleSectionClick('personal')}
+                >
+                  Edit Info
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleSectionClick('experience')}
+                >
+                  Add Experience
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleSectionClick('education')}
+                >
+                  Add Education
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => handleSectionClick('skills')}
+                >
+                  Edit Skills
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
