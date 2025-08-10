@@ -83,6 +83,30 @@ const Documents = () => {
   const [showAIService, setShowAIService] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  
+  // AI Service Form Data
+  const [aiFormData, setAiFormData] = useState({
+    writingFor: '', // 'program' or 'general'
+    documentType: '',
+    program: '',
+    programBackground: '',
+    requiredDocuments: [],
+    subject: '',
+    level: '',
+    deadline: '',
+    requirements: '',
+    tone: '',
+    pages: '',
+    // Academic background questions
+    currentDegree: '',
+    gpa: '',
+    workExperience: '',
+    researchExperience: '',
+    careerGoals: '',
+    whyThisProgram: '',
+    achievements: '',
+    challenges: ''
+  });
 
   const { applications } = useAdmissionSteps();
 
