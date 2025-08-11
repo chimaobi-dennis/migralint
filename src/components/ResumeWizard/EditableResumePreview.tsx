@@ -73,49 +73,30 @@ export const EditableResumePreview: React.FC<EditableResumePreviewProps> = ({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-2">Review Your Resume</h2>
-        <p className="text-muted-foreground">
-          Click on any section to edit. Your changes will be saved automatically.
-        </p>
+    <div className="space-y-4">
+      {/* Compact Resume Preview with Template Controls */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold">Resume Preview</h3>
+        <Dialog open={templateModalOpen} onOpenChange={setTemplateModalOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Palette className="h-4 w-4 mr-2" />
+              Change Template
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Choose Template</DialogTitle>
+            </DialogHeader>
+            <TemplateSelection
+              selectedTemplate={resumeData.template}
+              onTemplateSelect={handleTemplateChange}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Interactive Resume Preview */}
-        <Card className="col-span-1">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Resume Preview
-            </CardTitle>
-            <div className="flex gap-2">
-              <Dialog open={templateModalOpen} onOpenChange={setTemplateModalOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Palette className="h-4 w-4 mr-2" />
-                    Change Template
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle>Choose Template</DialogTitle>
-                  </DialogHeader>
-                  <TemplateSelection
-                    selectedTemplate={resumeData.template}
-                    onTemplateSelect={handleTemplateChange}
-                  />
-                </DialogContent>
-              </Dialog>
-              
-              <Button variant="outline" size="sm">
-                <FileCheck className="h-4 w-4 mr-2" />
-                AI Review
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="aspect-[8.5/11] bg-white border rounded-lg p-6 text-sm overflow-hidden shadow-lg">
+      <div className="aspect-[8.5/11] bg-white border rounded-lg p-4 text-xs overflow-hidden shadow-lg max-h-[600px]">
               {/* Header Section - Clickable */}
               <div 
                 className="text-center cursor-pointer hover:bg-blue-50 rounded p-2 transition-colors group"
@@ -293,101 +274,9 @@ export const EditableResumePreview: React.FC<EditableResumePreviewProps> = ({
                 </div>
               </div>
 
-              <div className="text-center text-gray-400 text-xs mt-6 pt-4 border-t">
-                Click any section above to edit • Template: {resumeData.template?.name || 'None Selected'}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Resume Actions */}
-        <Card className="col-span-1">
-          <CardHeader>
-            <CardTitle>Resume Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button className="w-full" size="lg">
-              <Download className="h-4 w-4 mr-2" />
-              Download as PDF
-            </Button>
-            
-            <Button variant="outline" className="w-full" size="lg">
-              <Edit3 className="h-4 w-4 mr-2" />
-              Continue Editing
-            </Button>
-            
-            <Button variant="outline" className="w-full" size="lg">
-              <Share2 className="h-4 w-4 mr-2" />
-              Share Resume
-            </Button>
-
-            <div className="pt-4 border-t">
-              <h4 className="font-medium mb-3">Resume Summary</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span>Template:</span>
-                  <Badge variant="secondary">{resumeData.template?.name || 'None'}</Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span>Target:</span>
-                  <Badge variant="secondary">
-                    {resumeData.resumeType === 'job' ? 'Job Application' : 
-                     resumeData.resumeType === 'program' ? 'Program Application' : 'General'}
-                  </Badge>
-                </div>
-                <div className="flex justify-between">
-                  <span>Sections:</span>
-                  <span className="text-muted-foreground">
-                    {2 + resumeData.experiences.length + resumeData.educations.length} sections
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Completion:</span>
-                  <Badge variant="outline">
-                    {Math.round(((resumeData.personalInfo.firstName ? 1 : 0) + 
-                                 (resumeData.experiences.length > 0 ? 1 : 0) + 
-                                 (resumeData.educations.length > 0 ? 1 : 0) + 
-                                 (resumeData.skills.technicalSkills?.length > 0 ? 1 : 0)) / 4 * 100)}%
-                  </Badge>
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t">
-              <h4 className="font-medium mb-3">Quick Actions</h4>
-              <div className="grid grid-cols-2 gap-2">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleSectionClick('personal')}
-                >
-                  Edit Info
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleSectionClick('experience')}
-                >
-                  Add Experience
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleSectionClick('education')}
-                >
-                  Add Education
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleSectionClick('skills')}
-                >
-                  Edit Skills
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="text-center text-gray-400 text-xs mt-4 pt-2 border-t">
+          Click any section above to edit • Template: {resumeData.template?.name || 'None Selected'}
+        </div>
       </div>
     </div>
   );

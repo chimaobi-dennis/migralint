@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Download, Eye, Edit3, Share2, FileText } from 'lucide-react';
+import { Download, Eye, Edit3, Share2, FileText, Plus } from 'lucide-react';
 import { TemplateSelection } from './TemplateSelection';
 import { ProgramSelection } from './ProgramSelection';
 import { PersonalInfoStep } from './PersonalInfoStep';
@@ -140,6 +140,193 @@ export const ResumeBuilder: React.FC = () => {
         return null;
     }
   };
+
+  // Full-page layout for step 7 (Review)
+  if (currentStep === 7) {
+    return (
+      <div className="min-h-screen bg-background">
+        {/* Header with title and actions */}
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+          <div className="container flex h-16 items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={handleBack}
+                className="h-8 w-8 p-0"
+              >
+                ←
+              </Button>
+              <div>
+                <h1 className="text-xl font-semibold">Resume Builder</h1>
+                <p className="text-sm text-muted-foreground">Review and finalize your resume</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm">
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
+              <Button variant="outline" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                AI Review
+              </Button>
+              <Button size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Main content layout */}
+        <div className="container mx-auto p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-8rem)]">
+            {/* Left side - Resume Actions (scrollable) */}
+            <div className="space-y-6 overflow-y-auto pr-4">
+              <div>
+                <h2 className="text-2xl font-bold mb-2">Customize Your Resume</h2>
+                <p className="text-muted-foreground mb-6">
+                  Click on any section in the preview to edit, or use the quick actions below.
+                </p>
+              </div>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Edit3 className="h-5 w-5" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => setCurrentStep(3)}
+                  >
+                    <Edit3 className="h-4 w-4 mr-2" />
+                    Edit Personal Information
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => setCurrentStep(4)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Work Experience
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => setCurrentStep(5)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Education
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => setCurrentStep(6)}
+                  >
+                    <Edit3 className="h-4 w-4 mr-2" />
+                    Edit Skills
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Resume Summary</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">Template:</span>
+                      <p className="font-medium">{resumeData.template?.name || 'None Selected'}</p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Target:</span>
+                      <p className="font-medium">
+                        {resumeData.resumeType === 'job' ? 'Job Application' : 
+                         resumeData.resumeType === 'program' ? 'Program Application' : 'General'}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Sections:</span>
+                      <p className="font-medium">
+                        {2 + resumeData.experiences.length + resumeData.educations.length} sections
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">Completion:</span>
+                      <p className="font-medium">
+                        {Math.round(((resumeData.personalInfo.firstName ? 1 : 0) + 
+                                     (resumeData.experiences.length > 0 ? 1 : 0) + 
+                                     (resumeData.educations.length > 0 ? 1 : 0) + 
+                                     (resumeData.skills.technicalSkills?.length > 0 ? 1 : 0)) / 4 * 100)}%
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t">
+                    <Button className="w-full" size="lg">
+                      <Download className="h-4 w-4 mr-2" />
+                      Download as PDF
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Export Options</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Share Resume Link
+                  </Button>
+                  
+                  <Button variant="outline" className="w-full justify-start">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export to Word
+                  </Button>
+                  
+                  <Button variant="outline" className="w-full justify-start">
+                    <Edit3 className="h-4 w-4 mr-2" />
+                    Create Another Version
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Right side - Resume Preview (sticky) */}
+            <div className="lg:sticky lg:top-24 lg:h-fit">
+              <Card className="h-full">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <Eye className="h-5 w-5" />
+                    Live Preview
+                  </CardTitle>
+                  <Badge variant="secondary">Click sections to edit</Badge>
+                </CardHeader>
+                <CardContent>
+                  <EditableResumePreview
+                    resumeData={resumeData}
+                    onUpdateData={setResumeData}
+                    onStepChange={setCurrentStep}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
