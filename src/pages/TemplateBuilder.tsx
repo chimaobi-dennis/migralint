@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { Template, templateManager } from '@/lib/templateManager';
 import TemplateStructureBuilder from '@/components/TemplateBuilder/TemplateStructureBuilder';
 import VisualStylingPanel from '@/components/TemplateBuilder/VisualStylingPanel';
+import EnhancedTemplateBuilder from '@/components/TemplateBuilder/EnhancedTemplateBuilder';
 
 const defaultTemplate: Omit<Template, 'id' | 'createdAt' | 'updatedAt'> = {
   name: '',
@@ -171,12 +172,11 @@ export default function TemplateBuilder() {
                   Create Template
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-4xl max-h-[90vh]">
+              <DialogContent className="max-w-full max-h-[95vh] w-[95vw]">
                 <DialogHeader>
                   <DialogTitle>Create New Template</DialogTitle>
                 </DialogHeader>
-                <TemplateEditor
-                  template={defaultTemplate}
+                <EnhancedTemplateBuilder
                   onSave={handleCreateTemplate}
                   onCancel={() => setIsCreateModalOpen(false)}
                 />
@@ -322,12 +322,12 @@ export default function TemplateBuilder() {
       {/* Edit Template Dialog */}
       {editingTemplate && (
         <Dialog open={true} onOpenChange={() => setEditingTemplate(null)}>
-          <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogContent className="max-w-full max-h-[95vh] w-[95vw]">
             <DialogHeader>
               <DialogTitle>Edit Template: {editingTemplate.name}</DialogTitle>
             </DialogHeader>
-            <TemplateEditor
-              template={editingTemplate}
+            <EnhancedTemplateBuilder
+              initialTemplate={editingTemplate}
               onSave={handleUpdateTemplate}
               onCancel={() => setEditingTemplate(null)}
             />
