@@ -187,7 +187,11 @@ export default function EnhancedTemplateBuilder({
       variant: 'default',
       isRequired: sectionConfig.required,
       isVisible: true,
-      content: []
+      content: {
+        header: sectionConfig.label,
+        content: '',
+        items: []
+      }
     };
 
     const updatedSections = [...template.structure.sections];
@@ -661,16 +665,21 @@ export default function EnhancedTemplateBuilder({
         <Dialog open={true} onOpenChange={() => setEditingSection(null)}>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
             <DialogHeader>
-              <DialogTitle>Edit Section Content</DialogTitle>
+              <DialogTitle>
+                Edit {editingSection.type.charAt(0).toUpperCase() + editingSection.type.slice(1)} Section
+              </DialogTitle>
             </DialogHeader>
             <ScrollArea className="h-[80vh] pr-4">
               <SectionContentEditor
                 section={template.structure.sections[editingSection.index]}
-                sectionIndex={editingSection.index}
-                onSectionUpdate={(updates) => updateSection(editingSection.index, updates)}
-                onClose={() => setEditingSection(null)}
+                onUpdateSection={(updates) => updateSection(editingSection.index, updates)}
               />
             </ScrollArea>
+            <div className="flex justify-end pt-4 border-t">
+              <Button onClick={() => setEditingSection(null)}>
+                Done Editing
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       )}

@@ -44,11 +44,25 @@ export interface SectionStyling {
   margin?: string;
 }
 
+export interface SectionContent {
+  header?: string;
+  content?: string;
+  items?: Array<{
+    title?: string;
+    subtitle?: string;
+    description?: string;
+    date?: string;
+    location?: string;
+    tags?: string[];
+  }>;
+}
+
 export interface SectionConfig {
-  type: 'header' | 'experience' | 'education' | 'skills' | 'summary' | 'projects' | 'certifications';
+  type: 'profile' | 'header' | 'summary' | 'experience' | 'education' | 'skills' | 'languages' | 'awards' | 'certifications' | 'interests' | 'projects' | 'publications' | 'volunteering' | 'custom';
   position: { row: number; column?: number };
-  variant: string; // 'timeline' | 'list' | 'grid' | 'compact' | 'detailed'
+  variant: string; // 'timeline' | 'list' | 'grid' | 'compact' | 'detailed' | 'paragraph' | 'centered' | 'simple'
   styling?: SectionStyling;
+  content?: SectionContent;
   isRequired: boolean;
   isVisible: boolean;
 }

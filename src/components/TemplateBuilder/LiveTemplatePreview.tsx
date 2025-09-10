@@ -414,7 +414,7 @@ export default function LiveTemplatePreview({
                   className="h-6 w-6 p-0 bg-white shadow-sm border"
                   onClick={(e) => {
                     e.stopPropagation();
-                    onAddSection(index);
+                    onAddSection('custom', index);
                   }}
                 >
                   <Plus className="h-3 w-3 text-green-600" />
@@ -465,7 +465,7 @@ export default function LiveTemplatePreview({
         <Button
           variant="outline"
           className="w-full"
-          onClick={() => onAddSection(template.structure.sections.length)}
+          onClick={() => onAddSection('custom', template.structure.sections.length)}
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Section
