@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +23,7 @@ interface ResumeData {
 }
 
 export const ResumeBuilder: React.FC = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [resumeData, setResumeData] = useState<ResumeData>({
     template: null,
@@ -380,10 +382,13 @@ export const ResumeBuilder: React.FC = () => {
         </div>
         
         <Button
-          onClick={handleNext}
-          disabled={!canProceed() || currentStep === steps.length}
+          onClick={currentStep === steps.length ? () => {
+            // Navigate to resume editor with resume data
+            navigate('/resume-editor', { state: { resumeData } });
+          } : handleNext}
+          disabled={!canProceed()}
         >
-          {currentStep === steps.length ? 'Complete' : 'Next'}
+          {currentStep === steps.length ? 'Build My Resume' : 'Next'}
         </Button>
       </div>
     </div>
