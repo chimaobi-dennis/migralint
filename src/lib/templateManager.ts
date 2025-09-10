@@ -233,7 +233,9 @@ export class TemplateManager {
     
     if (savedTemplates) {
       try {
-        customTemplates = JSON.parse(savedTemplates);
+        const rawTemplates = JSON.parse(savedTemplates);
+        // Migrate old templates to new structure
+        customTemplates = rawTemplates.map((template: any) => this.migrateTemplate(template));
       } catch (error) {
         console.error('Failed to parse saved templates:', error);
       }
@@ -241,6 +243,96 @@ export class TemplateManager {
 
     // Combine default templates with custom templates
     this.templates = [...defaultTemplates, ...customTemplates];
+  }
+
+  // Migrate old template format to new enhanced structure
+  private migrateTemplate(template: any): Template {
+    // If already has new structure, return as is
+    if (template.structure && template.styling) {
+      return template;
+    }
+
+    // Migrate from old format
+    return {
+      id: template.id || `template-${Date.now()}`,
+      name: template.name || 'Untitled Template',
+      description: template.description || '',
+      preview: template.preview || '',
+      type: template.type || 'professional',
+      isPremium: template.isPremium || false,
+      structure: {
+        layout: template.layout?.columns === 2 ? 'two-column' : 'single-column',
+        sections: this.migrateSections(template.layout?.sections || ['header', 'experience', 'education', 'skills']),
+        maxWidth: '800px',
+        pageMargins: '40px'
+      },
+      styling: {
+        colors: {
+          primary: template.colors?.primary || 'hsl(220, 14%, 20%)',
+          secondary: template.colors?.secondary || 'hsl(220, 9%, 46%)',
+          accent: template.colors?.accent || 'hsl(221, 83%, 53%)',
+          text: template.colors?.text || 'hsl(220, 14%, 8%)',
+          background: 'hsl(0, 0%, 100%)',
+          muted: 'hsl(220, 14%, 96%)'
+        },
+        typography: {
+          heading: {
+            fontFamily: template.fonts?.heading || 'Inter',
+            fontSize: '1.5rem',
+            fontWeight: '600',
+            lineHeight: '1.2'
+          },
+          body: {
+            fontFamily: template.fonts?.body || 'Inter',
+            fontSize: '0.875rem',
+            fontWeight: '400',
+            lineHeight: '1.5'
+          },
+          small: {
+            fontSize: '0.75rem',
+            fontWeight: '400'
+          }
+        },
+        spacing: {
+          sectionGap: template.layout?.spacing === 'compact' ? '1.5rem' : template.layout?.spacing === 'spacious' ? '2.5rem' : '2rem',
+          contentPadding: '1rem',
+          itemSpacing: '0.75rem',
+          marginTop: '0.5rem',
+          marginBottom: '0.5rem'
+        }
+      },
+      rules: {
+        requiredSections: ['header', 'experience'],
+        maxSections: 8,
+        allowCustomSections: false
+      },
+      createdAt: template.createdAt || new Date().toISOString(),
+      updatedAt: template.updatedAt || new Date().toISOString()
+    };
+  }
+
+  private migrateSections(oldSections: string[]): SectionConfig[] {
+    const sectionMap: Record<string, { type: SectionConfig['type'], variant: string }> = {
+      'header': { type: 'header', variant: 'centered' },
+      'personal': { type: 'header', variant: 'centered' },
+      'summary': { type: 'summary', variant: 'paragraph' },
+      'experience': { type: 'experience', variant: 'timeline' },
+      'education': { type: 'education', variant: 'list' },
+      'skills': { type: 'skills', variant: 'grid' },
+      'projects': { type: 'projects', variant: 'list' },
+      'certifications': { type: 'certifications', variant: 'list' }
+    };
+
+    return oldSections.map((section, index) => {
+      const mapped = sectionMap[section] || { type: 'summary', variant: 'paragraph' };
+      return {
+        type: mapped.type,
+        position: { row: index + 1 },
+        variant: mapped.variant,
+        isRequired: mapped.type === 'header' || mapped.type === 'experience',
+        isVisible: true
+      };
+    });
   }
 
   getAllTemplates(): Template[] {

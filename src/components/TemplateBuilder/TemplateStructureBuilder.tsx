@@ -37,9 +37,17 @@ const sectionVariants: Record<string, string[]> = {
 export default function TemplateStructureBuilder({ structure, onChange }: TemplateStructureBuilderProps) {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
 
+  // Ensure structure has default values
+  const safeStructure = {
+    layout: structure?.layout || 'single-column',
+    sections: structure?.sections || [],
+    maxWidth: structure?.maxWidth || '800px',
+    pageMargins: structure?.pageMargins || '40px'
+  } as TemplateStructure;
+
   const handleLayoutChange = (layout: string) => {
     onChange({
-      ...structure,
+      ...safeStructure,
       layout: layout as TemplateStructure['layout']
     });
   };
@@ -47,7 +55,7 @@ export default function TemplateStructureBuilder({ structure, onChange }: Templa
   const handleSectionDragEnd = (result: any) => {
     if (!result.destination) return;
 
-    const items = Array.from(structure.sections);
+    const items = Array.from(safeStructure.sections);
     const [reorderedItem] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, reorderedItem);
 
@@ -58,7 +66,7 @@ export default function TemplateStructureBuilder({ structure, onChange }: Templa
     }));
 
     onChange({
-      ...structure,
+      ...safeStructure,
       sections: updatedSections
     });
   };
@@ -66,31 +74,31 @@ export default function TemplateStructureBuilder({ structure, onChange }: Templa
   const addSection = (type: string) => {
     const newSection: SectionConfig = {
       type: type as SectionConfig['type'],
-      position: { row: structure.sections.length + 1 },
+      position: { row: safeStructure.sections.length + 1 },
       variant: sectionVariants[type][0],
       isRequired: sectionTypes.find(s => s.value === type)?.required || false,
       isVisible: true
     };
 
     onChange({
-      ...structure,
-      sections: [...structure.sections, newSection]
+      ...safeStructure,
+      sections: [...safeStructure.sections, newSection]
     });
   };
 
   const updateSection = (index: number, updates: Partial<SectionConfig>) => {
-    const updatedSections = structure.sections.map((section, i) =>
+    const updatedSections = safeStructure.sections.map((section, i) =>
       i === index ? { ...section, ...updates } : section
     );
 
     onChange({
-      ...structure,
+      ...safeStructure,
       sections: updatedSections
     });
   };
 
   const removeSection = (index: number) => {
-    const updatedSections = structure.sections
+    const updatedSections = safeStructure.sections
       .filter((_, i) => i !== index)
       .map((section, i) => ({
         ...section,
@@ -98,7 +106,7 @@ export default function TemplateStructureBuilder({ structure, onChange }: Templa
       }));
 
     onChange({
-      ...structure,
+      ...safeStructure,
       sections: updatedSections
     });
   };
@@ -114,7 +122,7 @@ export default function TemplateStructureBuilder({ structure, onChange }: Templa
           <div className="space-y-4">
             <div>
               <Label>Layout Type</Label>
-              <Select value={structure.layout} onValueChange={handleLayoutChange}>
+              <Select value={safeStructure.layout} onValueChange={handleLayoutChange}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
@@ -130,8 +138,8 @@ export default function TemplateStructureBuilder({ structure, onChange }: Templa
               <div>
                 <Label>Max Width</Label>
                 <Select 
-                  value={structure.maxWidth} 
-                  onValueChange={(value) => onChange({ ...structure, maxWidth: value })}
+                  value={safeStructure.maxWidth} 
+                  onValueChange={(value) => onChange({ ...safeStructure, maxWidth: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -147,8 +155,8 @@ export default function TemplateStructureBuilder({ structure, onChange }: Templa
               <div>
                 <Label>Page Margins</Label>
                 <Select 
-                  value={structure.pageMargins} 
-                  onValueChange={(value) => onChange({ ...structure, pageMargins: value })}
+                  value={safeStructure.pageMargins} 
+                  onValueChange={(value) => onChange({ ...safeStructure, pageMargins: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -175,7 +183,7 @@ export default function TemplateStructureBuilder({ structure, onChange }: Templa
             </SelectTrigger>
             <SelectContent>
               {sectionTypes
-                .filter(type => !structure.sections.some(s => s.type === type.value))
+                .filter(type => !safeStructure.sections.some(s => s.type === type.value))
                 .map((type) => (
                   <SelectItem key={type.value} value={type.value}>
                     <div className="flex items-center gap-2">
@@ -193,7 +201,7 @@ export default function TemplateStructureBuilder({ structure, onChange }: Templa
             <Droppable droppableId="sections">
               {(provided) => (
                 <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-3">
-                  {structure.sections.map((section, index) => (
+                  {safeStructure.sections.map((section, index) => (
                     <Draggable key={`${section.type}-${index}`} draggableId={`${section.type}-${index}`} index={index}>
                       {(provided, snapshot) => (
                         <div

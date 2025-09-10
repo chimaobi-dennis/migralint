@@ -105,7 +105,15 @@ export default function TemplateBuilder() {
 
   // Load templates on mount
   useEffect(() => {
-    setTemplates(templateManager.getAllTemplates().filter(t => t.id.startsWith('template-')));
+    try {
+      const allTemplates = templateManager.getAllTemplates();
+      const customTemplates = allTemplates.filter(t => t.id.startsWith('template-'));
+      setTemplates(customTemplates);
+    } catch (error) {
+      console.error('Error loading templates:', error);
+      toast.error('Failed to load templates');
+      setTemplates([]);
+    }
   }, []);
 
   // Save templates to localStorage and refresh manager
@@ -244,7 +252,7 @@ export default function TemplateBuilder() {
                       <div className="text-center text-muted-foreground">
                         <FileText className="h-12 w-12 mx-auto mb-2" />
                         <p className="text-sm">Template Preview</p>
-                        <p className="text-xs mt-1">{template.structure.layout}</p>
+                        <p className="text-xs mt-1">{template.structure?.layout || 'single-column'}</p>
                       </div>
                     </div>
                     
@@ -469,7 +477,7 @@ function TemplateEditor({ template, onSave, onCancel }: TemplateEditorProps) {
                     <FileText className="h-16 w-16 mx-auto mb-4" />
                     <p>Live Preview</p>
                     <p className="text-sm mt-2">{formData.name}</p>
-                    <p className="text-xs mt-1">{formData.structure.layout} • {formData.structure.sections.length} sections</p>
+                    <p className="text-xs mt-1">{formData.structure?.layout || 'single-column'} • {formData.structure?.sections?.length || 0} sections</p>
                   </div>
                 </div>
               </CardContent>
