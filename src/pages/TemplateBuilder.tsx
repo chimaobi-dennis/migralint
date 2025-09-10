@@ -13,31 +13,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Edit, Trash2, Eye, FileText, User, Briefcase, Crown, Settings, Palette, Layout, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface Template {
-  id: string;
-  name: string;
-  description: string;
-  preview: string;
-  type: 'professional' | 'academic' | 'creative' | 'ats-optimized';
-  isPremium: boolean;
-  colors: {
-    primary: string;
-    secondary: string;
-    accent: string;
-    text: string;
-  };
-  fonts: {
-    heading: string;
-    body: string;
-  };
-  layout: {
-    columns: number;
-    spacing: 'compact' | 'normal' | 'spacious';
-    sections: string[];
-  };
-  createdAt: string;
-  updatedAt: string;
-}
+import { Template, templateManager } from '@/lib/templateManager';
+import TemplateStructureBuilder from '@/components/TemplateBuilder/TemplateStructureBuilder';
+import VisualStylingPanel from '@/components/TemplateBuilder/VisualStylingPanel';
 
 const defaultTemplate: Omit<Template, 'id' | 'createdAt' | 'updatedAt'> = {
   name: '',
@@ -45,20 +23,56 @@ const defaultTemplate: Omit<Template, 'id' | 'createdAt' | 'updatedAt'> = {
   preview: '',
   type: 'professional',
   isPremium: false,
-  colors: {
-    primary: '#1f2937',
-    secondary: '#6b7280',
-    accent: '#3b82f6',
-    text: '#111827'
+  structure: {
+    layout: 'single-column',
+    sections: [
+      { type: 'header', position: { row: 1 }, variant: 'centered', isRequired: true, isVisible: true },
+      { type: 'experience', position: { row: 2 }, variant: 'timeline', isRequired: true, isVisible: true },
+      { type: 'education', position: { row: 3 }, variant: 'list', isRequired: true, isVisible: true },
+      { type: 'skills', position: { row: 4 }, variant: 'grid', isRequired: false, isVisible: true }
+    ],
+    maxWidth: '800px',
+    pageMargins: '40px'
   },
-  fonts: {
-    heading: 'Inter',
-    body: 'Inter'
+  styling: {
+    colors: {
+      primary: 'hsl(220, 14%, 20%)',
+      secondary: 'hsl(220, 9%, 46%)',
+      accent: 'hsl(221, 83%, 53%)',
+      text: 'hsl(220, 14%, 8%)',
+      background: 'hsl(0, 0%, 100%)',
+      muted: 'hsl(220, 14%, 96%)'
+    },
+    typography: {
+      heading: {
+        fontFamily: 'Inter',
+        fontSize: '1.5rem',
+        fontWeight: '600',
+        lineHeight: '1.2'
+      },
+      body: {
+        fontFamily: 'Inter',
+        fontSize: '0.875rem',
+        fontWeight: '400',
+        lineHeight: '1.5'
+      },
+      small: {
+        fontSize: '0.75rem',
+        fontWeight: '400'
+      }
+    },
+    spacing: {
+      sectionGap: '2rem',
+      contentPadding: '1rem',
+      itemSpacing: '0.75rem',
+      marginTop: '0.5rem',
+      marginBottom: '0.5rem'
+    }
   },
-  layout: {
-    columns: 1,
-    spacing: 'normal',
-    sections: ['personal', 'experience', 'education', 'skills']
+  rules: {
+    requiredSections: ['header', 'experience'],
+    maxSections: 8,
+    allowCustomSections: false
   }
 };
 
@@ -89,18 +103,16 @@ export default function TemplateBuilder() {
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Load templates from localStorage on mount
+  // Load templates on mount
   useEffect(() => {
-    const savedTemplates = localStorage.getItem('resume-templates');
-    if (savedTemplates) {
-      setTemplates(JSON.parse(savedTemplates));
-    }
+    setTemplates(templateManager.getAllTemplates().filter(t => t.id.startsWith('template-')));
   }, []);
 
-  // Save templates to localStorage
+  // Save templates to localStorage and refresh manager
   const saveTemplates = (updatedTemplates: Template[]) => {
     setTemplates(updatedTemplates);
     localStorage.setItem('resume-templates', JSON.stringify(updatedTemplates));
+    templateManager.refreshTemplates();
   };
 
   const handleCreateTemplate = (templateData: Omit<Template, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -232,6 +244,7 @@ export default function TemplateBuilder() {
                       <div className="text-center text-muted-foreground">
                         <FileText className="h-12 w-12 mx-auto mb-2" />
                         <p className="text-sm">Template Preview</p>
+                        <p className="text-xs mt-1">{template.structure.layout}</p>
                       </div>
                     </div>
                     
@@ -355,14 +368,31 @@ function TemplateEditor({ template, onSave, onCancel }: TemplateEditorProps) {
     onSave(formData);
   };
 
+  const handleStructureChange = (structure: any) => {
+    setFormData({ ...formData, structure });
+  };
+
+  const handleColorsChange = (colors: any) => {
+    setFormData({ ...formData, styling: { ...formData.styling, colors } });
+  };
+
+  const handleTypographyChange = (typography: any) => {
+    setFormData({ ...formData, styling: { ...formData.styling, typography } });
+  };
+
+  const handleSpacingChange = (spacing: any) => {
+    setFormData({ ...formData, styling: { ...formData.styling, spacing } });
+  };
+
   return (
     <ScrollArea className="h-[70vh]">
       <div className="space-y-6 p-1">
         <Tabs defaultValue="basic">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="basic">Basic Info</TabsTrigger>
-            <TabsTrigger value="design">Design</TabsTrigger>
-            <TabsTrigger value="layout">Layout</TabsTrigger>
+            <TabsTrigger value="structure">Structure</TabsTrigger>
+            <TabsTrigger value="styling">Styling</TabsTrigger>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
           </TabsList>
 
           <TabsContent value="basic" className="space-y-4">
@@ -410,137 +440,40 @@ function TemplateEditor({ template, onSave, onCancel }: TemplateEditorProps) {
             </div>
           </TabsContent>
 
-          <TabsContent value="design" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Primary Color</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="color"
-                    value={formData.colors.primary}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      colors: { ...formData.colors, primary: e.target.value }
-                    })}
-                    className="w-16 h-10"
-                  />
-                  <Input
-                    value={formData.colors.primary}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      colors: { ...formData.colors, primary: e.target.value }
-                    })}
-                    placeholder="#1f2937"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Accent Color</Label>
-                <div className="flex gap-2">
-                  <Input
-                    type="color"
-                    value={formData.colors.accent}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      colors: { ...formData.colors, accent: e.target.value }
-                    })}
-                    className="w-16 h-10"
-                  />
-                  <Input
-                    value={formData.colors.accent}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      colors: { ...formData.colors, accent: e.target.value }
-                    })}
-                    placeholder="#3b82f6"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Heading Font</Label>
-                <Select
-                  value={formData.fonts.heading}
-                  onValueChange={(value) => setFormData({
-                    ...formData,
-                    fonts: { ...formData.fonts, heading: value }
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Inter">Inter</SelectItem>
-                    <SelectItem value="Roboto">Roboto</SelectItem>
-                    <SelectItem value="Open Sans">Open Sans</SelectItem>
-                    <SelectItem value="Lato">Lato</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Body Font</Label>
-                <Select
-                  value={formData.fonts.body}
-                  onValueChange={(value) => setFormData({
-                    ...formData,
-                    fonts: { ...formData.fonts, body: value }
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Inter">Inter</SelectItem>
-                    <SelectItem value="Roboto">Roboto</SelectItem>
-                    <SelectItem value="Open Sans">Open Sans</SelectItem>
-                    <SelectItem value="Lato">Lato</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+          <TabsContent value="structure" className="space-y-4">
+            <TemplateStructureBuilder
+              structure={formData.structure}
+              onChange={handleStructureChange}
+            />
           </TabsContent>
 
-          <TabsContent value="layout" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Columns</Label>
-                <Select
-                  value={formData.layout.columns.toString()}
-                  onValueChange={(value) => setFormData({
-                    ...formData,
-                    layout: { ...formData.layout, columns: parseInt(value) }
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">Single Column</SelectItem>
-                    <SelectItem value="2">Two Columns</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Spacing</Label>
-                <Select
-                  value={formData.layout.spacing}
-                  onValueChange={(value: any) => setFormData({
-                    ...formData,
-                    layout: { ...formData.layout, spacing: value }
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="compact">Compact</SelectItem>
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="spacious">Spacious</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+          <TabsContent value="styling" className="space-y-4">
+            <VisualStylingPanel
+              colors={formData.styling.colors}
+              typography={formData.styling.typography}
+              spacing={formData.styling.spacing}
+              onColorsChange={handleColorsChange}
+              onTypographyChange={handleTypographyChange}
+              onSpacingChange={handleSpacingChange}
+            />
+          </TabsContent>
+
+          <TabsContent value="preview" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Template Preview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="aspect-[3/4] bg-muted rounded-md flex items-center justify-center">
+                  <div className="text-center text-muted-foreground">
+                    <FileText className="h-16 w-16 mx-auto mb-4" />
+                    <p>Live Preview</p>
+                    <p className="text-sm mt-2">{formData.name}</p>
+                    <p className="text-xs mt-1">{formData.structure.layout} • {formData.structure.sections.length} sections</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
 
