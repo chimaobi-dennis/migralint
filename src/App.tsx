@@ -19,6 +19,7 @@ import AdminVisaSteps from "./pages/AdminVisaSteps";
 import AdminSteps from "./pages/AdminSteps";
 import Documents from "./pages/Documents";
 import ResumeEditor from "./pages/ResumeEditor";
+import TemplateBuilder from "./pages/TemplateBuilder";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/admin/scholarship-steps" element={<AdminLayout><AdminScholarshipSteps /></AdminLayout>} />
           <Route path="/admin/visa-steps" element={<AdminLayout><AdminVisaSteps /></AdminLayout>} />
           <Route path="/admin/steps" element={<AdminLayout><AdminSteps /></AdminLayout>} />
+          <Route path="/admin/template-builder" element={<AdminLayout><TemplateBuilder /></AdminLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<Layout><NotFound /></Layout>} />
         </Routes>

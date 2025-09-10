@@ -1,57 +1,16 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, User, Briefcase, Crown } from 'lucide-react';
+import { Template, templateManager } from '@/lib/templateManager';
 
-interface Template {
-  id: string;
-  name: string;
-  description: string;
-  preview: string;
-  type: 'professional' | 'academic' | 'creative' | 'ats-optimized';
-  isPremium: boolean;
-}
 
 interface TemplateSelectionProps {
   onTemplateSelect: (template: Template) => void;
   selectedTemplate?: Template;
 }
 
-const templates: Template[] = [
-  {
-    id: 'modern-professional',
-    name: 'Modern Professional',
-    description: 'Clean, modern design perfect for corporate positions',
-    preview: '/resume-previews/modern-professional.jpg',
-    type: 'professional',
-    isPremium: false
-  },
-  {
-    id: 'ats-optimized',
-    name: 'ATS Optimized',
-    description: 'Simple format that passes Applicant Tracking Systems',
-    preview: '/resume-previews/ats-optimized.jpg',
-    type: 'ats-optimized',
-    isPremium: false
-  },
-  {
-    id: 'academic-researcher',
-    name: 'Academic CV',
-    description: 'Comprehensive format for academic and research positions',
-    preview: '/resume-previews/academic.jpg',
-    type: 'academic',
-    isPremium: true
-  },
-  {
-    id: 'creative-designer',
-    name: 'Creative Portfolio',
-    description: 'Eye-catching design for creative professionals',
-    preview: '/resume-previews/creative.jpg',
-    type: 'creative',
-    isPremium: true
-  }
-];
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -77,6 +36,13 @@ export const TemplateSelection: React.FC<TemplateSelectionProps> = ({
   onTemplateSelect,
   selectedTemplate
 }) => {
+  const [templates, setTemplates] = useState<Template[]>([]);
+
+  useEffect(() => {
+    // Load templates from template manager
+    const loadedTemplates = templateManager.getAllTemplates();
+    setTemplates(loadedTemplates);
+  }, []);
   return (
     <div className="space-y-6">
       <div className="text-center">
