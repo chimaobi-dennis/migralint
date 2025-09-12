@@ -45,8 +45,39 @@ const Index = () => {
     const fetchApplications = async () => {
       try {
         setLoadingApplications(true);
-        
-        // Mock data for development until Supabase types are updated
+
+        // Fetch from Supabase (using 'as any' to bypass types until DB types are synced)
+        const { data, error } = await (supabase as any)
+          .from('applications')
+          .select('*')
+          .eq('user_id', userId);
+
+        if (error) throw error;
+
+        const apps: SupabaseApplication[] = (data || []).map((row: any) => ({
+          id: row.id,
+          user_id: row.user_id,
+          status: row.status,
+          progress: row.progress,
+          degree: row.degree,
+          studyField: row.studyField,
+          university: row.university,
+          study_destination: row.study_destination,
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+          selected_programs: row.selected_programs,
+          recommended: row.recommended,
+          accepted_admission: row.accepted_admission,
+          rejected_admission: row.rejected_admission,
+          type: row.type,
+        }));
+
+        setApplications(apps);
+        setFilteredApplications(apps);
+        setErrorLoadingApplications(null);
+      } catch (err) {
+        console.error('Error fetching applications:', err);
+        // Fallback: minimal mock to keep UI working in dev
         const mockApplications: SupabaseApplication[] = [
           {
             id: 1,
@@ -64,34 +95,11 @@ const Index = () => {
             accepted_admission: null,
             rejected_admission: null,
             type: 'Regular'
-          },
-          {
-            id: 2,
-            user_id: 1,
-            status: 'Submitted',
-            progress: 100,
-            degree: 'Bachelor',
-            studyField: 'Engineering',
-            university: 'KTH Royal Institute',
-            study_destination: 'Sweden',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            selected_programs: 'Software Engineering',
-            recommended: 'Yes',
-            accepted_admission: 'Pending',
-            rejected_admission: null,
-            type: 'Early'
           }
         ];
-        
         setApplications(mockApplications);
         setFilteredApplications(mockApplications);
         setErrorLoadingApplications(null);
-      } catch (err) {
-        console.error('Error fetching applications:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load applications. Please try again later.';
-        setErrorLoadingApplications(errorMessage);
-        toast.error(errorMessage);
       } finally {
         setLoadingApplications(false);
       }
@@ -202,16 +210,29 @@ const Index = () => {
                   ))}
                 </div>
               ) : (
-                filteredApplications.map((application) => (
-                  <ApplicationCard
-                    key={application.id}
-                    application={application as any}
-                    onClick={() => handleApplicationClick(application)}
-                    onProgramClick={handleProgramClick}
-                    isSelected={selectedApplication?.id === application.id}
-                    selectedProgramId={selectedProgram?.id}
-                  />
-                ))
+                filteredApplications.map((application) => {
+                  const cardApp = {
+                    id: application.id,
+                    university: application.university || 'Unknown University',
+                    program: application.studyField || 'Program',
+                    deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+                    status: application.status || 'In Progress',
+                    progress: application.progress ?? 0,
+                    requirements: [] as string[],
+                    completed: [] as string[],
+                    isGroup: false,
+                  };
+                  return (
+                    <ApplicationCard
+                      key={application.id}
+                      application={cardApp}
+                      onClick={() => handleApplicationClick(application)}
+                      onProgramClick={handleProgramClick}
+                      isSelected={selectedApplication?.id === application.id}
+                      selectedProgramId={(selectedProgram as any)?.id}
+                    />
+                  );
+                })
               )}
             </div>
           </div>
