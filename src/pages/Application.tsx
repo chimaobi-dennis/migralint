@@ -46,13 +46,17 @@ const Index = () => {
       try {
         setLoadingApplications(true);
 
-        // Fetch from Supabase (using 'as any' to bypass types until DB types are synced)
+        // Fetch from Supabase with real data
         const { data, error } = await (supabase as any)
           .from('applications')
           .select('*')
           .eq('user_id', userId);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase error:', error);
+          setErrorLoadingApplications(error.message);
+          return;
+        }
 
         const apps: SupabaseApplication[] = (data || []).map((row: any) => ({
           id: row.id,
@@ -77,29 +81,9 @@ const Index = () => {
         setErrorLoadingApplications(null);
       } catch (err) {
         console.error('Error fetching applications:', err);
-        // Fallback: minimal mock to keep UI working in dev
-        const mockApplications: SupabaseApplication[] = [
-          {
-            id: 1,
-            user_id: 1,
-            status: 'In Progress',
-            progress: 65,
-            degree: 'Master',
-            studyField: 'Computer Science',
-            university: 'Stockholm University',
-            study_destination: 'Sweden',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            selected_programs: 'AI and Machine Learning',
-            recommended: 'Yes',
-            accepted_admission: null,
-            rejected_admission: null,
-            type: 'Regular'
-          }
-        ];
-        setApplications(mockApplications);
-        setFilteredApplications(mockApplications);
-        setErrorLoadingApplications(null);
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load applications from database';
+        setErrorLoadingApplications(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setLoadingApplications(false);
       }

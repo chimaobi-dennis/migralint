@@ -9,23 +9,20 @@ const userId = 1; // Development user ID
 
 interface Profile {
   id: number;
+  user_id: number;
   degree: string;
+  origin_country: string;
+  university_country: string;
   fields: string;
   area_of_study: string;
-  origin_country: string;
-  desired_field: string;
-  status: string;
   language: string;
   language_test_type: string;
-  language_test_year: string;
-  language_test_score: string;
-  has_language_test: boolean;
-  study_envs: string[];
-  interst_keywords: string[];
-  recommended_programs: string[];
-  application:string[];
-  // Add any other fields that might come from the API
-  [key: string]: any; // For any additional fields
+  language_test_score: number;
+  has_language_test: number;
+  work_experience: string;
+  fee_preference: string;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ApplicationProfileProps {
@@ -46,33 +43,43 @@ export const ApplicationProfile = ({ onAddNew, onStartApplication }: Application
       try {
         setLoading(true);
         
-        // Mock data for development until Supabase types are updated
-        const mockProfiles: Profile[] = [
-          {
-            id: 1,
-            degree: 'Master',
-            fields: 'Computer Science',
-            area_of_study: 'AI and Machine Learning',
-            origin_country: 'India',
-            desired_field: 'Artificial Intelligence',
-            status: 'Active',
-            language: 'English',
-            language_test_type: 'IELTS',
-            language_test_year: '2023',
-            language_test_score: '7.5',
-            has_language_test: true,
-            study_envs: ['Stockholm', 'Gothenburg'],
-            interst_keywords: ['AI', 'Machine Learning', 'Data Science'],
-            recommended_programs: ['KTH AI Program', 'Stockholm University CS'],
-            application: ['Sweden Universities', 'Application Portal']
-          }
-        ];
-        
-        setProfiles(mockProfiles);
+        // Fetch real student profiles from Supabase
+        const { data, error } = await (supabase as any)
+          .from('student_profile')
+          .select('*')
+          .eq('user_id', userId);
+
+        if (error) {
+          console.error('Error fetching profiles:', error);
+          setError(error.message);
+          return;
+        }
+
+        const profilesData: Profile[] = (data || []).map((row: any) => ({
+          id: row.id,
+          user_id: row.user_id,
+          degree: row.degree || '',
+          origin_country: row.origin_country || '',
+          university_country: row.university_country || '',
+          fields: row.fields || '',
+          area_of_study: row.area_of_study || '',
+          language: row.language || '',
+          language_test_type: row.language_test_type || '',
+          language_test_score: row.language_test_score || 0,
+          has_language_test: row.has_language_test || 0,
+          work_experience: row.work_experience || '',
+          fee_preference: row.fee_preference || '',
+          created_at: row.created_at,
+          updated_at: row.updated_at,
+        }));
+
+        setProfiles(profilesData);
+        setError(null);
       } catch (err) {
         console.error('Error fetching profiles:', err);
-        setError('Failed to load profiles. Please try again later.');
-        toast.error('Failed to load profiles');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load profiles from database';
+        setError(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -207,11 +214,11 @@ export const ApplicationProfile = ({ onAddNew, onStartApplication }: Application
                 </h4>
                 <p className="text-sm text-gray-500 truncate">{app.origin_country || 'Origin Country'} - {app.area_of_study || 'Area of Study'}</p>
                 <div className="mt-1 flex items-center text-sm text-gray-600">
-                  <span>{app.recommended_programs?.length || 0} recommended programs</span>
-                  {app.country && (
+                  <span>Profile created</span>
+                  {app.university_country && (
                     <>
                       <span className="mx-1">•</span>
-                      <span>{app.country}</span>
+                      <span>{app.university_country}</span>
                     </>
                   )}
                 </div>
@@ -226,7 +233,7 @@ export const ApplicationProfile = ({ onAddNew, onStartApplication }: Application
                       Degree: app.degree || '',
                       Field: app.fields || '',
                       Country: app.origin_country || '',
-                      ...(app.desired_fields && { 'desiredFields[]': app.desired_fields })
+                      AreaOfStudy: app.area_of_study || ''
                     });
                     window.location.href = `start-application?${params.toString()}`;
                   }}
@@ -249,7 +256,10 @@ export const ApplicationProfile = ({ onAddNew, onStartApplication }: Application
                 <div className="space-y-3">
                   <div className="text-sm">
                     <p className="font-medium text-gray-900">
-                      Status: {!app.application ? 'Not Started' : `Applications: ${app.application.join(', ')}`}
+                      Language Test: {app.language_test_type || 'Not specified'}
+                    </p>
+                    <p className="text-gray-600 mt-1">
+                      Score: {app.language_test_score || 'Not provided'} | Experience: {app.work_experience || 'Not specified'}
                     </p>
                   </div>
                   {/* //update here letter */}
