@@ -19,7 +19,7 @@ export function Layout({ children }: LayoutProps) {
     },
     {
       title: "Applications",
-      url: "/applications",
+      url: "/application",
       icon: Calendar,
     },
     {
