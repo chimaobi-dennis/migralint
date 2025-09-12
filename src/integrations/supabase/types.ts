@@ -14,7 +14,189 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      template_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      template_tags: {
+        Row: {
+          created_at: string
+          id: string
+          tag: string
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          tag: string
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          tag?: string
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_tags_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_usage: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          metadata: Json | null
+          template_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          template_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          metadata?: Json | null
+          template_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_usage_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_versions: {
+        Row: {
+          changes_summary: string | null
+          content: Json
+          created_at: string
+          created_by: string
+          id: string
+          structure: Json
+          styling: Json
+          template_id: string
+          version_number: number
+        }
+        Insert: {
+          changes_summary?: string | null
+          content?: Json
+          created_at?: string
+          created_by: string
+          id?: string
+          structure?: Json
+          styling?: Json
+          template_id: string
+          version_number: number
+        }
+        Update: {
+          changes_summary?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          structure?: Json
+          styling?: Json
+          template_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_versions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      templates: {
+        Row: {
+          content: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_premium: boolean
+          is_public: boolean
+          metadata: Json
+          name: string
+          structure: Json
+          styling: Json
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_premium?: boolean
+          is_public?: boolean
+          metadata?: Json
+          name: string
+          structure?: Json
+          styling?: Json
+          type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_premium?: boolean
+          is_public?: boolean
+          metadata?: Json
+          name?: string
+          structure?: Json
+          styling?: Json
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
