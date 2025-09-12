@@ -1,1 +1,4 @@
 project_id = "yjzsuzbvvfseouzwtxxt"
+
+[functions.mysql-bridge]
+verify_jwt = false
