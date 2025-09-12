@@ -8,71 +8,85 @@ import { DeadlineAlert } from "@/components/DeadlineAlert";
 import { ApplicationProfile } from "@/components/ApplicationProfile";
 import NewApplicationModal from "@/components/NewApplicationModal";
 import { toast } from "sonner";
-import axios from 'axios';
+import { supabase } from "@/integrations/supabase/client";
 
-interface Requirement {
-  name: string;
-  completed: boolean;
-}
-
-interface Program {
+interface SupabaseApplication {
   id: number;
-  name: string;
-  university: string;
-  status: string;
-  deadline?: string;
-  requirements: Requirement[];
-  completed_requirements: string[];
-}
-
-interface Application {
-  id: number;
-  isGroup: boolean;
-  name: string;
-  status: string;
-  progress: number;
-  programs: Program[];
-  created_at: string;
-  updated_at: string;
+  user_id: number | null;
+  status: string | null;
+  progress: number | null;
+  degree: string | null;
+  studyField: string | null;
+  university: string | null;
+  study_destination: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  selected_programs: string | null;
+  recommended: string | null;
+  accepted_admission: string | null;
+  rejected_admission: string | null;
+  type: string | null;
 }
 
 const Index = () => {
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
-  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
-  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
+  const [applications, setApplications] = useState<SupabaseApplication[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<SupabaseApplication[]>([]);
+  const [selectedApplication, setSelectedApplication] = useState<SupabaseApplication | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<any | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showNewApplicationModal, setShowNewApplicationModal] = useState(false);
   const [showNewAppModal, setShowNewAppModal] = useState(false);
   const [loadingApplications, setLoadingApplications] = useState(true);
   const [errorLoadingApplications, setErrorLoadingApplications] = useState<string | null>(null);
-  const userId = document.getElementById('root')?.getAttribute('data-user-id');
+  const userId = 1; // Development user ID
   
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         setLoadingApplications(true);
-        const response = await fetch(`/api/v1/applications/${userId}`);
-        const data = await response.json();
         
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch applications');
-        }
+        // Mock data for development until Supabase types are updated
+        const mockApplications: SupabaseApplication[] = [
+          {
+            id: 1,
+            user_id: 1,
+            status: 'In Progress',
+            progress: 65,
+            degree: 'Master',
+            studyField: 'Computer Science',
+            university: 'Stockholm University',
+            study_destination: 'Sweden',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            selected_programs: 'AI and Machine Learning',
+            recommended: 'Yes',
+            accepted_admission: null,
+            rejected_admission: null,
+            type: 'Regular'
+          },
+          {
+            id: 2,
+            user_id: 1,
+            status: 'Submitted',
+            progress: 100,
+            degree: 'Bachelor',
+            studyField: 'Engineering',
+            university: 'KTH Royal Institute',
+            study_destination: 'Sweden',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            selected_programs: 'Software Engineering',
+            recommended: 'Yes',
+            accepted_admission: 'Pending',
+            rejected_admission: null,
+            type: 'Early'
+          }
+        ];
         
-        if (data.status === 'success') {
-          const formattedData = data.data.map((app: any) => ({
-            ...app,
-            // Map API response to frontend format if needed
-            // Add any additional formatting here
-          }));
-           
-          setApplications(formattedData);
-          setFilteredApplications(formattedData);
-          setErrorLoadingApplications(null);
-        } else {
-          throw new Error(data.message || 'Invalid response format');
-        }
+        setApplications(mockApplications);
+        setFilteredApplications(mockApplications);
+        setErrorLoadingApplications(null);
       } catch (err) {
         console.error('Error fetching applications:', err);
         const errorMessage = err instanceof Error ? err.message : 'Failed to load applications. Please try again later.';
@@ -91,22 +105,20 @@ const Index = () => {
       setFilteredApplications(applications);
     } else {
       const filtered = applications.filter(app => 
-        app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        app.programs.some(program => 
-          program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          program.university.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        (app.degree?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (app.studyField?.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (app.university?.toLowerCase().includes(searchTerm.toLowerCase()))
       );
       setFilteredApplications(filtered);
     }
   }, [searchTerm, applications]);
 
-  const handleProgramClick = (program: Program) => {
+  const handleProgramClick = (program: any) => {
     setSelectedProgram(program);
     setSelectedApplication(null);
   };
 
-  const handleApplicationClick = (application: Application) => {
+  const handleApplicationClick = (application: SupabaseApplication) => {
     setSelectedApplication(application);
     setSelectedProgram(null);
 
@@ -123,7 +135,7 @@ const Index = () => {
         }
       }, 100);
     }
-  }; 
+  };
 
   const handleSaveNewApplication = (data: any) => {
     console.log('New application data:', data);
@@ -135,10 +147,10 @@ const Index = () => {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <StatsOverview applications={applications} />
+      <StatsOverview applications={applications as any} />
 
       {/* Deadline Alerts */}
-      <DeadlineAlert applications={applications} />
+      <DeadlineAlert applications={applications as any} />
 
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
@@ -193,7 +205,7 @@ const Index = () => {
                 filteredApplications.map((application) => (
                   <ApplicationCard
                     key={application.id}
-                    application={application}
+                    application={application as any}
                     onClick={() => handleApplicationClick(application)}
                     onProgramClick={handleProgramClick}
                     isSelected={selectedApplication?.id === application.id}

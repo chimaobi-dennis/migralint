@@ -3,7 +3,8 @@ import { ChevronDown, ChevronUp, Edit, Trash2, Plus, Check, X, ArrowRight, Loade
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-const userId = document.getElementById('root')?.getAttribute('data-user-id');
+import { supabase } from "@/integrations/supabase/client";
+const userId = 1; // Development user ID
 
 
 interface Profile {
@@ -44,13 +45,30 @@ export const ApplicationProfile = ({ onAddNew, onStartApplication }: Application
     const fetchProfiles = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`/api/v1/student-profiles/${userId}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch profiles');
-        }
-        const data = await response.json();
-        setProfiles(data);
-        console.log('data', data);
+        
+        // Mock data for development until Supabase types are updated
+        const mockProfiles: Profile[] = [
+          {
+            id: 1,
+            degree: 'Master',
+            fields: 'Computer Science',
+            area_of_study: 'AI and Machine Learning',
+            origin_country: 'India',
+            desired_field: 'Artificial Intelligence',
+            status: 'Active',
+            language: 'English',
+            language_test_type: 'IELTS',
+            language_test_year: '2023',
+            language_test_score: '7.5',
+            has_language_test: true,
+            study_envs: ['Stockholm', 'Gothenburg'],
+            interst_keywords: ['AI', 'Machine Learning', 'Data Science'],
+            recommended_programs: ['KTH AI Program', 'Stockholm University CS'],
+            application: ['Sweden Universities', 'Application Portal']
+          }
+        ];
+        
+        setProfiles(mockProfiles);
       } catch (err) {
         console.error('Error fetching profiles:', err);
         setError('Failed to load profiles. Please try again later.');
