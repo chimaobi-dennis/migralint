@@ -1,269 +1,361 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, Sparkles, Plane, Users, GraduationCap, MessageSquare, Zap, Shield, Heart } from 'lucide-react';
+import { ArrowRight, Check, Sparkles, Plane, Users, GraduationCap, MessageSquare, Zap, Shield, Heart, Globe, BookOpen, Target, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { AuthModal } from '@/components/AuthModal';
+import studentHero from '@/assets/student-hero.jpg';
 
 export const LandingPage = () => {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="bg-slate-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur-sm border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <GraduationCap className="h-8 w-8 text-yellow-400" />
-              <span className="ml-2 text-xl font-bold">Uniplanr</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <GraduationCap className="h-5 w-5 text-white" />
+              </div>
+              <span className="ml-3 text-xl font-bold text-white">Uniplanr</span>
             </div>
             <div className="hidden md:flex items-center space-x-8">
-              <a href="#home" className="text-gray-300 hover:text-white transition-colors">Home</a>
-              <a href="#programs" className="text-gray-300 hover:text-white transition-colors">Programs</a>
-              <a href="#community" className="text-gray-300 hover:text-white transition-colors">Community</a>
-              <a href="#universities" className="text-gray-300 hover:text-white transition-colors">For Universities</a>
-              <a href="#contact" className="text-gray-300 hover:text-white transition-colors">Contact</a>
-              <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-slate-800">Login</Button>
-              <Link to="/app">
-                <Button className="bg-yellow-400 text-slate-900 hover:bg-yellow-300 font-medium">Get Started</Button>
-              </Link>
+              <a href="#home" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Home</a>
+              <a href="#programs" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Programs</a>
+              <a href="#community" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Community</a>
+              <a href="#universities" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">For Universities</a>
+              <a href="#contact" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Contact</a>
+              <Button 
+                variant="ghost" 
+                className="text-gray-300 hover:text-white hover:bg-white/10 text-sm font-medium"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                Login
+              </Button>
+              <Button 
+                className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold px-6"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                Get Started
+              </Button>
             </div>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-slate-50 to-blue-50 overflow-hidden">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative z-10 pb-8 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32">
-            <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
-              <div className="sm:text-center lg:text-left">
-                <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-                  <span className="block xl:inline">Uniplanr – Your</span>{' '}
-                  <span className="block text-blue-600 xl:inline">Global Study</span>{' '}
-                  <span className="block xl:inline">Lifetool</span>
+      <section className="pt-20 pb-16 bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5"></div>
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 relative">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Content */}
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+                  <span className="block">Uniplanr – Your</span>
+                  <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Global Study</span>
+                  <span className="block">Lifetool</span>
                 </h1>
-                <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
                   From first thought to final graduation, Uniplanr guides you every step of your study abroad journey.
                 </p>
-                
-                {/* CTA Button */}
-                <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
-                  <div className="rounded-md shadow">
-                    <Link to="/app">
-                      <Button className="w-full flex items-center justify-center px-8 py-3 text-base font-medium bg-blue-600 text-white hover:bg-blue-700 md:py-4 md:text-lg md:px-10">
-                        Try It Now
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
+              </div>
 
-                {/* Feature Points */}
-                <div className="mt-6 space-y-2">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Check className="h-4 w-4 text-green-500 mr-2" />
-                    Built by international students like you
+              <Button 
+                size="lg" 
+                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                Try It Now
+              </Button>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                    <Check className="h-3 w-3 text-white" />
                   </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <Check className="h-4 w-4 text-green-500 mr-2" />
-                    Your journey, supported from day one
+                  <span className="text-gray-700 font-medium">Built by international students like you</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                    <Check className="h-3 w-3 text-white" />
                   </div>
+                  <span className="text-gray-700 font-medium">Your journey, supported from day one</span>
                 </div>
               </div>
-            </main>
-          </div>
-        </div>
-        
-        {/* Hero Image */}
-        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
-          <div className="h-56 w-full bg-gradient-to-r from-blue-400 to-purple-500 sm:h-72 md:h-96 lg:w-full lg:h-full flex items-center justify-center">
-            <div className="text-white text-center">
-              <MessageSquare className="h-16 w-16 mx-auto mb-4 opacity-80" />
-              <div className="space-y-2">
-                <div className="bg-white/20 backdrop-blur rounded-lg p-3 max-w-xs">
-                  <p className="text-sm">Hey! Just arrived my dream study destination and already settling in.</p>
-                </div>
-                <div className="bg-yellow-400 text-slate-900 rounded-lg p-3 max-w-xs ml-8">
-                  <p className="text-sm">Oh wow, that seemed quick and easy! How'd you manage that?</p>
-                </div>
-                <div className="bg-white/20 backdrop-blur rounded-lg p-3 max-w-xs">
-                  <p className="text-sm">Yeah, it was effortless! With Uniplanr, I barely had to stress, it handled everything smoothly</p>
+            </div>
+
+            {/* Right Content - Hero Image with Chat Bubbles */}
+            <div className="relative">
+              <div className="relative">
+                <img 
+                  src={studentHero} 
+                  alt="Happy international student using Uniplanr" 
+                  className="w-full h-auto rounded-2xl shadow-2xl"
+                />
+                
+                {/* Chat Bubbles Overlay */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* First Chat Bubble */}
+                  <div className="absolute top-8 left-4 bg-white/95 backdrop-blur-sm rounded-2xl p-4 max-w-xs shadow-lg border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-600">Alex</span>
+                    </div>
+                    <p className="text-sm text-gray-800">Hey! Just arrived my dream study destination and already settling in.</p>
+                  </div>
+
+                  {/* Second Chat Bubble */}
+                  <div className="absolute top-32 right-4 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-2xl p-4 max-w-xs shadow-lg">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 bg-white rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-800">Sarah</span>
+                    </div>
+                    <p className="text-sm text-gray-800 font-medium">Oh wow, that seemed quick and easy! How'd you manage that?</p>
+                  </div>
+
+                  {/* Third Chat Bubble */}
+                  <div className="absolute bottom-8 left-4 bg-white/95 backdrop-blur-sm rounded-2xl p-4 max-w-xs shadow-lg border">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-gray-600">Alex</span>
+                    </div>
+                    <p className="text-sm text-gray-800">Yeah, it was effortless! With Uniplanr, I barely had to stress, it handled everything smoothly</p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Features Section */}
-      <div className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="lg:text-center">
-            <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Features</h2>
-            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center space-y-4 mb-16">
+            <h2 className="text-4xl font-bold text-gray-900">
               Powered by AI. Built by Students. For Students.
-            </p>
-            <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Your Journey Abroad Starts with Clarity, Confidence & Care
             </p>
           </div>
 
-          <div className="mt-10">
-            <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-3 md:gap-x-8 md:gap-y-10">
-              {[
-                {
-                  icon: <Sparkles className="h-6 w-6" />,
-                  title: "AI-Powered Matching",
-                  description: "Our intelligent system matches you with the perfect programs based on your profile and aspirations."
-                },
-                {
-                  icon: <Plane className="h-6 w-6" />,
-                  title: "Visa & Travel Support",
-                  description: "Complete guidance through visa applications, travel planning, and pre-departure preparation."
-                },
-                {
-                  icon: <Heart className="h-6 w-6" />,
-                  title: "Lifelong Guidance",
-                  description: "From first inquiry to graduation and beyond - we're with you every step of the way."
-                }
-              ].map((feature, index) => (
-                <div key={index} className="relative">
-                  <div className="absolute flex items-center justify-center h-12 w-12 rounded-md bg-blue-500 text-white">
-                    {feature.icon}
-                  </div>
-                  <p className="ml-16 text-lg leading-6 font-medium text-gray-900">{feature.title}</p>
-                  <p className="mt-2 ml-16 text-base text-gray-500">{feature.description}</p>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: <Sparkles className="h-8 w-8" />,
+                title: "AI-Powered Matching",
+                description: "Our intelligent system matches you with the perfect programs based on your profile and aspirations."
+              },
+              {
+                icon: <Plane className="h-8 w-8" />,
+                title: "Visa & Travel Support", 
+                description: "Complete guidance through visa applications, travel planning, and pre-departure preparation."
+              },
+              {
+                icon: <Heart className="h-8 w-8" />,
+                title: "Lifelong Guidance",
+                description: "From first inquiry to graduation and beyond - we're with you every step of the way."
+              }
+            ].map((feature, index) => (
+              <div key={index} className="text-center group">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 group-hover:scale-110 transition-transform duration-200">
+                  {feature.icon}
                 </div>
-              ))}
-            </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-4">{feature.title}</h3>
+                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Journey Section */}
-      <div className="bg-slate-50 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <Plane className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              ✈️ Dreaming of studying abroad?
-            </h2>
-            <p className="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+      {/* Study Abroad Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center space-y-6 mb-16">
+            <div className="flex items-center justify-center gap-2 text-4xl">
+              <span>✈️ Dreaming of</span>
+            </div>
+            <h2 className="text-5xl font-bold text-gray-900">studying abroad?</h2>
+            <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
               Whether you're just starting to explore your options or already overwhelmed by applications 
               and paperwork — we've got you. Uniplanr will guide you every step of the way, from 
               admission, student life, beyond.
             </p>
           </div>
-          
-          <div className="mt-12 text-center">
-            <h3 className="text-2xl font-bold text-gray-900 mb-8">
+        </div>
+      </section>
+
+      {/* Lifetool Section */}
+      <section className="py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center space-y-6 mb-16">
+            <h2 className="text-4xl font-bold text-gray-900">
               Uniplanr is Not Just a Consultancy — It is Your Lifetool
-            </h3>
-            
-            <div className="grid md:grid-cols-3 gap-8">
-              {[
-                {
-                  icon: <Users className="h-8 w-8" />,
-                  title: "Community Support",
-                  description: "Connect with thousands of students who share your dreams and challenges."
-                },
-                {
-                  icon: <Shield className="h-8 w-8" />,
-                  title: "Trusted Guidance",
-                  description: "Expert advice from those who've successfully navigated the journey before you."
-                },
-                {
-                  icon: <Zap className="h-8 w-8" />,
-                  title: "Smart Tools",
-                  description: "Cutting-edge technology to streamline every aspect of your application process."
-                }
-              ].map((feature, index) => (
-                <div key={index} className="bg-white rounded-lg p-6 shadow-sm">
-                  <div className="flex items-center justify-center h-12 w-12 rounded-md bg-blue-100 text-blue-600 mx-auto mb-4">
-                    {feature.icon}
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Unlike traditional agents that leave you at the airport, Uniplanr stays by your 
+              side from day one — and every day after.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                icon: <Target className="h-8 w-8" />,
+                title: "Personalized Journeys",
+                description: "Tailored program and country recommendations based on your personality, interests, and goals."
+              },
+              {
+                icon: <Shield className="h-8 w-8" />,
+                title: "Stress-Free Applications",
+                description: "Never miss a step — from SOPs and visas to documentation and deadlines, Uniplanr got it sorted."
+              },
+              {
+                icon: <HandHeart className="h-8 w-8" />,
+                title: "Real Integration Support",
+                description: "We help you adapt to your new life — language, accommodation, local culture, and more."
+              },
+              {
+                icon: <Globe className="h-8 w-8" />,
+                title: "Built for Global Students",
+                description: "Whether you're in Lagos, Lahore, or London — our platform speaks your language and understands your fears."
+              }
+            ].map((feature, index) => (
+              <div key={index} className="text-center group">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-6 group-hover:scale-110 transition-transform duration-200">
+                  {feature.icon}
                 </div>
-              ))}
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">{feature.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-16 text-center">
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-8 max-w-4xl mx-auto">
+              <blockquote className="text-xl italic text-gray-700 mb-4">
+                "Uniplanr was born from our experience — solving study abroad stress with clarity and full support."
+              </blockquote>
+              <div className="font-semibold text-gray-900">Chimaobi & Li, Founders</div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Global Support Section */}
+      <section className="py-20 bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="text-center space-y-6 mb-16">
+            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto">
+              <Globe className="h-8 w-8 text-white" />
+            </div>
+            <h2 className="text-4xl font-bold">One Tool. Global Support.</h2>
+            <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+              Helping students from 100+ countries connect, apply & thrive abroad.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            <div className="space-y-4">
+              <div className="text-5xl font-bold">100+</div>
+              <div className="text-xl font-semibold">Countries</div>
+              <div className="text-blue-200">Worldwide Student Support</div>
+            </div>
+            <div className="space-y-4">
+              <div className="text-5xl font-bold">50K+</div>
+              <div className="text-xl font-semibold">Students</div>
+              <div className="text-blue-200">Successfully Guided</div>
+            </div>
+            <div className="space-y-4">
+              <div className="text-5xl font-bold">500+</div>
+              <div className="text-xl font-semibold">Universities</div>
+              <div className="text-blue-200">Partner Institutions</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* CTA Section */}
-      <div className="bg-blue-600">
-        <div className="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-extrabold text-white sm:text-4xl">
-            <span className="block">Ready to start your journey?</span>
+      <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-700">
+        <div className="max-w-4xl mx-auto text-center px-6 lg:px-8">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Ready to start your journey?
           </h2>
-          <p className="mt-4 text-lg leading-6 text-blue-200">
+          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Join thousands of students who have found their path to global education with Uniplanr.
           </p>
-          <Link to="/app">
-            <Button className="mt-8 bg-white text-blue-600 hover:bg-gray-50 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm">
-              Get Started Today
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </Link>
+          <Button 
+            size="lg"
+            className="bg-white text-blue-600 hover:bg-gray-50 font-semibold px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+            onClick={() => setAuthModalOpen(true)}
+          >
+            Get Started Today
+            <ArrowRight className="ml-2 h-5 w-5" />
+          </Button>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="bg-gray-800">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:py-16 lg:px-8">
-          <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-            <div className="space-y-8 xl:col-span-1">
-              <div className="flex items-center">
-                <GraduationCap className="h-8 w-8 text-yellow-400" />
-                <span className="ml-2 text-xl font-bold text-white">Uniplanr</span>
+      <footer className="bg-gray-900 text-white">
+        <div className="max-w-7xl mx-auto py-16 px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div className="md:col-span-1">
+              <div className="flex items-center mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <GraduationCap className="h-5 w-5 text-white" />
+                </div>
+                <span className="ml-3 text-xl font-bold">Uniplanr</span>
               </div>
-              <p className="text-gray-400 text-base">
+              <p className="text-gray-400 leading-relaxed">
                 Your comprehensive platform for international education planning and support.
               </p>
             </div>
-            <div className="mt-12 grid grid-cols-2 gap-8 xl:mt-0 xl:col-span-2">
-              <div className="md:grid md:grid-cols-2 md:gap-8">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Solutions</h3>
-                  <ul className="mt-4 space-y-4">
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Program Search</a></li>
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Application Support</a></li>
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Visa Guidance</a></li>
-                  </ul>
-                </div>
-                <div className="mt-12 md:mt-0">
-                  <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Support</h3>
-                  <ul className="mt-4 space-y-4">
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Help Center</a></li>
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Community</a></li>
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Contact Us</a></li>
-                  </ul>
-                </div>
-              </div>
-              <div className="md:grid md:grid-cols-2 md:gap-8">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Company</h3>
-                  <ul className="mt-4 space-y-4">
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">About</a></li>
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Blog</a></li>
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Careers</a></li>
-                  </ul>
-                </div>
-                <div className="mt-12 md:mt-0">
-                  <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Legal</h3>
-                  <ul className="mt-4 space-y-4">
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Privacy</a></li>
-                    <li><a href="#" className="text-base text-gray-300 hover:text-white">Terms</a></li>
-                  </ul>
-                </div>
-              </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Solutions</h3>
+              <ul className="space-y-3 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">Program Search</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Application Support</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Visa Guidance</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Student Life</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Support</h3>
+              <ul className="space-y-3 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Community</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Contact Us</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Resources</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h3 className="font-semibold mb-4">Company</h3>
+              <ul className="space-y-3 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+              </ul>
             </div>
           </div>
-          <div className="mt-12 border-t border-gray-700 pt-8">
-            <p className="text-base text-gray-400 xl:text-center">
-              &copy; {new Date().getFullYear()} Uniplanr. All rights reserved.
+          
+          <div className="mt-12 pt-8 border-t border-gray-800 text-center">
+            <p className="text-gray-400">
+              © {new Date().getFullYear()} Uniplanr. All rights reserved.
             </p>
           </div>
         </div>
       </footer>
+
+      {/* Auth Modal */}
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
   );
 };
