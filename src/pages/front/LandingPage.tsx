@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, Sparkles, Plane, Users, GraduationCap, MessageSquare, Zap, Shield, Heart, Globe, BookOpen, Target, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AuthModal } from '@/components/AuthModal';
+import { StudentProfileModal } from '@/components/StudentProfileModal';
 import studentHero from '@/assets/student-hero.jpg';
 
 export const LandingPage = () => {
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -35,7 +37,7 @@ export const LandingPage = () => {
               </Button>
               <Button 
                 className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold px-6"
-                onClick={() => setAuthModalOpen(true)}
+                onClick={() => setProfileModalOpen(true)}
               >
                 Get Started
               </Button>
@@ -356,6 +358,9 @@ export const LandingPage = () => {
 
       {/* Auth Modal */}
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
+      
+      {/* Student Profile Modal */}
+      <StudentProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
     </div>
   );
 };
