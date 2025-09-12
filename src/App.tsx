@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { AdminLayout } from "@/components/AdminLayout";
 import Index from "./pages/Index";
-import StudyInSweden from "./pages/StudyInSweden";
+import Application from "./pages/Application";
 import ApplicationJourney from "./pages/ApplicationJourney";
 import PathwaySelection from "./pages/PathwaySelection";
 import SelfDirectedPath from "./pages/SelfDirectedPath";
@@ -32,7 +32,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout><Index /></Layout>} />
-          <Route path="/applications" element={<Layout><StudyInSweden /></Layout>} />
+          <Route path="/application" element={<Layout><Application /></Layout>} />
           <Route path="/application-journey" element={<Layout><ApplicationJourney /></Layout>} />
           <Route path="/pathway-selection" element={<Layout><PathwaySelection /></Layout>} />
           <Route path="/self-directed" element={<Layout><SelfDirectedPath /></Layout>} />
