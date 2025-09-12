@@ -13,17 +13,17 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Plus, Edit, Trash2, Eye, FileText, User, Briefcase, Crown, Settings, Palette, Layout, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
-import { Template, templateManager } from '@/lib/templateManager';
+import { useTemplates, Template } from '@/hooks/useTemplates';
 import TemplateStructureBuilder from '@/components/TemplateBuilder/TemplateStructureBuilder';
 import VisualStylingPanel from '@/components/TemplateBuilder/VisualStylingPanel';
 import EnhancedTemplateBuilder from '@/components/TemplateBuilder/EnhancedTemplateBuilder';
 
-const defaultTemplate: Omit<Template, 'id' | 'createdAt' | 'updatedAt'> = {
+const defaultTemplate: Omit<Template, 'id' | 'created_at' | 'updated_at'> = {
   name: '',
   description: '',
-  preview: '',
-  type: 'professional',
-  isPremium: false,
+  type: 'resume',
+  is_premium: false,
+  is_public: true,
   structure: {
     layout: 'single-column',
     sections: [
@@ -70,7 +70,8 @@ const defaultTemplate: Omit<Template, 'id' | 'createdAt' | 'updatedAt'> = {
       marginBottom: '0.5rem'
     }
   },
-  rules: {
+  content: {},
+  metadata: {
     requiredSections: ['header', 'experience'],
     maxSections: 8,
     allowCustomSections: false
@@ -98,62 +99,70 @@ const getTypeColor = (type: string) => {
 };
 
 export default function TemplateBuilder() {
-  const [templates, setTemplates] = useState<Template[]>([]);
+  const { templates, loading, createTemplate, updateTemplate, deleteTemplate } = useTemplates();
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
   const [activeTab, setActiveTab] = useState('overview');
 
-  // Load templates on mount
-  useEffect(() => {
-    try {
-      const allTemplates = templateManager.getAllTemplates();
-      const customTemplates = allTemplates.filter(t => t.id.startsWith('template-'));
-      setTemplates(customTemplates);
-    } catch (error) {
-      console.error('Error loading templates:', error);
-      toast.error('Failed to load templates');
-      setTemplates([]);
+  // Convert old format to new format for compatibility with EnhancedTemplateBuilder
+  const convertToOldFormat = (template: Template): any => ({
+    id: template.id,
+    name: template.name,
+    description: template.description || '',
+    preview: '',
+    type: template.type,
+    isPremium: template.is_premium,
+    structure: template.structure,
+    styling: template.styling,
+    rules: template.metadata,
+    createdAt: template.created_at,
+    updatedAt: template.updated_at
+  });
+
+  const convertToNewFormat = (template: any): Omit<Template, 'id' | 'created_at' | 'updated_at'> => ({
+    name: template.name,
+    description: template.description || '',
+    type: template.type,
+    is_premium: template.isPremium || false,
+    is_public: true,
+    structure: template.structure,
+    styling: template.styling,
+    content: {},
+    metadata: template.rules || {}
+  });
+
+  const handleCreateTemplate = async (templateData: any) => {
+    const converted = convertToNewFormat(templateData);
+    const result = await createTemplate(converted);
+    if (result) {
+      setIsCreateModalOpen(false);
     }
-  }, []);
-
-  // Save templates to localStorage and refresh manager
-  const saveTemplates = (updatedTemplates: Template[]) => {
-    setTemplates(updatedTemplates);
-    localStorage.setItem('resume-templates', JSON.stringify(updatedTemplates));
-    templateManager.refreshTemplates();
   };
 
-  const handleCreateTemplate = (templateData: Omit<Template, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const newTemplate: Template = {
-      ...templateData,
-      id: `template-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    const updatedTemplates = [...templates, newTemplate];
-    saveTemplates(updatedTemplates);
-    toast.success('Template created successfully');
-    setIsCreateModalOpen(false);
+  const handleUpdateTemplate = async (templateData: any) => {
+    if (!templateData.id) return;
+    const converted = convertToNewFormat(templateData);
+    const result = await updateTemplate(templateData.id, converted);
+    if (result) {
+      setEditingTemplate(null);
+    }
   };
 
-  const handleUpdateTemplate = (templateData: Template) => {
-    const updatedTemplates = templates.map(t => 
-      t.id === templateData.id 
-        ? { ...templateData, updatedAt: new Date().toISOString() }
-        : t
+  const handleDeleteTemplate = async (templateId: string) => {
+    await deleteTemplate(templateId);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading templates...</p>
+        </div>
+      </div>
     );
-    saveTemplates(updatedTemplates);
-    toast.success('Template updated successfully');
-    setEditingTemplate(null);
-  };
-
-  const handleDeleteTemplate = (templateId: string) => {
-    const updatedTemplates = templates.filter(t => t.id !== templateId);
-    saveTemplates(updatedTemplates);
-    toast.success('Template deleted successfully');
-  };
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -212,7 +221,7 @@ export default function TemplateBuilder() {
                   <Crown className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{templates.filter(t => t.isPremium).length}</div>
+                  <div className="text-2xl font-bold">{templates.filter(t => t.is_premium).length}</div>
                 </CardContent>
               </Card>
               <Card>
@@ -237,7 +246,7 @@ export default function TemplateBuilder() {
                         {getTypeIcon(template.type)}
                         {template.name}
                       </CardTitle>
-                      {template.isPremium && (
+                      {template.is_premium && (
                         <Badge variant="secondary" className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
                           <Crown className="h-3 w-3 mr-1" />
                           Premium
@@ -278,7 +287,7 @@ export default function TemplateBuilder() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => handleDeleteTemplate(template.id)}
+                          onClick={() => template.id && handleDeleteTemplate(template.id)}
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -327,7 +336,7 @@ export default function TemplateBuilder() {
               <DialogTitle>Edit Template: {editingTemplate.name}</DialogTitle>
             </DialogHeader>
             <EnhancedTemplateBuilder
-              initialTemplate={editingTemplate}
+              initialTemplate={editingTemplate ? convertToOldFormat(editingTemplate) : undefined}
               onSave={handleUpdateTemplate}
               onCancel={() => setEditingTemplate(null)}
             />
@@ -360,7 +369,7 @@ export default function TemplateBuilder() {
 
 // Template Editor Component
 interface TemplateEditorProps {
-  template: Template | Omit<Template, 'id' | 'createdAt' | 'updatedAt'>;
+  template: Template | Omit<Template, 'id' | 'created_at' | 'updated_at'>;
   onSave: (template: any) => void;
   onCancel: () => void;
 }
@@ -390,6 +399,10 @@ function TemplateEditor({ template, onSave, onCancel }: TemplateEditorProps) {
 
   const handleSpacingChange = (spacing: any) => {
     setFormData({ ...formData, styling: { ...formData.styling, spacing } });
+  };
+
+  const handlePremiumToggle = (isPremium: boolean) => {
+    setFormData({ ...formData, is_premium: isPremium });
   };
 
   return (
@@ -441,8 +454,8 @@ function TemplateEditor({ template, onSave, onCancel }: TemplateEditorProps) {
             </div>
             <div className="flex items-center space-x-2">
               <Switch
-                checked={formData.isPremium}
-                onCheckedChange={(checked) => setFormData({ ...formData, isPremium: checked })}
+                checked={formData.is_premium}
+                onCheckedChange={(checked) => setFormData({ ...formData, is_premium: checked })}
               />
               <Label>Premium Template</Label>
             </div>

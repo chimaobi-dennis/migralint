@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { FileText, User, Briefcase, Crown } from 'lucide-react';
-import { Template, templateManager } from '@/lib/templateManager';
+import { useTemplates, Template } from '@/hooks/useTemplates';
 
 
 interface TemplateSelectionProps {
@@ -36,13 +36,19 @@ export const TemplateSelection: React.FC<TemplateSelectionProps> = ({
   onTemplateSelect,
   selectedTemplate
 }) => {
-  const [templates, setTemplates] = useState<Template[]>([]);
+  const { templates, loading } = useTemplates();
 
-  useEffect(() => {
-    // Load templates from template manager
-    const loadedTemplates = templateManager.getAllTemplates();
-    setTemplates(loadedTemplates);
-  }, []);
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-2">Choose Your Resume Template</h2>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading templates...</p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -69,7 +75,7 @@ export const TemplateSelection: React.FC<TemplateSelectionProps> = ({
                   {getTypeIcon(template.type)}
                   {template.name}
                 </CardTitle>
-                {template.isPremium && (
+                {template.is_premium && (
                   <Badge variant="secondary" className="bg-amber-100 text-amber-800">
                     <Crown className="h-3 w-3 mr-1" />
                     Premium

@@ -163,7 +163,7 @@ export type Database = {
           styling: Json
           type: string
           updated_at: string
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           content?: Json
@@ -178,7 +178,7 @@ export type Database = {
           styling?: Json
           type?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           content?: Json
@@ -193,7 +193,7 @@ export type Database = {
           styling?: Json
           type?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
