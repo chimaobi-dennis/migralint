@@ -6,17 +6,18 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { AdminLayout } from "@/components/AdminLayout";
-import Index from "./pages/Index";
-import Application from "./pages/Application";
+import LandingPage from "./pages/LandingPage";
+import Dashboard from "./pages/Index";
+import Application from "./pages/user/Application";
 import ApplicationJourney from "./pages/ApplicationJourney";
 import PathwaySelection from "./pages/PathwaySelection";
 import SelfDirectedPath from "./pages/SelfDirectedPath";
 import PremiumService from "./pages/PremiumService";
 import MyPage from "./pages/MyPage";
 import MyProfile from "./pages/MyProfile";
-import AdminScholarshipSteps from "./pages/AdminScholarshipSteps";
-import AdminVisaSteps from "./pages/AdminVisaSteps";
-import AdminSteps from "./pages/AdminSteps";
+import AdminScholarshipSteps from "./pages/admin/AdminScholarshipSteps";
+import AdminVisaSteps from "./pages/admin/AdminVisaSteps";
+import AdminSteps from "./pages/admin/AdminSteps";
 import Documents from "./pages/Documents";
 import ResumeEditor from "./pages/ResumeEditor";
 import TemplateBuilder from "./pages/TemplateBuilder";
@@ -31,23 +32,36 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout><Index /></Layout>} />
-          <Route path="/applications" element={<Layout><Application /></Layout>} />
-          <Route path="/application" element={<Layout><Application /></Layout>} />
-          <Route path="/application-journey" element={<Layout><ApplicationJourney /></Layout>} />
-          <Route path="/pathway-selection" element={<Layout><PathwaySelection /></Layout>} />
-          <Route path="/self-directed" element={<Layout><SelfDirectedPath /></Layout>} />
-          <Route path="/premium-service" element={<Layout><PremiumService /></Layout>} />
-          <Route path="/documents" element={<Layout><Documents /></Layout>} />
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          
+          {/* Authenticated App Routes */}
+          <Route path="/app" element={<Layout><Dashboard /></Layout>}>
+            <Route index element={<Dashboard />} />
+            <Route path="applications" element={<Application />} />
+            <Route path="application" element={<Application />} />
+            <Route path="application-journey" element={<ApplicationJourney />} />
+            <Route path="pathway-selection" element={<PathwaySelection />} />
+            <Route path="self-directed" element={<SelfDirectedPath />} />
+            <Route path="premium-service" element={<PremiumService />} />
+            <Route path="documents" element={<Documents />} />
+            <Route path="my-page" element={<MyPage />} />
+            <Route path="my-profile" element={<MyProfile />} />
+          </Route>
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLayout><AdminSteps /></AdminLayout>}>
+            <Route index element={<AdminSteps />} />
+            <Route path="scholarship-steps" element={<AdminScholarshipSteps />} />
+            <Route path="visa-steps" element={<AdminVisaSteps />} />
+            <Route path="template-builder" element={<TemplateBuilder />} />
+          </Route>
+          
+          {/* Utility Routes */}
           <Route path="/resume-editor" element={<ResumeEditor />} />
-          <Route path="/my-page" element={<Layout><MyPage /></Layout>} />
-          <Route path="/my-profile" element={<Layout><MyProfile /></Layout>} />
-          <Route path="/admin/scholarship-steps" element={<AdminLayout><AdminScholarshipSteps /></AdminLayout>} />
-          <Route path="/admin/visa-steps" element={<AdminLayout><AdminVisaSteps /></AdminLayout>} />
-          <Route path="/admin/steps" element={<AdminLayout><AdminSteps /></AdminLayout>} />
-          <Route path="/admin/template-builder" element={<AdminLayout><TemplateBuilder /></AdminLayout>} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<Layout><NotFound /></Layout>} />
+          
+          {/* 404 - Not Found */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
