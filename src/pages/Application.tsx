@@ -129,9 +129,42 @@ const Index = () => {
     }
   };
 
-  const handleSaveNewApplication = (data: any) => {
-    console.log('New application data:', data);
-    // TODO: Implement API call to save new application
+  const handleSaveNewApplication = async (data: any) => {
+    try {
+      setLoadingApplications(true);
+      
+      const { data: newApp, error } = await (supabase as any)
+        .from('applications')
+        .insert([
+          { 
+            user_id: userId,
+            status: 'In Progress',
+            progress: 0,
+            degree: data.degree,
+            studyField: data.field,
+            university: data.university,
+            study_destination: data.studyDestination,
+            selected_programs: JSON.stringify(data.selectedPrograms),
+            type: data.type
+          }
+        ])
+        .select();
+
+      if (error) throw error;
+
+      // Add the new application to the local state
+      const newApplication = newApp[0];
+      setApplications(prev => [...prev, newApplication]);
+      setFilteredApplications(prev => [...prev, newApplication]);
+      
+      toast.success('Application created successfully');
+      setShowNewApplicationModal(false);
+    } catch (err) {
+      console.error('Error creating application:', err);
+      toast.error('Failed to create application');
+    } finally {
+      setLoadingApplications(false);
+    }
   };
 
  

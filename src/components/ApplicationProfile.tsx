@@ -105,17 +105,14 @@ export const ApplicationProfile = ({ onAddNew, onStartApplication }: Application
   const saveEdit = async (id: number) => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/v1/student-profiles/${userId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(editForm),
-      });
+      
+      const { data, error } = await (supabase as any)
+        .from('student_profile')
+        .update(editForm)
+        .eq('id', id)
+        .select();
 
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
+      if (error) throw error;
 
       // Update the local state with the edited profile
       setProfiles(profiles.map(profile =>
@@ -142,13 +139,12 @@ export const ApplicationProfile = ({ onAddNew, onStartApplication }: Application
     }
 
     try {
-      const response = await fetch(`/api/v1/student-profiles/${userId}`, {
-        method: 'DELETE',
-      });
+      const { error } = await (supabase as any)
+        .from('student_profile')
+        .delete()
+        .eq('id', id);
 
-      if (!response.ok) {
-        throw new Error('Failed to delete profile');
-      }
+      if (error) throw error;
 
       // Remove the deleted profile from the local state
       setProfiles(profiles.filter(profile => profile.id !== id));
@@ -159,6 +155,26 @@ export const ApplicationProfile = ({ onAddNew, onStartApplication }: Application
     }
   };
 
+  const addNewProfile = async () => {
+    try {
+      setLoading(true);
+      
+      const { data, error } = await (supabase as any)
+        .from('student_profile')
+        .insert([{ user_id: userId }]);
+
+      if (error) throw error;
+
+      // Add the new profile to the local state
+      setProfiles([...profiles, data[0]]);
+      toast.success('Profile created successfully');
+    } catch (err) {
+      console.error('Error creating profile:', err);
+      toast.error('Failed to create profile');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'No deadline';
