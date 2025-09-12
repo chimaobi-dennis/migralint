@@ -33,6 +33,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Layout><Index /></Layout>} />
           <Route path="/applications" element={<Layout><Application /></Layout>} />
+          <Route path="/application" element={<Layout><Application /></Layout>} />
           <Route path="/application-journey" element={<Layout><ApplicationJourney /></Layout>} />
           <Route path="/pathway-selection" element={<Layout><PathwaySelection /></Layout>} />
           <Route path="/self-directed" element={<Layout><SelfDirectedPath /></Layout>} />

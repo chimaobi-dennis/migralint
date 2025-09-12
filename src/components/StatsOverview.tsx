@@ -3,13 +3,8 @@ import { TrendingUp, Clock, CheckCircle, AlertTriangle } from "lucide-react";
 
 interface Application {
   id: number;
-  university: string;
-  program: string;
-  deadline: string;
-  status: string;
-  progress: number;
-  requirements: string[];
-  completed: string[];
+  status: string | null;
+  progress: number | null;
 }
 
 interface StatsOverviewProps {
@@ -17,10 +12,29 @@ interface StatsOverviewProps {
 }
 
 export const StatsOverview = ({ applications }: StatsOverviewProps) => {
+  if (!applications || applications.length === 0) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {[...Array(4)].map((_, index) => (
+          <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600 mb-1">Loading...</p>
+                <p className="text-2xl font-bold text-gray-900">0</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   const totalApplications = applications.length;
   const submittedApplications = applications.filter(app => app.status === "Submitted" || app.status === "Under Review").length;
   const inProgressApplications = applications.filter(app => app.status === "In Progress").length;
-  const averageProgress = Math.round(applications.reduce((sum, app) => sum + app.progress, 0) / totalApplications);
+  const averageProgress = totalApplications > 0 ? Math.round(
+    applications.reduce((sum, app) => sum + (app.progress || 0), 0) / totalApplications
+  ) : 0;
 
   const stats = [
     {

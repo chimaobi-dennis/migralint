@@ -147,10 +147,10 @@ const Index = () => {
   return (
     <div className="space-y-6">
       {/* Stats Overview */}
-      <StatsOverview applications={applications as any} />
+      <StatsOverview applications={applications} />
 
       {/* Deadline Alerts */}
-      <DeadlineAlert applications={applications as any} />
+      <DeadlineAlert applications={applications} />
 
       {/* Main Content Grid */}
       <div className="grid lg:grid-cols-3 grid-cols-1 gap-6">
