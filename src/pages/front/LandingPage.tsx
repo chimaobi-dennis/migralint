@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, Sparkles, Plane, Users, GraduationCap, MessageSquare, Zap, Shield, Heart, Globe, BookOpen, Target, HandHeart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { AuthModal } from '@/components/AuthModal';
-import { StudentProfileModal } from '@/components/StudentProfileModal';
+import { ModernStudentProfileModal } from '@/components/ModernStudentProfileModal';
 import studentHero from '@/assets/student-hero.jpg';
 
 export const LandingPage = () => {
@@ -359,8 +359,8 @@ export const LandingPage = () => {
       {/* Auth Modal */}
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
       
-      {/* Student Profile Modal */}
-      <StudentProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
+      {/* Modern Student Profile Modal */}
+      <ModernStudentProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
     </div>
   );
 };
