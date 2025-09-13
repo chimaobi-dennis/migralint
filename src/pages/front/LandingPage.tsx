@@ -22,6 +22,8 @@ export const LandingPage = () => {
               </div>
               <span className="ml-3 text-xl font-bold text-white">Uniplanr</span>
             </div>
+            
+            {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
               <a href="#home" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Home</a>
               <a href="#programs" className="text-gray-300 hover:text-white transition-colors text-sm font-medium">Programs</a>
@@ -37,6 +39,24 @@ export const LandingPage = () => {
               </Button>
               <Button 
                 className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold px-6"
+                onClick={() => setProfileModalOpen(true)}
+              >
+                Get Started
+              </Button>
+            </div>
+
+            {/* Mobile Navigation */}
+            <div className="flex md:hidden items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                className="text-gray-300 hover:text-white hover:bg-white/10 text-sm font-medium"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                Login
+              </Button>
+              <Button 
+                size="sm"
+                className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold px-4"
                 onClick={() => setProfileModalOpen(true)}
               >
                 Get Started
