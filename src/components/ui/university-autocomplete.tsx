@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react"
 import { Search, MapPin, ExternalLink, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import universitiesData from "@/lib/allUniList.json"
 
 interface University {
   name: string
@@ -43,15 +44,22 @@ export const UniversityAutocomplete = React.forwardRef<HTMLInputElement, Univers
         clearTimeout(debounceRef.current)
       }
 
-      debounceRef.current = setTimeout(async () => {
+      debounceRef.current = setTimeout(() => {
         try {
-          const response = await fetch(
-            `http://universities.hipolabs.com/search?name=${encodeURIComponent(searchQuery.trim())}`
+          const query = searchQuery.trim().toLowerCase()
+          if (!query) {
+            setUniversities([])
+            return
+          }
+          
+          const filtered = universitiesData.filter(uni => 
+            uni.name.toLowerCase().includes(query) ||
+            (uni.domains?.some(domain => domain.toLowerCase().includes(query)) ?? false)
           )
-          const data = await response.json()
-          setUniversities(data.slice(0, 10)) // Limit to 10 results
+          
+          setUniversities(filtered.slice(0, 10)) // Limit to 10 results
         } catch (error) {
-          console.error('Error fetching universities:', error)
+          console.error('Error filtering universities:', error)
           setUniversities([])
         } finally {
           setIsLoading(false)
