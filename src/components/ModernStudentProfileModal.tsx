@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
+import { UniversityAutocomplete } from "@/components/ui/university-autocomplete";
 import { X, ArrowLeft, ArrowRight, Check, ChevronDown, Search, GraduationCap } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -367,24 +368,19 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   I got my {formData.education_level?.replace('_', ' ')} from...
                 </h3>
-                <p className="text-gray-600">Select the university where you completed your degree</p>
+                <p className="text-gray-600">Search and select the university where you completed your degree</p>
               </div>
               
               <div>
                 <Label htmlFor="university">University</Label>
-                <Select
-                  value={formData.university}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, university: value }))}
-                >
-                  <SelectTrigger className="mt-2 h-12">
-                    <SelectValue placeholder="Search or select your university" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-60">
-                    {programsData.universities.map(university => (
-                      <SelectItem key={university} value={university}>{university}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="mt-2">
+                  <UniversityAutocomplete
+                    value={formData.university}
+                    onChange={(value) => setFormData(prev => ({ ...prev, university: value }))}
+                    placeholder="Type to search universities worldwide..."
+                    className="w-full"
+                  />
+                </div>
               </div>
             </div>
           )}
