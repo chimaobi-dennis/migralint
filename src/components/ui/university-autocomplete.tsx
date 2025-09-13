@@ -46,7 +46,7 @@ export const UniversityAutocomplete = React.forwardRef<HTMLInputElement, Univers
       debounceRef.current = setTimeout(async () => {
         try {
           const response = await fetch(
-            `https://universities.hipolabs.com/search?name=${encodeURIComponent(searchQuery.trim())}`
+            `http://universities.hipolabs.com/search?name=${encodeURIComponent(searchQuery.trim())}`
           )
           const data = await response.json()
           setUniversities(data.slice(0, 10)) // Limit to 10 results
