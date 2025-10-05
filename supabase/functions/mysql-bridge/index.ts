@@ -14,10 +14,25 @@ serve(async (req) => {
   }
 
   try {
+    // Verify JWT authentication
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Unauthorized: Missing authorization header');
+    }
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    )
+    );
+
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      throw new Error('Unauthorized: Invalid token');
+    }
+
+    console.log('Authenticated user:', user.id);
 
     // Create MySQL connection
     const mysqlClient = await new Client().connect({
@@ -30,7 +45,12 @@ serve(async (req) => {
 
     console.log('Connected to MySQL database')
 
-    const { action, table, data, userId, query } = await req.json()
+    const { action, table, data, userId, query } = await req.json();
+
+    // Ensure userId matches authenticated user for security
+    if (userId && userId !== user.id) {
+      throw new Error('Unauthorized: Cannot access other user data');
+    }
 
     switch (action) {
       case 'sync_to_supabase':

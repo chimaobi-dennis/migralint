@@ -5,7 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { emailSchema, passwordSchema } from '@/lib/validations';
 
 interface AuthModalProps {
   open: boolean;
@@ -25,7 +27,6 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     firstName: '',
     lastName: ''
   });
-  const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -35,25 +36,75 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    toast({
-      title: mode === 'signin' ? 'Welcome back!' : mode === 'signup' ? 'Account created!' : 'Reset link sent!',
-      description: mode === 'reset' 
-        ? 'Check your email for password reset instructions.' 
-        : 'Redirecting to your dashboard...'
-    });
-    
-    setLoading(false);
-    onOpenChange(false);
+    try {
+      // Validate email
+      emailSchema.parse(formData.email);
+      
+      if (mode === 'reset') {
+        const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        
+        if (error) throw error;
+        
+        toast.success("Password reset instructions sent to your email");
+        switchMode('signin');
+      } else if (mode === 'signup') {
+        // Validate password for signup
+        passwordSchema.parse(formData.password);
+        
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("Passwords do not match");
+          return;
+        }
+        
+        const { error } = await supabase.auth.signUp({
+          email: formData.email,
+          password: formData.password,
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+          }
+        });
+        
+        if (error) throw error;
+        
+        toast.success("Account created! Please check your email to verify your account.");
+        onOpenChange(false);
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: formData.email,
+          password: formData.password,
+        });
+        
+        if (error) throw error;
+        
+        toast.success("Welcome back!");
+        onOpenChange(false);
+      }
+    } catch (error: any) {
+      if (error.errors) {
+        error.errors.forEach((err: any) => toast.error(err.message));
+      } else {
+        toast.error(error.message || "An error occurred. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSocialAuth = (provider: string) => {
-    toast({
-      title: `${provider} Authentication`,
-      description: `Connecting with ${provider}...`
-    });
+  const handleSocialAuth = async (provider: 'google' | 'azure') => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider === 'azure' ? 'azure' : 'google',
+        options: {
+          redirectTo: `${window.location.origin}/`,
+        }
+      });
+      
+      if (error) throw error;
+    } catch (error: any) {
+      toast.error(error.message || `Failed to sign in with ${provider}`);
+    }
   };
 
   const resetForm = () => {
@@ -102,7 +153,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 <Button 
                   variant="outline" 
                   className="w-full h-11" 
-                  onClick={() => handleSocialAuth('Google')}
+                  onClick={() => handleSocialAuth('google')}
                 >
                   <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -116,7 +167,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 <Button 
                   variant="outline" 
                   className="w-full h-11" 
-                  onClick={() => handleSocialAuth('Microsoft')}
+                  onClick={() => handleSocialAuth('azure')}
                 >
                   <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
                     <path fill="#f25022" d="M11.4 11.4H.6V.6h10.8v10.8z"/>

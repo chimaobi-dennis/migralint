@@ -9,7 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { UniversityAutocomplete } from "@/components/ui/university-autocomplete";
 import { X, ArrowLeft, ArrowRight, Check, ChevronDown, Search, GraduationCap } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from 'sonner';
+import { studentProfileSchema } from "@/lib/validations";
 
 interface ModernStudentProfileModalProps {
   isOpen: boolean;
@@ -109,7 +110,6 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   const [searchTerm, setSearchTerm] = useState('');
   const [keywordSearch, setKeywordSearch] = useState('');
 
-  const { toast } = useToast();
   const totalSteps = 10;
   const progress = (currentStep / totalSteps) * 100;
 
@@ -178,21 +178,42 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      // Simulate API call - for demo purposes
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const { data: { user } } = await supabase.auth.getUser();
       
+      if (!user) {
+        toast.error("You must be logged in to create a profile");
+        return;
+      }
+
+      // Validate the profile data
+      const validatedData = studentProfileSchema.parse({
+        degree: formData.education_level,
+        field_of_study: formData.current_field,
+        area_of_study: formData.area_of_study,
+        desired_fields: formData.desired_fields,
+        origin_country: '',
+        university_country: formData.university,
+        language: formData.language_test_type,
+        language_test_type: formData.language_test_type,
+        language_test_score: formData.language_test_score || 0,
+        language_test_year: new Date().getFullYear(),
+        has_language_test: formData.language_test_type !== 'No test taken' ? 1 : 0,
+        study_envs: [formData.study_environment],
+        interest_keywords: formData.interest_keywords,
+        work_experience: formData.work_experience,
+        fee_preference: formData.budget_preference,
+      });
+
+      // Save to database - implementation would go here
       setShowConfirmation(true);
-      toast({
-        title: "Profile Created!",
-        description: "Your information has been saved successfully.",
-      });
-    } catch (error) {
+      toast.success("Profile Created! Your information has been saved successfully.");
+    } catch (error: any) {
       console.error('Error saving profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save profile. Please try again.",
-        variant: "destructive"
-      });
+      if (error.errors) {
+        error.errors.forEach((err: any) => toast.error(err.message));
+      } else {
+        toast.error(error.message || "Failed to save profile. Please try again.");
+      }
     } finally {
       setIsSubmitting(false);
     }
