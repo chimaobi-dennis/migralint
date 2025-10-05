@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef } from "react"
 import { Search, MapPin, ExternalLink, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
-import universitiesData from "@/lib/allUniList.json"
+import { supabase } from "@/integrations/supabase/client"
 
 interface University {
+  id: number
   name: string
-  country: string
-  "state-province": string | null
-  web_pages: string[]
-  domains: string[]
+  country: string | null
+  state: string | null
+  website: string | null
+  country_code: string | null
 }
 
 interface UniversityAutocompleteProps {
@@ -45,25 +46,47 @@ export const UniversityAutocomplete = React.forwardRef<HTMLInputElement, Univers
       }
 
       debounceRef.current = setTimeout(() => {
-        try {
-          const query = searchQuery.trim().toLowerCase()
-          if (!query) {
+        const fetchData = async () => {
+          try {
+            const query = searchQuery.trim()
+            if (!query) {
+              setUniversities([])
+              return
+            }
+
+            const { data, error } = await supabase
+              .from("universities")
+              .select("id,name,country,website,country_code,state")
+              .or(
+                `name.ilike.%${query}%,country.ilike.%${query}%,website.ilike.%${query}%,state.ilike.%${query}%`
+              )
+              .limit(10)
+
+            if (error) {
+              console.error("Error fetching universities:", error)
+              setUniversities([])
+              return
+            }
+
+            const mapped: University[] = (data || []).map((u) => ({
+              id: Number(u.id),
+              name: u.name ?? "",
+              country: u.country,
+              website: u.website,
+              country_code: u.country_code,
+              state: u.state,
+            }))
+
+            setUniversities(mapped)
+          } catch (err) {
+            console.error("Unexpected error fetching universities:", err)
             setUniversities([])
-            return
+          } finally {
+            setIsLoading(false)
           }
-          
-          const filtered = universitiesData.filter(uni => 
-            uni.name.toLowerCase().includes(query) ||
-            (uni.domains?.some(domain => domain.toLowerCase().includes(query)) ?? false)
-          )
-          
-          setUniversities(filtered.slice(0, 10)) // Limit to 10 results
-        } catch (error) {
-          console.error('Error filtering universities:', error)
-          setUniversities([])
-        } finally {
-          setIsLoading(false)
         }
+
+        fetchData()
       }, 300)
 
       return () => {
@@ -105,7 +128,8 @@ export const UniversityAutocomplete = React.forwardRef<HTMLInputElement, Univers
     }
 
     const handleSelectUniversity = (university: University) => {
-      const universityName = `${university.name} (${university.country})`
+      const countryLabel = university.country ?? ""
+      const universityName = `${university.name} (${countryLabel})`
       setSearchQuery(universityName)
       onChange(universityName)
       setIsOpen(false)
@@ -178,7 +202,7 @@ export const UniversityAutocomplete = React.forwardRef<HTMLInputElement, Univers
               <div className="py-2">
                 {universities.map((university, index) => (
                   <div
-                    key={`${university.name}-${university.country}-${index}`}
+                    key={`${university.id}-${index}`}
                     onClick={() => handleSelectUniversity(university)}
                     className={cn(
                       "px-4 py-3 cursor-pointer transition-colors hover:bg-accent hover:text-accent-foreground",
@@ -194,14 +218,14 @@ export const UniversityAutocomplete = React.forwardRef<HTMLInputElement, Univers
                         <div className="flex items-center text-xs text-muted-foreground">
                           <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                           <span className="truncate">
-                            {university["state-province"] 
-                              ? `${university["state-province"]}, ${university.country}`
-                              : university.country
+                            {university.state
+                              ? `${university.state}${university.country ? ", " + university.country : ""}`
+                              : university.country ?? ""
                             }
                           </span>
                         </div>
                       </div>
-                      {university.web_pages && university.web_pages.length > 0 && (
+                      {university.website && (
                         <div className="ml-2 flex-shrink-0">
                           <ExternalLink className="h-3 w-3 text-muted-foreground" />
                         </div>

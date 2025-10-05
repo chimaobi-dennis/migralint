@@ -187,6 +187,36 @@ export type Database = {
         }
         Relationships: []
       }
+      universities: {
+        Row: {
+          id: number
+          created_at: string
+          name: string | null
+          country: string | null
+          website: string | null
+          country_code: string | null
+          state: string | null
+        }
+        Insert: {
+          id: number
+          created_at?: string
+          name?: string | null
+          country?: string | null
+          website?: string | null
+          country_code?: string | null
+          state?: string | null
+        }
+        Update: {
+          id?: number
+          created_at?: string
+          name?: string | null
+          country?: string | null
+          website?: string | null
+          country_code?: string | null
+          state?: string | null
+        }
+        Relationships: []
+      }
       programs: {
         Row: {
           app_link: string | null
