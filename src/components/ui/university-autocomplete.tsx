@@ -54,6 +54,14 @@ export const UniversityAutocomplete = React.forwardRef<HTMLInputElement, Univers
               return
             }
 
+            // First, let's check if there's any data in the table at all
+            const { data: totalCount } = await supabase
+              .from("universities")
+              .select("id", { count: "exact" })
+              .limit(1)
+            
+            console.log("Total universities in table:", totalCount)
+
             const { data, error } = await supabase
               .from("universities")
               .select("id,name,country,website,country_code,state")
@@ -64,9 +72,12 @@ export const UniversityAutocomplete = React.forwardRef<HTMLInputElement, Univers
 
             if (error) {
               console.error("Error fetching universities:", error)
+              console.error("Error details:", error.message, error.details, error.hint)
               setUniversities([])
               return
             }
+
+            console.log("Universities query result:", { query, data, count: data?.length })
 
             const mapped: University[] = (data || []).map((u) => ({
               id: Number(u.id),
