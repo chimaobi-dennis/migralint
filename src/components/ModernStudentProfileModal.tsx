@@ -458,7 +458,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       return results
         .sort((a, b) => a.localeCompare(b))
         .slice(0, 200);
-    } catch (e:any) {
+    } catch (e: any) {
       console.error('Error fetching keywords:', e?.message || e);
       return [];
     }
@@ -515,10 +515,10 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       }
 
       // Validate the profile data
-      const finalAreaOfStudy = formData.area_of_study === "Other (Please specify)" 
-        ? formData.custom_area_of_study 
+      const finalAreaOfStudy = formData.area_of_study === "Other (Please specify)"
+        ? formData.custom_area_of_study
         : formData.area_of_study;
-        
+
       const validatedData = studentProfileSchema.parse({
         degree: formData.education_level,
         field_of_study: formData.current_field,
@@ -559,7 +559,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       case 2: return formData.university !== '';
       case 3: return formData.current_field !== '';
       case 4: return true; // Area of study is optional
-      case 5: 
+      case 5:
         if (step5SubStep === 1) {
           return formData.desired_degree_type !== '';
         } else {
@@ -633,14 +633,14 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       field.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
-  
+
   const filteredFields = getFilteredFields();
 
-  const filteredKeywords = keywordSearch.trim() 
-    ? searchedKeywords 
+  const filteredKeywords = keywordSearch.trim()
+    ? searchedKeywords
     : programsData.keywords.filter(keyword =>
-        keyword.toLowerCase().includes(keywordSearch.toLowerCase())
-      );
+      keyword.toLowerCase().includes(keywordSearch.toLowerCase())
+    );
 
   if (showConfirmation) {
     return (
@@ -713,7 +713,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   My highest education level is...
                 </h3>
-                <p className="text-gray-600">This helps {siteName || 'our platform'} understand your academic background so we can tailor recommendations appropriately.</p>
+                <p className="text-gray-600">Helps {siteName || 'our platform'} understand your academic background.</p>
               </div>
 
               <div className="space-y-4">
@@ -754,9 +754,8 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   I completed my {formData.education_level?.replace('_', ' ')} at...
                 </h3>
-                <p className="text-gray-600">Your institution helps  match you with relevant programs and academic contexts.</p>
+                <p className="text-gray-600">Helps {siteName || 'our platform'} understand your background and align future study options. </p>
               </div>
-
               <div>
                 <Label htmlFor="university">University</Label>
                 <div className="mt-2">
@@ -777,7 +776,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   My degree/field of study is...
                 </h3>
-                <p className="text-gray-600">Sharing your major helps {siteName || 'our platform'} understand your background and align future study options.</p>
+                <p className="text-gray-600">Helps {siteName || 'our platform'} match you with relevant programs.</p>
               </div>
 
               <div>
@@ -817,7 +816,10 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                   {filteredFields.map(field => (
                     <button
                       key={field}
-                      onClick={() => setFormData(prev => ({ ...prev, current_field: field }))}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, current_field: field }));
+                        setSearchTerm('');
+                      }}
                       className="p-3 text-left border rounded-lg transition-all hover:shadow-sm border-gray-200 hover:border-gray-300 hover:bg-gray-50"
                     >
                       <span>{field}</span>
@@ -825,7 +827,10 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                   ))}
                   {searchTerm && !filteredFields.some(f => f.toLowerCase() === searchTerm.toLowerCase()) && (
                     <button
-                      onClick={() => setFormData(prev => ({ ...prev, current_field: searchTerm }))}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, current_field: searchTerm }));
+                        setSearchTerm('');
+                      }}
                       className="p-3 text-left border border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
                     >
                       <div className="flex items-center gap-2">
@@ -858,18 +863,17 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   The area of study for {formData.current_field} is...
                 </h3>
-                <p className="text-gray-600">This helps {siteName || 'our platform'} categorize your academic background and improve program matches (optional).</p>
+                <p className="text-gray-600">Helps {siteName || 'our platform'} categorize your academic background and improve program matches.</p>
               </div>
 
               <div className="space-y-3">
                 {/* Skip option */}
                 <div
                   onClick={() => setFormData(prev => ({ ...prev, area_of_study: '', custom_area_of_study: '' }))}
-                  className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
-                    !formData.area_of_study && !formData.custom_area_of_study
+                  className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${!formData.area_of_study && !formData.custom_area_of_study
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-gray-200 hover:border-gray-300'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <ArrowRight className="h-4 w-4" />
@@ -888,11 +892,10 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                         setFormData(prev => ({ ...prev, area_of_study: area, custom_area_of_study: '' }));
                       }
                     }}
-                    className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
-                      formData.area_of_study === area
+                    className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.area_of_study === area
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : 'border-gray-200 hover:border-gray-300'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <span>{area}</span>
@@ -928,7 +931,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                   <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                     I want to study a...
                   </h3>
-                  <p className="text-gray-600">This tells {siteName || 'our platform'} your intended study level so we can tailor recommendations.</p>
+                  <p className="text-gray-600">This tells {siteName || 'our platform'} your intended study level to tailor recommendations.</p>
                 </div>
 
                 <div className="space-y-3 mt-4">
@@ -936,11 +939,10 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                     <div
                       key={degreeType}
                       onClick={() => setFormData(prev => ({ ...prev, desired_degree_type: degreeType }))}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
-                        formData.desired_degree_type === degreeType
+                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.desired_degree_type === degreeType
                           ? 'border-blue-500 bg-blue-50 text-blue-700'
                           : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{degreeType}</span>
@@ -960,7 +962,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                     <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                       I am curious about these topics...
                     </h3>
-                    <p className="text-gray-600">We use your interests to personalize content and surface relevant programs (up to 10).</p>
+                    <p className="text-gray-600">{siteName || 'Our platform'} uses your interests to personalize and surface relevant programs (choose up to 10 for a wider recommendations).</p>
                   </div>
 
                   <div className="mt-4">
@@ -1041,9 +1043,9 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  For language requirements...
+                  I have taken this language test...
                 </h3>
-                <p className="text-gray-600">What language test have you taken?</p>
+                <p className="text-gray-600">What language test have you taken within the past 5 years?</p>
               </div>
 
               {/* If no selection yet, show the list of tests */}
@@ -1294,8 +1296,8 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
               disabled={!isStepValid() || isSubmitting}
               className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
             >
-              {currentStep === totalSteps ? 'Submit' : 
-               currentStep === 5 && step5SubStep === 1 ? 'Continue' : 'Next'}
+              {currentStep === totalSteps ? 'Submit' :
+                currentStep === 5 && step5SubStep === 1 ? 'Continue' : 'Next'}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
