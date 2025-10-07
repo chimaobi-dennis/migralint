@@ -148,6 +148,36 @@ export type Database = {
           },
         ]
       }
+      business_details: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: number
+          siteFav: string | null
+          siteLogo: string | null
+          siteName: string | null
+          tagline: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          siteFav?: string | null
+          siteLogo?: string | null
+          siteName?: string | null
+          tagline?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: number
+          siteFav?: string | null
+          siteLogo?: string | null
+          siteName?: string | null
+          tagline?: string | null
+        }
+        Relationships: []
+      }
       countries: {
         Row: {
           code: string | null
