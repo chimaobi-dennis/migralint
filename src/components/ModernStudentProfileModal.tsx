@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { UniversityAutocomplete } from "@/components/ui/university-autocomplete";
+import { AuthModal } from '@/components/AuthModal';
 import { X, ArrowLeft, ArrowRight, Check, ChevronDown, Search, GraduationCap, Plus, BookOpen } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
@@ -300,6 +301,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   const [step5SubStep, setStep5SubStep] = useState(1); // 1: degree type, 2: topics
   const [searchedKeywords, setSearchedKeywords] = useState<string[]>([]);
   const [siteName, setSiteName] = useState<string>('');
+  const [authOpen, setAuthOpen] = useState(false);
 
   const totalSteps = 9; // Reduced from 10 since we're removing step 10
   const progress = (currentStep / totalSteps) * 100;
@@ -510,7 +512,8 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        toast.error("You must be logged in to create a profile");
+        setAuthOpen(true);
+        setIsSubmitting(false);
         return;
       }
 
