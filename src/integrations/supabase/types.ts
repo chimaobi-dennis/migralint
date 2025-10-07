@@ -423,7 +423,7 @@ export type Database = {
           fee_preference?: string | null
           field_of_study?: string | null
           has_language_test?: number | null
-          id: number
+          id?: number
           interest_keywords?: Json | null
           language?: string | null
           language_test_score?: number | null
