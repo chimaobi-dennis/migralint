@@ -394,7 +394,6 @@ export type Database = {
           area_of_study: string | null
           created_at: string | null
           degree: string | null
-          desired_fields: Json | null
           fee_preference: string | null
           field_of_study: string | null
           has_language_test: number | null
@@ -418,7 +417,6 @@ export type Database = {
           area_of_study?: string | null
           created_at?: string | null
           degree?: string | null
-          desired_fields?: Json | null
           fee_preference?: string | null
           field_of_study?: string | null
           has_language_test?: number | null
@@ -442,7 +440,6 @@ export type Database = {
           area_of_study?: string | null
           created_at?: string | null
           degree?: string | null
-          desired_fields?: Json | null
           fee_preference?: string | null
           field_of_study?: string | null
           has_language_test?: number | null
@@ -918,7 +915,6 @@ export type Database = {
         Args: {
           p_area_of_study: string
           p_degree: string
-          p_desired_fields: string
           p_fee_preference: string
           p_field_of_study: string
           p_has_language_test: number
@@ -927,11 +923,11 @@ export type Database = {
           p_language_test_score: number
           p_language_test_type: string
           p_language_test_year: number
-          p_origin_country: string
           p_study_envs: string
-          p_university_country: string
           p_user_id: string
           p_work_experience: string
+          p_desired_degree_type: string
+          p_university: string
         }
         Returns: undefined
       }

@@ -20,9 +20,8 @@ CREATE OR REPLACE FUNCTION public.create_student_profile(
   p_degree text,
   p_field_of_study text,
   p_area_of_study text,
-  p_desired_fields text,
-  p_origin_country text,
-  p_university_country text,
+  p_country text,
+  p_university text,
   p_language text,
   p_language_test_type text,
   p_language_test_score bigint,
@@ -31,7 +30,8 @@ CREATE OR REPLACE FUNCTION public.create_student_profile(
   p_study_envs text,
   p_interest_keywords text,
   p_work_experience text,
-  p_fee_preference text
+  p_fee_preference text,
+  p_desired_degree_type text
 )
 RETURNS void
 LANGUAGE plpgsql
@@ -50,9 +50,8 @@ BEGIN
     degree,
     field_of_study,
     area_of_study,
-    desired_fields,
-    origin_country,
-    university_country,
+    country,
+    university,
     language,
     language_test_type,
     language_test_score,
@@ -62,6 +61,7 @@ BEGIN
     interest_keywords,
     work_experience,
     fee_preference,
+    desired_degree_type,
     created_at,
     updated_at
   ) VALUES (
@@ -70,9 +70,8 @@ BEGIN
     p_degree,
     p_field_of_study,
     p_area_of_study,
-    p_desired_fields::jsonb,
-    p_origin_country,
-    p_university_country,
+    p_country,
+    p_university,
     p_language,
     p_language_test_type,
     p_language_test_score,
@@ -82,6 +81,7 @@ BEGIN
     p_interest_keywords::jsonb,
     p_work_experience,
     p_fee_preference,
+    p_desired_degree_type,
     now(),
     now()
   );

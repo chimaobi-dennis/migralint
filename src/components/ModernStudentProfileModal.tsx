@@ -26,7 +26,6 @@ interface FormData {
   area_of_study: string;
   custom_area_of_study: string;
   desired_degree_type: string;
-  desired_fields: string[];
   language_test_type: string;
   language_test_score: number | null;
   language_test_year: number | null;
@@ -280,7 +279,6 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     area_of_study: '',
     custom_area_of_study: '',
     desired_degree_type: '',
-    desired_fields: [],
     language_test_type: '',
     language_test_score: null,
     language_test_year: null,
@@ -530,12 +528,20 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         ? formData.custom_area_of_study
         : formData.area_of_study;
 
+      // Ensure at least one desired field is selected (schema requires it)
+      // if (!formData.desired_fields || formData.desired_fields.length === 0) {
+      //   toast.error("Please select at least one topic of interest.");
+      //   setCurrentStep(5);
+      //   setStep5SubStep(2);
+      //   throw new Error('desired_fields is required');
+      // }
+
       const validatedData = studentProfileSchema.parse({
         degree: formData.education_level,
+        country: originCountry,
         university: formData.university,
         field_of_study: formData.current_field,
         area_of_study: finalAreaOfStudy,
-        desired_fields: formData.desired_fields,
         desired_degree_type: formData.desired_degree_type,
         language: formData.language_test_type,
         language_test_type: formData.language_test_type,
@@ -553,7 +559,6 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         p_degree: validatedData.degree,
         p_field_of_study: validatedData.field_of_study,
         p_area_of_study: validatedData.area_of_study,
-        p_desired_fields: JSON.stringify(validatedData.desired_fields),
         p_university: validatedData.university,
         p_language: validatedData.language,
         p_language_test_type: validatedData.language_test_type,
@@ -566,7 +571,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         p_fee_preference: validatedData.fee_preference,
         p_desired_degree_type: validatedData.desired_degree_type,
       });
-
+      console.log(error);
       if (error) throw error;
 
       setShowConfirmation(true);
@@ -661,21 +666,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     }
   };
 
-  const addField = (field: string) => {
-    if (!formData.desired_fields.includes(field) && formData.desired_fields.length < 5) {
-      setFormData(prev => ({
-        ...prev,
-        desired_fields: [...prev.desired_fields, field]
-      }));
-    }
-  };
-
-  const removeField = (field: string) => {
-    setFormData(prev => ({
-      ...prev,
-      desired_fields: prev.desired_fields.filter(f => f !== field)
-    }));
-  };
+  
 
   const addKeyword = (keyword: string) => {
     const candidate = toTitleCase(keyword);
