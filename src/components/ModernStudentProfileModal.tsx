@@ -37,194 +37,27 @@ interface ProgramsData {
   universities: string[];
 }
 
+interface Program {
+  id: number;
+  course_name: string;
+  university_name: string;
+  country: string;
+}
+
 const educationLevels = [
   { value: "bachelor", label: "Bachelor's Degree", description: "Undergraduate level" },
   { value: "master", label: "Master's Degree", description: "Postgraduate level" },
   { value: "phd", label: "PhD", description: "Doctoral level" },
   { value: "other", label: "Other", description: "Diploma, Certificate, etc." }
 ];
-const bachelorDegrees = [
-  "Accounting",
-  "Actuarial Science",
-  "Advertising",
-  "Aerospace Engineering",
-  "Agricultural Business",
-  "Agricultural Economics",
-  "Agricultural Engineering",
-  "Agricultural Science",
-  "Animal Science",
-  "Anthropology",
-  "Applied Biology",
-  "Applied Chemistry",
-  "Applied Computer Science",
-  "Applied Economics",
-  "Applied Mathematics",
-  "Applied Physics",
-  "Applied Statistics",
-  "Aquaculture",
-  "Architecture",
-  "Arts",
-  "Artificial Intelligence",
-  "Asian Studies",
-  "Astronomy",
-  "Atmospheric Science",
-  "Audio Engineering",
-  "Automotive Engineering",
-  "Aviation",
-  "Biochemistry",
-  "Biology",
-  "Business Administration",
-  "Business Analytics",
-  "Business Economics",
-  "Business Finance",
-  "Business Information Systems",
-  "Business Management",
-  "Business Management and Economics",
-  "Business Management and Marketing",
-  "Business Management and Statistics",
-  "Business Management and Finance",
-  "Business Management and Human Resources",
-  "Business Management and Logistics",
-  "Business Management and Marketing and Statistics",
-  "Chemical Engineering",
-  "Chemistry",
-  "Civil Engineering",
-  "Communication",
-  "Communication and Media Studies",
-  "Communication and Public Relations",
-  "Computer Engineering",
-  "Computer Information Systems",
-  "Computer Science",
-  "Computer Systems and Information Technology",
-  "Construction Management",
-  "Criminology",
-  "Cultural Anthropology",
-  "Data Analytics",
-  "Data Science",
-  "Dentistry",
-  "Design and Visual Arts",
-  "Digital Communications",
-  "Digital Media",
-  "Early Childhood Education",
-  "Earth and Planetary Sciences",
-  "Earth Sciences",
-  "Economics",
-  "Education",
-  "Electrical Engineering",
-  "Elementary Education",
-  "Engineering",
-  "Engineering Physics",
-  "English",
-  "Environmental Engineering",
-  "Environmental Health",
-  "Environmental Science",
-  "Environmental Studies",
-  "Epidemiology",
-  "Ergonomics",
-  "Ethnic Studies",
-  "Exercise Science",
-  "Film and Video Production",
-  "Finance",
-  "Fine Arts",
-  "Food and Nutrition",
-  "Food Science",
-  "Forensic Science",
-  "Forestry",
-  "Geography",
-  "Geology",
-  "Graphic Design",
-  "Healthcare Administration",
-  "Healthcare Management",
-  "Health Education",
-  "Health Informatics",
-  "Health Promotion",
-  "Health Science",
-  "History",
-  "Hospitality Management",
-  "Human Development and Family Studies",
-  "Human Resources Management",
-  "Human Services",
-  "Industrial Design",
-  "Industrial Engineering",
-  "Information Assurance",
-  "Information Systems",
-  "Information Technology",
-  "International Business",
-  "International Relations",
-  "Journalism",
-  "Kinesiology",
-  "Landscape Architecture",
-  "Language and Linguistics",
-  "Law",
-  "Liberal Arts",
-  "Library and Information Science",
-  "Life Sciences",
-  "Logistics and Supply Chain Management",
-  "Management",
-  "Management Information Systems",
-  "Manufacturing Engineering",
-  "Marketing",
-  "Materials Science and Engineering",
-  "Mathematics",
-  "Mechanical Engineering",
-  "Media and Communication Studies",
-  "Medical Laboratory Science",
-  "Medical Science",
-  "Medical Technology",
-  "Medicine",
-  "Mental Health",
-  "Microbiology",
-  "Molecular Biology",
-  "Music",
-  "Music Education",
-  "Natural Resource Management",
-  "Neuroscience",
-  "Nursing",
-  "Nutrition",
-  "Occupational Safety and Health",
-  "Occupational Therapy",
-  "Operations Management",
-  "Organizational Management",
-  "Pharmaceutical Sciences",
-  "Philosophy",
-  "Photography",
-  "Physical Education",
-  "Physical Therapy",
-  "Physics",
-  "Political Science",
-  "Psychology",
-  "Public Administration",
-  "Public Health",
-  "Public Policy",
-  "Public Relations",
-  "Radiologic Technology",
-  "Real Estate",
-  "Recreation and Leisure Studies",
-  "Religious Studies",
-  "Retail Management",
-  "Risk Management and Insurance",
-  "Social Work",
-  "Sociology",
-  "Software Engineering",
-  "Special Education",
-  "Speech and Language Pathology",
-  "Statistics",
-  "Sustainable Development",
-  "Theater",
-  "Tourism",
-  "Urban Planning",
-  "Visual Arts",
-  "Women's and Gender Studies",
-  "Writing and Journalism",
-  "Zoology",
-];
+
 const areasOfStudy = [
   "Arts and Humanities",
-  "Computer Science and IT",
+  "Computer Science and IT", 
   "Education and Teaching",
   "Engineering and Technology",
   "Health and Medicine",
-  "Law and Legal Studies",
+  "Law and Legal Studies", 
   "Life Sciences",
   "Mathematics and Statistics",
   "Natural Sciences",
@@ -234,7 +67,7 @@ const areasOfStudy = [
 
 const workExperienceLevels = [
   "No work experience",
-  "Less than 1 year",
+  "Less than 1 year", 
   "1-2 years",
   "3-5 years",
   "5+ years",
@@ -243,7 +76,7 @@ const workExperienceLevels = [
 
 const studyEnvironments = [
   "Big & busy city",
-  "Somewhere warm & sunny",
+  "Somewhere warm & sunny", 
   "A small, cosy town",
   "At a top-10 ranked university",
   "Near nature & outdoor activities"
@@ -251,7 +84,7 @@ const studyEnvironments = [
 
 const budgetPreferences = [
   "Low fees programs - Looking for the most affordable education options",
-  "I don't mind the school fee - Open to all options regardless of cost",
+  "I don't mind the school fee - Open to all options regardless of cost", 
   "I want only high school fees programs - Interested in premium education options"
 ];
 
@@ -279,10 +112,12 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     universities: []
   });
 
+  const [bachelorPrograms, setBachelorPrograms] = useState<Program[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [keywordSearch, setKeywordSearch] = useState('');
+  const [programSearch, setProgramSearch] = useState('');
 
   const totalSteps = 10;
   const progress = (currentStep / totalSteps) * 100;
@@ -290,6 +125,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   // Fetch programs data on component mount
   useEffect(() => {
     fetchProgramsData();
+    fetchBachelorPrograms();
   }, []);
 
   const fetchProgramsData = async () => {
@@ -302,7 +138,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       if (programs) {
         const fields = [...new Set(programs.map(p => p.field_of_study).filter(Boolean))];
         const universities = [...new Set(programs.map(p => p.university_name).filter(Boolean))];
-
+        
         // Extract keywords from JSONB
         const allKeywords: string[] = [];
         programs.forEach(p => {
@@ -353,7 +189,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     setIsSubmitting(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-
+      
       if (!user) {
         toast.error("You must be logged in to create a profile");
         return;
@@ -441,13 +277,35 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     }));
   };
 
-  // Filter bachelor degrees based on search term
-  const filteredFields = bachelorDegrees.filter(degree =>
-    degree.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 20); // Limit to 20 results for better UX
+  const fetchBachelorPrograms = async () => {
+    try {
+      const { data: programs } = await supabase
+        .from('programs')
+        .select('id, course_name, university_name, country')
+        .eq('level', 'bachelor')
+        .not('course_name', 'is', null)
+        .order('course_name', { ascending: true });
+
+      if (programs) {
+        setBachelorPrograms(programs);
+      }
+    } catch (error) {
+      console.error('Error fetching bachelor programs:', error);
+    }
+  };
+
+  const filteredFields = programsData.fields_of_study.filter(field =>
+    field.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const filteredKeywords = programsData.keywords.filter(keyword =>
     keyword.toLowerCase().includes(keywordSearch.toLowerCase())
+  );
+
+  const filteredPrograms = bachelorPrograms.filter(program =>
+    program.course_name?.toLowerCase().includes(programSearch.toLowerCase()) ||
+    program.university_name?.toLowerCase().includes(programSearch.toLowerCase()) ||
+    program.country?.toLowerCase().includes(programSearch.toLowerCase())
   );
 
   if (showConfirmation) {
@@ -464,7 +322,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <p className="text-gray-600 mb-8">
               Your personalized study abroad journey is ready. We'll help you find the perfect programs.
             </p>
-            <Button
+            <Button 
               onClick={handleClose}
               className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3"
             >
@@ -492,7 +350,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             >
               <X className="h-5 w-5" />
             </Button>
-
+            
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                 <GraduationCap className="h-6 w-6" />
@@ -502,10 +360,10 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <p className="text-blue-100 text-sm">Step {currentStep} of {totalSteps}</p>
               </div>
             </div>
-
+            
             {/* Progress Bar */}
             <div className="w-full bg-white/20 rounded-full h-2">
-              <div
+              <div 
                 className="bg-white h-2 rounded-full transition-all duration-300 ease-out"
                 style={{ width: `${progress}%` }}
               />
@@ -523,26 +381,28 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </h3>
                 <p className="text-gray-600">Select your current or completed education level</p>
               </div>
-
+              
               <div className="space-y-4">
                 {educationLevels.map(level => (
-                  <div
+                  <div 
                     key={level.value}
                     onClick={() => setFormData(prev => ({ ...prev, education_level: level.value }))}
-                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md ${formData.education_level === level.value
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    className={`p-4 border-2 rounded-xl cursor-pointer transition-all hover:shadow-md ${
+                      formData.education_level === level.value 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-medium text-gray-900">{level.label}</p>
                         <p className="text-sm text-gray-500">{level.description}</p>
                       </div>
-                      <div className={`w-5 h-5 rounded-full border-2 ${formData.education_level === level.value
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300'
-                        }`}>
+                      <div className={`w-5 h-5 rounded-full border-2 ${
+                        formData.education_level === level.value 
+                          ? 'border-blue-500 bg-blue-500' 
+                          : 'border-gray-300'
+                      }`}>
                         {formData.education_level === level.value && (
                           <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
                             <div className="w-2 h-2 bg-white rounded-full" />
@@ -564,7 +424,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </h3>
                 <p className="text-gray-600">Search and select the university where you completed your degree</p>
               </div>
-
+              
               <div>
                 <Label htmlFor="university">University</Label>
                 <div className="mt-2">
@@ -583,11 +443,11 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  I got my {formData.education_level?.replace('_', ' ')} degree in...
+                  I got my {formData.education_level?.replace('_', ' ')} in...
                 </h3>
-                <p className="text-gray-600">What degree did you study?</p>
+                <p className="text-gray-600">What field did you study?</p>
               </div>
-
+              
               <div>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -601,37 +461,26 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                {filteredFields.length > 0 ? (
-                  filteredFields.map(field => (
-                    <button
-                      key={field}
-                      onClick={() => setFormData(prev => ({ ...prev, current_field: field }))}
-                      className={`p-3 text-left border rounded-lg transition-all hover:shadow-sm ${formData.current_field === field
+                {filteredFields.map(field => (
+                  <button
+                    key={field}
+                    onClick={() => setFormData(prev => ({ ...prev, current_field: field }))}
+                    className={`p-3 text-left border rounded-lg transition-all hover:shadow-sm ${
+                      formData.current_field === field
                         ? 'border-blue-500 bg-blue-50 text-blue-700'
                         : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                    >
-                      {field}
-                    </button>
-                  ))
-                ) : searchTerm ? (
-                  <div className="col-span-full">
-                    <div className="text-center py-8 px-4 border border-dashed border-gray-300 rounded-lg">
-                      <p className="text-gray-500 mb-4">
-                        No matching degrees found for "{searchTerm}"
-                      </p>
-                      <button
-                        onClick={() => setFormData(prev => ({ ...prev, current_field: searchTerm }))}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                      >
-                        Add "{searchTerm}" as my degree
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="col-span-full text-center py-8 text-gray-500">
-                    Start typing to search for your degree...
-                  </div>
+                    }`}
+                  >
+                    {field}
+                  </button>
+                ))}
+                {searchTerm && !filteredFields.some(f => f.toLowerCase() === searchTerm.toLowerCase()) && (
+                  <button
+                    onClick={() => setFormData(prev => ({ ...prev, current_field: searchTerm }))}
+                    className="p-3 text-left border border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50"
+                  >
+                    Add "{searchTerm}"
+                  </button>
                 )}
               </div>
             </div>
@@ -645,16 +494,17 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </h3>
                 <p className="text-gray-600">Help us categorize your field of study</p>
               </div>
-
+              
               <div className="space-y-3">
                 {areasOfStudy.map(area => (
-                  <div
+                  <div 
                     key={area}
                     onClick={() => setFormData(prev => ({ ...prev, area_of_study: area }))}
-                    className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.area_of_study === area
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                      formData.area_of_study === area 
+                        ? 'border-blue-500 bg-blue-50 text-blue-700' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
                     {area}
                   </div>
@@ -667,18 +517,18 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  I want to study a master's degree in...
+                  Browse Bachelor Programs
                 </h3>
-                <p className="text-gray-600">Select up to 5 fields that interest you</p>
+                <p className="text-gray-600">Search and select programs that interest you (up to 5)</p>
               </div>
-
+              
               <div>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search fields of study..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search programs by name, university, or country..."
+                    value={programSearch}
+                    onChange={(e) => setProgramSearch(e.target.value)}
                     className="pl-10 h-12"
                   />
                 </div>
@@ -700,21 +550,34 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                {filteredFields.map(field => (
-                  <button
-                    key={field}
-                    onClick={() => addField(field)}
-                    disabled={formData.desired_fields.includes(field) || formData.desired_fields.length >= 5}
-                    className="p-3 text-left border rounded-lg transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed border-gray-200 hover:border-gray-300"
-                  >
-                    {field}
-                  </button>
-                ))}
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {filteredPrograms.length > 0 ? (
+                  filteredPrograms.map(program => (
+                    <button
+                      key={program.id}
+                      onClick={() => addField(program.course_name)}
+                      disabled={formData.desired_fields.includes(program.course_name) || formData.desired_fields.length >= 5}
+                      className={`w-full p-4 text-left border rounded-lg transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                        formData.desired_fields.includes(program.course_name)
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="font-medium text-gray-900">{program.course_name}</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        {program.university_name} • {program.country}
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    {programSearch ? 'No programs found matching your search' : 'Loading programs...'}
+                  </div>
+                )}
               </div>
-
+              
               <p className="text-sm text-gray-500">
-                Selected: {formData.desired_fields.length}/5 fields
+                Selected: {formData.desired_fields.length}/5 programs
               </p>
             </div>
           )}
@@ -727,23 +590,25 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </h3>
                 <p className="text-gray-600">What language test have you taken?</p>
               </div>
-
+              
               <div className="space-y-4">
                 {languageTests.map(test => (
-                  <div
+                  <div 
                     key={test}
                     onClick={() => setFormData(prev => ({ ...prev, language_test_type: test }))}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.language_test_type === test
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                      formData.language_test_type === test 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{test}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 ${formData.language_test_type === test
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300'
-                        }`}>
+                      <div className={`w-5 h-5 rounded-full border-2 ${
+                        formData.language_test_type === test 
+                          ? 'border-blue-500 bg-blue-500' 
+                          : 'border-gray-300'
+                      }`}>
                         {formData.language_test_type === test && (
                           <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
                             <div className="w-2 h-2 bg-white rounded-full" />
@@ -763,9 +628,9 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                     type="number"
                     placeholder="Enter your score"
                     value={formData.language_test_score || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      language_test_score: e.target.value ? parseInt(e.target.value) : null
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      language_test_score: e.target.value ? parseInt(e.target.value) : null 
                     }))}
                     className="mt-2 h-12"
                   />
@@ -782,23 +647,25 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </h3>
                 <p className="text-gray-600">This helps us recommend suitable programs</p>
               </div>
-
+              
               <div className="space-y-3">
                 {workExperienceLevels.map(level => (
-                  <div
+                  <div 
                     key={level}
                     onClick={() => setFormData(prev => ({ ...prev, work_experience: level }))}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.work_experience === level
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                      formData.work_experience === level 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{level}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 ${formData.work_experience === level
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300'
-                        }`}>
+                      <div className={`w-5 h-5 rounded-full border-2 ${
+                        formData.work_experience === level 
+                          ? 'border-blue-500 bg-blue-500' 
+                          : 'border-gray-300'
+                      }`}>
                         {formData.work_experience === level && (
                           <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
                             <div className="w-2 h-2 bg-white rounded-full" />
@@ -820,23 +687,25 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </h3>
                 <p className="text-gray-600">What kind of environment appeals to you?</p>
               </div>
-
+              
               <div className="space-y-3">
                 {studyEnvironments.map(env => (
-                  <div
+                  <div 
                     key={env}
                     onClick={() => setFormData(prev => ({ ...prev, study_environment: env }))}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.study_environment === env
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                      formData.study_environment === env 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{env}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 ${formData.study_environment === env
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300'
-                        }`}>
+                      <div className={`w-5 h-5 rounded-full border-2 ${
+                        formData.study_environment === env 
+                          ? 'border-blue-500 bg-blue-500' 
+                          : 'border-gray-300'
+                      }`}>
                         {formData.study_environment === env && (
                           <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
                             <div className="w-2 h-2 bg-white rounded-full" />
@@ -858,23 +727,25 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </h3>
                 <p className="text-gray-600">Help us find programs within your budget range</p>
               </div>
-
+              
               <div className="space-y-3">
                 {budgetPreferences.map(budget => (
-                  <div
+                  <div 
                     key={budget}
                     onClick={() => setFormData(prev => ({ ...prev, budget_preference: budget }))}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.budget_preference === budget
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                      formData.budget_preference === budget 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{budget}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 ${formData.budget_preference === budget
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300'
-                        }`}>
+                      <div className={`w-5 h-5 rounded-full border-2 ${
+                        formData.budget_preference === budget 
+                          ? 'border-blue-500 bg-blue-500' 
+                          : 'border-gray-300'
+                      }`}>
                         {formData.budget_preference === budget && (
                           <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
                             <div className="w-2 h-2 bg-white rounded-full" />
@@ -896,7 +767,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </h3>
                 <p className="text-gray-600">Select topics that interest you to help us personalize recommendations</p>
               </div>
-
+              
               <div>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
@@ -958,8 +829,9 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
               {Array.from({ length: totalSteps }, (_, i) => (
                 <div
                   key={i}
-                  className={`w-2 h-2 rounded-full transition-all ${i + 1 <= currentStep ? 'bg-blue-500' : 'bg-gray-300'
-                    }`}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    i + 1 <= currentStep ? 'bg-blue-500' : 'bg-gray-300'
+                  }`}
                 />
               ))}
             </div>
