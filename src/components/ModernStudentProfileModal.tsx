@@ -512,6 +512,22 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
 
   const saveProfileToDatabase = async (userId: string) => {
     try {
+      // Resolve numeric user ID and fetch country from user table
+      const { data: numericUserId, error: idErr } = await supabase.rpc('get_user_bigint_id', { auth_uuid: userId });
+      if (idErr) throw idErr;
+
+      let originCountry = '';
+      if (numericUserId != null) {
+        const { data: userRow, error: userErr } = await supabase
+          .from('user')
+          .select('country')
+          .eq('id', numericUserId)
+          .single();
+        if (!userErr && userRow?.country) {
+          originCountry = String(userRow.country);
+        }
+      }
+
       const finalAreaOfStudy = formData.area_of_study === "Other (Please specify)"
         ? formData.custom_area_of_study
         : formData.area_of_study;
@@ -522,7 +538,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         area_of_study: finalAreaOfStudy,
         desired_degree_type: formData.desired_degree_type,
         desired_fields: formData.desired_fields,
-        origin_country: formData.origin_country,
+        origin_country: originCountry,
         university_country: formData.university,
         language: formData.language_test_type,
         language_test_type: formData.language_test_type,
