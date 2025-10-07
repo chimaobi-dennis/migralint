@@ -22,6 +22,7 @@ interface FormData {
   university: string;
   current_field: string;
   area_of_study: string;
+  custom_area_of_study: string;
   desired_fields: string[];
   language_test_type: string;
   language_test_score: number | null;
@@ -264,6 +265,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     university: '',
     current_field: '',
     area_of_study: '',
+    custom_area_of_study: '',
     desired_fields: [],
     language_test_type: '',
     language_test_score: null,
@@ -360,10 +362,14 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       }
 
       // Validate the profile data
+      const finalAreaOfStudy = formData.area_of_study === "Other (Please specify)" 
+        ? formData.custom_area_of_study 
+        : formData.area_of_study;
+        
       const validatedData = studentProfileSchema.parse({
         degree: formData.education_level,
         field_of_study: formData.current_field,
-        area_of_study: formData.area_of_study,
+        area_of_study: finalAreaOfStudy,
         desired_fields: formData.desired_fields,
         origin_country: '',
         university_country: formData.university,
@@ -675,22 +681,64 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   What area of study is {formData.current_field}?
                 </h3>
-                <p className="text-gray-600">Help us categorize your field of study</p>
+                <p className="text-gray-600">Help us categorize your field of study (optional)</p>
               </div>
 
               <div className="space-y-3">
+                {/* Skip option */}
+                <div
+                  onClick={() => setFormData(prev => ({ ...prev, area_of_study: '', custom_area_of_study: '' }))}
+                  className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                    !formData.area_of_study && !formData.custom_area_of_study
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <ArrowRight className="h-4 w-4" />
+                    <span>Skip - I'll specify later</span>
+                  </div>
+                </div>
+
+                {/* Predefined areas */}
                 {areasOfStudy.map(area => (
                   <div
                     key={area}
-                    onClick={() => setFormData(prev => ({ ...prev, area_of_study: area }))}
-                    className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.area_of_study === area
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    onClick={() => {
+                      if (area === "Other (Please specify)") {
+                        setFormData(prev => ({ ...prev, area_of_study: area, custom_area_of_study: '' }));
+                      } else {
+                        setFormData(prev => ({ ...prev, area_of_study: area, custom_area_of_study: '' }));
+                      }
+                    }}
+                    className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                      formData.area_of_study === area
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
                   >
-                    {area}
+                    <div className="flex items-center justify-between">
+                      <span>{area}</span>
+                      {formData.area_of_study === area && (
+                        <Check className="h-4 w-4 text-blue-500" />
+                      )}
+                    </div>
                   </div>
                 ))}
+
+                {/* Custom input field when "Other" is selected */}
+                {formData.area_of_study === "Other (Please specify)" && (
+                  <div className="mt-4">
+                    <Label htmlFor="custom_area">Specify your area of study</Label>
+                    <Input
+                      id="custom_area"
+                      placeholder="Enter your specific area of study..."
+                      value={formData.custom_area_of_study}
+                      onChange={(e) => setFormData(prev => ({ ...prev, custom_area_of_study: e.target.value }))}
+                      className="mt-2 h-12"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
