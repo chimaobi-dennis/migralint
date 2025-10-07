@@ -813,7 +813,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  I completed my {formData.education_level?.replace('_', ' ')} at...
+                  I completed my {formData.education_level?.replace('_', ' ')} degree at...
                 </h3>
                 <p className="text-gray-600">Helps {siteName || 'our platform'} understand your background and align future study options. </p>
               </div>
