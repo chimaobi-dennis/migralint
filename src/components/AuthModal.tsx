@@ -8,7 +8,7 @@ import { Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { PhoneInput } from '@/components/ui/phone-input';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { emailSchema, passwordSchema } from '@/lib/validations';
+import { emailSchema, passwordSchema, phoneSchema } from '@/lib/validations';
 
 interface AuthModalProps {
   open: boolean;
@@ -56,6 +56,9 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       } else if (mode === 'signup') {
         // Validate password for signup
         passwordSchema.parse(formData.password);
+        
+        // Validate phone number
+        phoneSchema.parse(formData.phone);
         
         if (formData.password !== formData.confirmPassword) {
           toast.error("Passwords do not match");

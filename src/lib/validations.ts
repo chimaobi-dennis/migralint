@@ -37,3 +37,8 @@ export const passwordSchema = z.string()
   .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
   .regex(/[a-z]/, "Password must contain at least one lowercase letter")
   .regex(/[0-9]/, "Password must contain at least one number");
+
+export const phoneSchema = z.string()
+  .min(8, "Phone number must be at least 8 digits")
+  .max(20, "Phone number must be less than 20 digits")
+  .regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format");
