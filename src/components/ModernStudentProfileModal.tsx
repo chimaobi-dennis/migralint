@@ -10,6 +10,7 @@ import { UniversityAutocomplete } from "@/components/ui/university-autocomplete"
 import { AuthModal } from '@/components/AuthModal';
 import { X, ArrowLeft, ArrowRight, Check, ChevronDown, Search, GraduationCap, Plus, BookOpen } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from 'sonner';
 import { studentProfileSchema } from "@/lib/validations";
 
@@ -270,6 +271,7 @@ const languageTests = [
 ];
 
 export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProfileModalProps) => {
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     education_level: '',
@@ -506,18 +508,8 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     }
   };
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
+  const saveProfileToDatabase = async (userId: string) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        setAuthOpen(true);
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Validate the profile data
       const finalAreaOfStudy = formData.area_of_study === "Other (Please specify)"
         ? formData.custom_area_of_study
         : formData.area_of_study;
@@ -541,9 +533,30 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         fee_preference: formData.budget_preference,
       });
 
-      // Save to database - implementation would go here
+      const { error } = await supabase.rpc('create_student_profile', {
+        p_user_id: userId,
+        p_degree: validatedData.degree,
+        p_field_of_study: validatedData.field_of_study,
+        p_area_of_study: validatedData.area_of_study,
+        p_desired_fields: JSON.stringify(validatedData.desired_fields),
+        p_origin_country: validatedData.origin_country,
+        p_university_country: validatedData.university_country,
+        p_language: validatedData.language,
+        p_language_test_type: validatedData.language_test_type,
+        p_language_test_score: validatedData.language_test_score,
+        p_language_test_year: validatedData.language_test_year,
+        p_has_language_test: validatedData.has_language_test,
+        p_study_envs: JSON.stringify(validatedData.study_envs),
+        p_interest_keywords: JSON.stringify(validatedData.interest_keywords),
+        p_work_experience: validatedData.work_experience,
+        p_fee_preference: validatedData.fee_preference,
+      });
+
+      if (error) throw error;
+
       setShowConfirmation(true);
       toast.success("Profile Created! Your information has been saved successfully.");
+      sessionStorage.removeItem('pendingStudentProfileData');
     } catch (error: any) {
       console.error('Error saving profile:', error);
       if (error.errors) {
@@ -551,10 +564,55 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       } else {
         toast.error(error.message || "Failed to save profile. Please try again.");
       }
+      throw error;
+    }
+  };
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        // Store form data in session storage
+        sessionStorage.setItem('pendingStudentProfileData', JSON.stringify(formData));
+        setAuthOpen(true);
+        setIsSubmitting(false);
+        return;
+      }
+
+      await saveProfileToDatabase(user.id);
+    } catch (error: any) {
+      // Error already handled in saveProfileToDatabase
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Check for pending profile data after authentication
+  useEffect(() => {
+    const checkPendingProfile = async () => {
+      if (user && isOpen) {
+        const pendingData = sessionStorage.getItem('pendingStudentProfileData');
+        if (pendingData) {
+          try {
+            const parsedData = JSON.parse(pendingData);
+            setFormData(parsedData);
+            setIsSubmitting(true);
+            await saveProfileToDatabase(user.id);
+          } catch (error) {
+            console.error('Error processing pending profile:', error);
+            toast.error('Failed to save your profile. Please try again.');
+            sessionStorage.removeItem('pendingStudentProfileData');
+          } finally {
+            setIsSubmitting(false);
+          }
+        }
+      }
+    };
+
+    checkPendingProfile();
+  }, [user, isOpen]);
 
   const isStepValid = () => {
     switch (currentStep) {
@@ -1306,6 +1364,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
           </div>
         </div>
       </DialogContent>
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
     </Dialog>
   );
 };
