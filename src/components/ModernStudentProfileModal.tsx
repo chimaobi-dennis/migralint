@@ -1158,7 +1158,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   My work experience level is...
                 </h3>
-                <p className="text-gray-600">This helps {siteName || 'our platform'} recommend suitable programs</p>
+                <p className="text-gray-600">This helps {siteName || 'our platform'} recommend suitable scholarships</p>
               </div>
 
               <div className="space-y-3">
@@ -1196,7 +1196,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   I would like to study in a...
                 </h3>
-                <p className="text-gray-600">What kind of environment appeals to you?</p>
+                <p className="text-gray-600">This helps {siteName || 'our platform'} filter for the right campus and location experience.</p>
               </div>
 
               <div className="space-y-3">
@@ -1234,7 +1234,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   My budget preference is...
                 </h3>
-                <p className="text-gray-600">Help {siteName || 'our platform'} find programs within your budget range</p>
+                <p className="text-gray-600">Helps {siteName || 'our platform'} find programs within your budget range</p>
               </div>
 
               <div className="space-y-3">
