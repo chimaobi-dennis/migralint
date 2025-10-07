@@ -27,6 +27,7 @@ interface FormData {
   desired_fields: string[];
   language_test_type: string;
   language_test_score: number | null;
+  language_test_year: number | null;
   work_experience: string;
   study_environment: string;
   budget_preference: string;
@@ -257,7 +258,15 @@ const budgetPreferences = [
   "I want only high school fees programs - Interested in premium education options"
 ];
 
-const languageTests = ["IELTS", "TOEFL", "Cambridge English", "PTE", "Duolingo", "No test taken"];
+const languageTests = [
+  "IELTS",
+  "TOEFL",
+  "Cambridge English",
+  "PTE",
+  "Duolingo",
+  "Test taken more than 5 years ago",
+  "No test taken"
+];
 
 export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProfileModalProps) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -271,6 +280,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     desired_fields: [],
     language_test_type: '',
     language_test_score: null,
+    language_test_year: null,
     work_experience: '',
     study_environment: '',
     budget_preference: '',
@@ -289,13 +299,52 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   const [keywordSearch, setKeywordSearch] = useState('');
   const [step5SubStep, setStep5SubStep] = useState(1); // 1: degree type, 2: topics
   const [searchedKeywords, setSearchedKeywords] = useState<string[]>([]);
+  const [siteName, setSiteName] = useState<string>('');
 
   const totalSteps = 9; // Reduced from 10 since we're removing step 10
   const progress = (currentStep / totalSteps) * 100;
 
+  // Helper: convert a string to Initial Caps for each word
+  const toTitleCase = (s: string) =>
+    s
+      .trim()
+      .replace(/\s+/g, ' ')
+      .split(' ')
+      .map(w => (w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : ''))
+      .join(' ');
+
+  // Helper: filter-out low-quality keywords like "3d", "4.0", "5g"
+  const isValidKeyword = (s: string) => {
+    const str = s.trim();
+    if (str.length < 3) return false; // too short
+    // exclude pure numbers or number-like (e.g., 4, 4.0)
+    if (/^\d+(\.\d+)?$/.test(str)) return false;
+    // must contain at least one letter
+    if (!/[a-zA-Z]/.test(str)) return false;
+    return true;
+  };
+
   // Fetch programs data on component mount
   useEffect(() => {
     fetchProgramsData();
+  }, []);
+
+  // Fetch site name from business_details
+  useEffect(() => {
+    const fetchSiteName = async () => {
+      try {
+        const { data, error } = await (supabase as any)
+          .from('business_details' as any)
+          .select('siteName')
+          .limit(1);
+        if (!error && Array.isArray(data) && data.length > 0 && (data[0] as any)?.siteName) {
+          setSiteName(String((data[0] as any).siteName));
+        }
+      } catch (e) {
+        console.error('Error fetching site name:', e);
+      }
+    };
+    fetchSiteName();
   }, []);
 
   // Handle keyword search
@@ -334,18 +383,24 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         const fields = [...new Set(programs.map(p => p.field_of_study).filter(Boolean))];
         const universities = [...new Set(programs.map(p => p.university_name).filter(Boolean))];
 
-        // Extract keywords from JSONB
-        const allKeywords: string[] = [];
+        // Extract keywords from JSONB, dedupe case-insensitively and Title Case
+        const seen = new Set<string>(); // lowercased for dedupe
+        const normalizedKeywords: string[] = [];
         programs.forEach(p => {
           if (p.keywords && Array.isArray(p.keywords)) {
             p.keywords.forEach(keyword => {
-              if (typeof keyword === 'string') {
-                allKeywords.push(keyword);
+              if (typeof keyword === 'string' && isValidKeyword(keyword)) {
+                const norm = toTitleCase(keyword);
+                const key = norm.toLowerCase();
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  normalizedKeywords.push(norm);
+                }
               }
             });
           }
         });
-        const keywords = [...new Set(allKeywords)];
+        const keywords = normalizedKeywords;
 
         setProgramsData({
           fields_of_study: fields.sort(),
@@ -378,16 +433,21 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
 
       if (!programs) return [];
 
-      const results = new Set<string>();
+      const results: string[] = [];
+      const seen = new Set<string>(); // lowercased for dedupe
 
       programs.forEach((p: any) => {
         if (Array.isArray(p.keywords)) {
           p.keywords.forEach((kw: unknown) => {
             if (typeof kw === 'string') {
-              const norm = kw.trim();
-              if (norm.toLowerCase().includes(q)) {
-                // keep original casing in UI, dedupe via Set
-                results.add(norm);
+              const raw = kw.trim();
+              if (isValidKeyword(raw) && raw.toLowerCase().includes(q)) {
+                const norm = toTitleCase(raw);
+                const key = norm.toLowerCase();
+                if (!seen.has(key)) {
+                  seen.add(key);
+                  results.push(norm);
+                }
               }
             }
           });
@@ -395,7 +455,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       });
 
       // Sort alphabetically and cap the list returned to the UI
-      return Array.from(results)
+      return results
         .sort((a, b) => a.localeCompare(b))
         .slice(0, 200);
     } catch (e:any) {
@@ -470,8 +530,8 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         language: formData.language_test_type,
         language_test_type: formData.language_test_type,
         language_test_score: formData.language_test_score || 0,
-        language_test_year: new Date().getFullYear(),
-        has_language_test: formData.language_test_type !== 'No test taken' ? 1 : 0,
+        language_test_year: formData.language_test_year || 0,
+        has_language_test: (formData.language_test_type !== 'No test taken' && formData.language_test_type !== 'Test taken more than 5 years ago') ? 1 : 0,
         study_envs: [formData.study_environment],
         interest_keywords: formData.interest_keywords,
         work_experience: formData.work_experience,
@@ -505,7 +565,19 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         } else {
           return true; // Topics are optional
         }
-      case 6: return formData.language_test_type !== '';
+      case 6: {
+        if (!formData.language_test_type) return false;
+        if (formData.language_test_type === 'No test taken') return true;
+        if (formData.language_test_type === 'Test taken more than 5 years ago') return true;
+        // Recent test requires year and score
+        const currentYear = new Date().getFullYear();
+        const minYear = currentYear - 5;
+        const y = formData.language_test_year;
+        const s = formData.language_test_score;
+        const yearOk = typeof y === 'number' && y >= minYear && y <= currentYear;
+        const scoreOk = typeof s === 'number' && !Number.isNaN(s) && s > 0;
+        return yearOk && scoreOk;
+      }
       case 7: return formData.work_experience !== '';
       case 8: return formData.study_environment !== '';
       case 9: return formData.budget_preference !== '';
@@ -530,10 +602,12 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   };
 
   const addKeyword = (keyword: string) => {
-    if (!formData.interest_keywords.includes(keyword) && formData.interest_keywords.length < 10) {
+    const candidate = toTitleCase(keyword);
+    const exists = formData.interest_keywords.some(k => k.toLowerCase() === candidate.toLowerCase());
+    if (!exists && formData.interest_keywords.length < 10) {
       setFormData(prev => ({
         ...prev,
-        interest_keywords: [...prev.interest_keywords, keyword]
+        interest_keywords: [...prev.interest_keywords, candidate]
       }));
       // Clear the search input and results to start a new search
       setKeywordSearch('');
@@ -637,9 +711,9 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  What is your highest education level?
+                  My highest education level is...
                 </h3>
-                <p className="text-gray-600">Select your current or completed education level</p>
+                <p className="text-gray-600">This helps {siteName || 'our platform'} understand your academic background so we can tailor recommendations appropriately.</p>
               </div>
 
               <div className="space-y-4">
@@ -678,9 +752,9 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  I got my {formData.education_level?.replace('_', ' ')} from...
+                  I completed my {formData.education_level?.replace('_', ' ')} at...
                 </h3>
-                <p className="text-gray-600">Search and select the university where you completed your degree</p>
+                <p className="text-gray-600">Your institution helps  match you with relevant programs and academic contexts.</p>
               </div>
 
               <div>
@@ -701,9 +775,9 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  I got my {formData.education_level?.replace('_', ' ')} degree in...
+                  My degree/field of study is...
                 </h3>
-                <p className="text-gray-600">What degree did you study?</p>
+                <p className="text-gray-600">Sharing your major helps {siteName || 'our platform'} understand your background and align future study options.</p>
               </div>
 
               <div>
@@ -782,9 +856,9 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  What area of study is {formData.current_field}?
+                  The area of study for {formData.current_field} is...
                 </h3>
-                <p className="text-gray-600">Help us categorize your field of study (optional)</p>
+                <p className="text-gray-600">This helps {siteName || 'our platform'} categorize your academic background and improve program matches (optional).</p>
               </div>
 
               <div className="space-y-3">
@@ -854,7 +928,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                   <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                     I want to study a...
                   </h3>
-                  <p className="text-gray-600">Select the degree type you're interested in</p>
+                  <p className="text-gray-600">This tells {siteName || 'our platform'} your intended study level so we can tailor recommendations.</p>
                 </div>
 
                 <div className="space-y-3 mt-4">
@@ -886,7 +960,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                     <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                       I am curious about these topics...
                     </h3>
-                    <p className="text-gray-600">Search and select up to 10 topics that interest you</p>
+                    <p className="text-gray-600">We use your interests to personalize content and surface relevant programs (up to 10).</p>
                   </div>
 
                   <div className="mt-4">
@@ -931,7 +1005,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                     {keywordSearch && !filteredKeywords.some(k => k.toLowerCase() === keywordSearch.toLowerCase()) && (
                       <button
                         onClick={() => addKeyword(keywordSearch)}
-                        disabled={formData.interest_keywords.includes(keywordSearch) || formData.interest_keywords.length >= 10}
+                        disabled={formData.interest_keywords.some(k => k.toLowerCase() === keywordSearch.toLowerCase()) || formData.interest_keywords.length >= 10}
                         className="p-3 text-left border border-dashed rounded-lg transition-all hover:shadow-sm border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-sm"
                       >
                         <div className="flex items-center gap-2">
@@ -972,47 +1046,105 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <p className="text-gray-600">What language test have you taken?</p>
               </div>
 
-              <div className="space-y-4">
-                {languageTests.map(test => (
-                  <div
-                    key={test}
-                    onClick={() => setFormData(prev => ({ ...prev, language_test_type: test }))}
-                    className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.language_test_type === test
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{test}</span>
-                      <div className={`w-5 h-5 rounded-full border-2 ${formData.language_test_type === test
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-300'
-                        }`}>
-                        {formData.language_test_type === test && (
-                          <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
-                            <div className="w-2 h-2 bg-white rounded-full" />
-                          </div>
-                        )}
+              {/* If no selection yet, show the list of tests */}
+              {!formData.language_test_type && (
+                <div className="space-y-4">
+                  {languageTests.map(test => (
+                    <div
+                      key={test}
+                      onClick={() => setFormData(prev => ({ ...prev, language_test_type: test, language_test_year: null, language_test_score: null }))}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.language_test_type === test
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{test}</span>
+                        <div className={`w-5 h-5 rounded-full border-2 ${formData.language_test_type === test
+                          ? 'border-blue-500 bg-blue-500'
+                          : 'border-gray-300'
+                          }`}>
+                          {formData.language_test_type === test && (
+                            <div className="w-full h-full rounded-full bg-blue-500 flex items-center justify-center">
+                              <div className="w-2 h-2 bg-white rounded-full" />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
 
-              {formData.language_test_type && formData.language_test_type !== "No test taken" && (
-                <div>
-                  <Label htmlFor="score">Test Score (Optional)</Label>
-                  <Input
-                    id="score"
-                    type="number"
-                    placeholder="Enter your score"
-                    value={formData.language_test_score || ''}
-                    onChange={(e) => setFormData(prev => ({
-                      ...prev,
-                      language_test_score: e.target.value ? parseInt(e.target.value) : null
-                    }))}
-                    className="mt-2 h-12"
-                  />
+              {/* If selected 'No test taken' or 'Test >5 years', show summary and a button to change */}
+              {formData.language_test_type && (formData.language_test_type === 'No test taken' || formData.language_test_type === 'Test taken more than 5 years ago') && (
+                <div className="space-y-4">
+                  <div className="p-4 border rounded-lg bg-gray-50">
+                    <p className="font-medium">{formData.language_test_type}</p>
+                    <p className="text-sm text-gray-600 mt-1">You can continue without providing a recent test score.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, language_test_type: '', language_test_year: null, language_test_score: null }))}
+                    className="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm"
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-1" /> Change test type
+                  </button>
+                </div>
+              )}
+
+              {/* If a recent test is selected, show year and score inputs */}
+              {formData.language_test_type && (formData.language_test_type !== 'No test taken' && formData.language_test_type !== 'Test taken more than 5 years ago') && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">{formData.language_test_type}</p>
+                      <p className="text-sm text-gray-600">Provide your test year and score</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, language_test_type: '', language_test_year: null, language_test_score: null }))}
+                      className="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm"
+                    >
+                      <ArrowLeft className="h-4 w-4 mr-1" /> Back to test types
+                    </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Year dropdown: last 5 years including current */}
+                    <div>
+                      <Label htmlFor="test_year">Test Year</Label>
+                      <select
+                        id="test_year"
+                        value={formData.language_test_year ?? ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, language_test_year: e.target.value ? parseInt(e.target.value) : null }))}
+                        className="mt-2 h-12 w-full border border-gray-300 rounded-md px-3"
+                      >
+                        <option value="">Select year</option>
+                        {Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i).map(y => (
+                          <option key={y} value={y}>{y}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Score input */}
+                    <div>
+                      <Label htmlFor="score">Test Score</Label>
+                      <Input
+                        id="score"
+                        type="number"
+                        placeholder="Enter your score"
+                        value={formData.language_test_score ?? ''}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          language_test_score: e.target.value ? Number(e.target.value) : null
+                        }))}
+                        className="mt-2 h-12"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-gray-500">Year must be within the last 5 years. Provide a numeric score.</p>
                 </div>
               )}
             </div>
@@ -1024,7 +1156,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   My work experience level is...
                 </h3>
-                <p className="text-gray-600">This helps us recommend suitable programs</p>
+                <p className="text-gray-600">This helps {siteName || 'our platform'} recommend suitable programs</p>
               </div>
 
               <div className="space-y-3">
@@ -1100,7 +1232,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
                   My budget preference is...
                 </h3>
-                <p className="text-gray-600">Help us find programs within your budget range</p>
+                <p className="text-gray-600">Help {siteName || 'our platform'} find programs within your budget range</p>
               </div>
 
               <div className="space-y-3">
@@ -1162,7 +1294,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
               disabled={!isStepValid() || isSubmitting}
               className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
             >
-              {currentStep === totalSteps ? 'Complete' : 
+              {currentStep === totalSteps ? 'Submit' : 
                currentStep === 5 && step5SubStep === 1 ? 'Continue' : 'Next'}
               <ArrowRight className="h-4 w-4" />
             </Button>
