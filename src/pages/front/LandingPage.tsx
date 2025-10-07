@@ -4,11 +4,21 @@ import { ArrowRight, Check, Sparkles, Plane, Users, GraduationCap, MessageSquare
 import { Link } from 'react-router-dom';
 import { AuthModal } from '@/components/AuthModal';
 import { ModernStudentProfileModal } from '@/components/ModernStudentProfileModal';
+import { useAuth } from '@/contexts/AuthContext';
 import studentHero from '@/assets/student-hero.jpg';
 
 export const LandingPage = () => {
+  const { user } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+
+  const handleGetStarted = () => {
+    if (user) {
+      setProfileModalOpen(true);
+    } else {
+      setAuthModalOpen(true);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -39,7 +49,7 @@ export const LandingPage = () => {
               </Button>
               <Button 
                 className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold px-6"
-                onClick={() => setProfileModalOpen(true)}
+                onClick={handleGetStarted}
               >
                 Get Started
               </Button>
@@ -57,7 +67,7 @@ export const LandingPage = () => {
               <Button 
                 size="sm"
                 className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold px-4"
-                onClick={() => setProfileModalOpen(true)}
+                onClick={handleGetStarted}
               >
                 Get Started
               </Button>
