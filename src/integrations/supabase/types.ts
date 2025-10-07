@@ -409,7 +409,6 @@ export type Database = {
           recommended_programs: Json | null
           study_envs: Json | null
           university: string | null
-          university_country: string | null
           updated_at: string | null
           user_id: number | null
           work_experience: string | null
@@ -434,7 +433,6 @@ export type Database = {
           recommended_programs?: Json | null
           study_envs?: Json | null
           university?: string | null
-          university_country?: string | null
           updated_at?: string | null
           user_id?: number | null
           work_experience?: string | null
@@ -459,7 +457,6 @@ export type Database = {
           recommended_programs?: Json | null
           study_envs?: Json | null
           university?: string | null
-          university_country?: string | null
           updated_at?: string | null
           user_id?: number | null
           work_experience?: string | null
