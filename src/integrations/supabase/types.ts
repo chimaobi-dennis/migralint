@@ -187,36 +187,6 @@ export type Database = {
         }
         Relationships: []
       }
-      universities: {
-        Row: {
-          id: number
-          created_at: string
-          name: string | null
-          country: string | null
-          website: string | null
-          country_code: string | null
-          state: string | null
-        }
-        Insert: {
-          id: number
-          created_at?: string
-          name?: string | null
-          country?: string | null
-          website?: string | null
-          country_code?: string | null
-          state?: string | null
-        }
-        Update: {
-          id?: number
-          created_at?: string
-          name?: string | null
-          country?: string | null
-          website?: string | null
-          country_code?: string | null
-          state?: string | null
-        }
-        Relationships: []
-      }
       programs: {
         Row: {
           app_link: string | null
@@ -723,6 +693,36 @@ export type Database = {
           type?: string
           updated_at?: string
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      universities: {
+        Row: {
+          country: string | null
+          country_code: string | null
+          created_at: string
+          id: number
+          name: string | null
+          state: string | null
+          website: string | null
+        }
+        Insert: {
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          id?: number
+          name?: string | null
+          state?: string | null
+          website?: string | null
+        }
+        Update: {
+          country?: string | null
+          country_code?: string | null
+          created_at?: string
+          id?: number
+          name?: string | null
+          state?: string | null
+          website?: string | null
         }
         Relationships: []
       }
