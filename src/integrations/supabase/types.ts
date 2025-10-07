@@ -762,7 +762,8 @@ export type Database = {
           address: string | null
           adminAccess: string | null
           city: string | null
-          country_id: string | null
+          country: string | null
+          countryCode: string | null
           created_at: string | null
           credit_plan: string | null
           credits: number | null
@@ -780,7 +781,6 @@ export type Database = {
           name: string | null
           password: string | null
           phone: string | null
-          phone_code: string | null
           pm_last_four: string | null
           pm_type: string | null
           portfolio_link: string | null
@@ -805,7 +805,8 @@ export type Database = {
           address?: string | null
           adminAccess?: string | null
           city?: string | null
-          country_id?: string | null
+          country?: string | null
+          countryCode?: string | null
           created_at?: string | null
           credit_plan?: string | null
           credits?: number | null
@@ -823,7 +824,6 @@ export type Database = {
           name?: string | null
           password?: string | null
           phone?: string | null
-          phone_code?: string | null
           pm_last_four?: string | null
           pm_type?: string | null
           portfolio_link?: string | null
@@ -848,7 +848,8 @@ export type Database = {
           address?: string | null
           adminAccess?: string | null
           city?: string | null
-          country_id?: string | null
+          country?: string | null
+          countryCode?: string | null
           created_at?: string | null
           credit_plan?: string | null
           credits?: number | null
@@ -866,7 +867,6 @@ export type Database = {
           name?: string | null
           password?: string | null
           phone?: string | null
-          phone_code?: string | null
           pm_last_four?: string | null
           pm_type?: string | null
           portfolio_link?: string | null
