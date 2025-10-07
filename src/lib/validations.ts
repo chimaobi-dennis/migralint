@@ -5,8 +5,8 @@ export const studentProfileSchema = z.object({
   field_of_study: z.string().min(1, "Field of study is required").max(100),
   area_of_study: z.string().min(1, "Area of study is required").max(100),
   desired_fields: z.array(z.string()).min(1, "At least one field is required"),
-  origin_country: z.string().min(1, "Origin country is required").max(100),
-  university_country: z.string().min(1, "University country is required").max(100),
+  country: z.string().min(1, "Origin country is required").max(100),
+  university: z.string().min(1, "University country is required").max(100),
   language: z.string().min(1, "Language is required").max(50),
   language_test_type: z.string().max(50).optional(),
   language_test_score: z.number().int().min(0).max(120).optional(),
@@ -16,6 +16,7 @@ export const studentProfileSchema = z.object({
   interest_keywords: z.array(z.string()).optional(),
   work_experience: z.string().max(1000).optional(),
   fee_preference: z.string().max(100).optional(),
+  desired_degree_type: z.string().max(100).optional(),
 });
 
 export const applicationSchema = z.object({

@@ -532,11 +532,11 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
 
       const validatedData = studentProfileSchema.parse({
         degree: formData.education_level,
+        university: formData.university,
         field_of_study: formData.current_field,
         area_of_study: finalAreaOfStudy,
-        desired_degree_type: formData.desired_degree_type,
         desired_fields: formData.desired_fields,
-        university_country: formData.university,
+        desired_degree_type: formData.desired_degree_type,
         language: formData.language_test_type,
         language_test_type: formData.language_test_type,
         language_test_score: formData.language_test_score || 0,
@@ -554,7 +554,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         p_field_of_study: validatedData.field_of_study,
         p_area_of_study: validatedData.area_of_study,
         p_desired_fields: JSON.stringify(validatedData.desired_fields),
-        p_university_country: validatedData.university_country,
+        p_university: validatedData.university,
         p_language: validatedData.language,
         p_language_test_type: validatedData.language_test_type,
         p_language_test_score: validatedData.language_test_score,
@@ -564,6 +564,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         p_interest_keywords: JSON.stringify(validatedData.interest_keywords),
         p_work_experience: validatedData.work_experience,
         p_fee_preference: validatedData.fee_preference,
+        p_desired_degree_type: validatedData.desired_degree_type,
       });
 
       if (error) throw error;
@@ -946,8 +947,8 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <div
                   onClick={() => setFormData(prev => ({ ...prev, area_of_study: '', custom_area_of_study: '' }))}
                   className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${!formData.area_of_study && !formData.custom_area_of_study
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50 text-blue-700'
+                    : 'border-gray-200 hover:border-gray-300'
                     }`}
                 >
                   <div className="flex items-center gap-2">
@@ -968,8 +969,8 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                       }
                     }}
                     className={`p-3 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.area_of_study === area
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-200 hover:border-gray-300'
                       }`}
                   >
                     <div className="flex items-center justify-between">
@@ -1015,8 +1016,8 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                       key={degreeType}
                       onClick={() => setFormData(prev => ({ ...prev, desired_degree_type: degreeType }))}
                       className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${formData.desired_degree_type === degreeType
-                          ? 'border-blue-500 bg-blue-50 text-blue-700'
-                          : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300'
                         }`}
                     >
                       <div className="flex items-center justify-between">
