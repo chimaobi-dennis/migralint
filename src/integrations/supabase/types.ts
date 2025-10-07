@@ -394,6 +394,7 @@ export type Database = {
           area_of_study: string | null
           created_at: string | null
           degree: string | null
+          desired_degree_type: string | null
           fee_preference: string | null
           field_of_study: string | null
           has_language_test: number | null
@@ -407,6 +408,7 @@ export type Database = {
           recommended_percentage: Json | null
           recommended_programs: Json | null
           study_envs: Json | null
+          university: string | null
           university_country: string | null
           updated_at: string | null
           user_id: number | null
@@ -417,6 +419,7 @@ export type Database = {
           area_of_study?: string | null
           created_at?: string | null
           degree?: string | null
+          desired_degree_type?: string | null
           fee_preference?: string | null
           field_of_study?: string | null
           has_language_test?: number | null
@@ -430,6 +433,7 @@ export type Database = {
           recommended_percentage?: Json | null
           recommended_programs?: Json | null
           study_envs?: Json | null
+          university?: string | null
           university_country?: string | null
           updated_at?: string | null
           user_id?: number | null
@@ -440,6 +444,7 @@ export type Database = {
           area_of_study?: string | null
           created_at?: string | null
           degree?: string | null
+          desired_degree_type?: string | null
           fee_preference?: string | null
           field_of_study?: string | null
           has_language_test?: number | null
@@ -453,6 +458,7 @@ export type Database = {
           recommended_percentage?: Json | null
           recommended_programs?: Json | null
           study_envs?: Json | null
+          university?: string | null
           university_country?: string | null
           updated_at?: string | null
           user_id?: number | null
@@ -768,7 +774,7 @@ export type Database = {
           current_team_id: string | null
           document_subscription: number | null
           education: Json | null
-          email: string | null
+          email: string
           email_verified_at: string | null
           forum: number | null
           id: number
@@ -777,7 +783,7 @@ export type Database = {
           lname: string | null
           name: string | null
           password: string | null
-          phone: string | null
+          phone: string
           pm_last_four: string | null
           pm_type: string | null
           portfolio_link: string | null
@@ -811,7 +817,7 @@ export type Database = {
           current_team_id?: string | null
           document_subscription?: number | null
           education?: Json | null
-          email?: string | null
+          email: string
           email_verified_at?: string | null
           forum?: number | null
           id: number
@@ -820,7 +826,7 @@ export type Database = {
           lname?: string | null
           name?: string | null
           password?: string | null
-          phone?: string | null
+          phone: string
           pm_last_four?: string | null
           pm_type?: string | null
           portfolio_link?: string | null
@@ -854,7 +860,7 @@ export type Database = {
           current_team_id?: string | null
           document_subscription?: number | null
           education?: Json | null
-          email?: string | null
+          email?: string
           email_verified_at?: string | null
           forum?: number | null
           id?: number
@@ -863,7 +869,7 @@ export type Database = {
           lname?: string | null
           name?: string | null
           password?: string | null
-          phone?: string | null
+          phone?: string
           pm_last_four?: string | null
           pm_type?: string | null
           portfolio_link?: string | null
@@ -915,6 +921,7 @@ export type Database = {
         Args: {
           p_area_of_study: string
           p_degree: string
+          p_desired_fields: string
           p_fee_preference: string
           p_field_of_study: string
           p_has_language_test: number
@@ -923,11 +930,11 @@ export type Database = {
           p_language_test_score: number
           p_language_test_type: string
           p_language_test_year: number
+          p_origin_country: string
           p_study_envs: string
+          p_university_country: string
           p_user_id: string
           p_work_experience: string
-          p_desired_degree_type: string
-          p_university: string
         }
         Returns: undefined
       }
