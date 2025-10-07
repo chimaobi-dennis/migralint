@@ -34,7 +34,6 @@ interface FormData {
   study_environment: string;
   budget_preference: string;
   interest_keywords: string[];
-  origin_country: string;
 }
 
 interface ProgramsData {
@@ -289,7 +288,6 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     study_environment: '',
     budget_preference: '',
     interest_keywords: [],
-    origin_country: ''
   });
 
   const [programsData, setProgramsData] = useState<ProgramsData>({
@@ -538,7 +536,6 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         area_of_study: finalAreaOfStudy,
         desired_degree_type: formData.desired_degree_type,
         desired_fields: formData.desired_fields,
-        origin_country: originCountry,
         university_country: formData.university,
         language: formData.language_test_type,
         language_test_type: formData.language_test_type,
@@ -557,7 +554,6 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         p_field_of_study: validatedData.field_of_study,
         p_area_of_study: validatedData.area_of_study,
         p_desired_fields: JSON.stringify(validatedData.desired_fields),
-        p_origin_country: validatedData.origin_country,
         p_university_country: validatedData.university_country,
         p_language: validatedData.language,
         p_language_test_type: validatedData.language_test_type,
