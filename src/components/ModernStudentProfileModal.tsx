@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { UniversityAutocomplete } from "@/components/ui/university-autocomplete";
-import { X, ArrowLeft, ArrowRight, Check, ChevronDown, Search, GraduationCap } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight, Check, ChevronDown, Search, GraduationCap, Plus, BookOpen } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from 'sonner';
 import { studentProfileSchema } from "@/lib/validations";
@@ -601,7 +601,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search or type your field of study..."
+                    placeholder="Search for your degree (e.g., Computer Science, Business Administration)..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="pl-10 h-12"
@@ -609,44 +609,63 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                {filteredFields.map(field => (
-                  <button
-                    key={field}
-                    onClick={() => setFormData(prev => ({ ...prev, current_field: field }))}
-                    className={`p-3 text-left border rounded-lg transition-all hover:shadow-sm ${formData.current_field === field
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:border-gray-300'
-                      }`}
-                  >
-                    {field}
-                  </button>
-                ))}
-                {searchTerm && !filteredFields.some(f => f.toLowerCase() === searchTerm.toLowerCase()) && (
-                  <button
-                    onClick={() => setFormData(prev => ({ ...prev, current_field: searchTerm }))}
-                    className="p-3 text-left border border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Plus className="h-4 w-4 text-blue-500" />
-                      <span>Add "{searchTerm}" as custom degree</span>
+              {/* Show selected degree with remove option */}
+              {formData.current_field && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between p-4 bg-blue-50 border-2 border-blue-500 rounded-lg">
+                    <div className="flex items-center gap-3">
+                      <Check className="h-5 w-5 text-blue-500" />
+                      <span className="font-medium text-blue-700">{formData.current_field}</span>
                     </div>
-                  </button>
-                )}
-                {filteredFields.length === 0 && !searchTerm && (
-                  <div className="col-span-full text-center py-8 text-gray-500">
-                    <BookOpen className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>Start typing to search for your degree...</p>
+                    <button
+                      onClick={() => setFormData(prev => ({ ...prev, current_field: '' }))}
+                      className="p-1 hover:bg-blue-100 rounded-full transition-colors"
+                      title="Remove selection"
+                    >
+                      <X className="h-4 w-4 text-blue-500" />
+                    </button>
                   </div>
-                )}
-                {filteredFields.length === 0 && searchTerm && (
-                  <div className="col-span-full text-center py-8 text-gray-500">
-                    <Search className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                    <p>No degrees found matching "{searchTerm}"</p>
-                    <p className="text-sm mt-1">Click the "Add custom degree" button above to add it</p>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
+
+              {/* Show search results only when no degree is selected */}
+              {!formData.current_field && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                  {filteredFields.map(field => (
+                    <button
+                      key={field}
+                      onClick={() => setFormData(prev => ({ ...prev, current_field: field }))}
+                      className="p-3 text-left border rounded-lg transition-all hover:shadow-sm border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                    >
+                      <span>{field}</span>
+                    </button>
+                  ))}
+                  {searchTerm && !filteredFields.some(f => f.toLowerCase() === searchTerm.toLowerCase()) && (
+                    <button
+                      onClick={() => setFormData(prev => ({ ...prev, current_field: searchTerm }))}
+                      className="p-3 text-left border border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Plus className="h-4 w-4 text-blue-500" />
+                        <span>Add "{searchTerm}" as custom degree</span>
+                      </div>
+                    </button>
+                  )}
+                  {filteredFields.length === 0 && !searchTerm && (
+                    <div className="col-span-full text-center py-8 text-gray-500">
+                      <BookOpen className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <p>Start typing to search for your degree...</p>
+                    </div>
+                  )}
+                  {filteredFields.length === 0 && searchTerm && (
+                    <div className="col-span-full text-center py-8 text-gray-500">
+                      <Search className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                      <p>No degrees found matching "{searchTerm}"</p>
+                      <p className="text-sm mt-1">Click the "Add custom degree" button above to add it</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -654,7 +673,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  What area of study is "{formData.current_field}"?
+                  What area of study is {formData.current_field}?
                 </h3>
                 <p className="text-gray-600">Help us categorize your field of study</p>
               </div>
