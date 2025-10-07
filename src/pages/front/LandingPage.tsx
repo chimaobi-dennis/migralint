@@ -8,13 +8,21 @@ import { useAuth } from '@/contexts/AuthContext';
 import studentHero from '@/assets/student-hero.jpg';
 
 export const LandingPage = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
 
   const handleGetStarted = () => {
     if (user) {
       setProfileModalOpen(true);
+    } else {
+      setAuthModalOpen(true);
+    }
+  };
+
+  const handleAuthAction = async () => {
+    if (user) {
+      await signOut();
     } else {
       setAuthModalOpen(true);
     }
@@ -43,9 +51,9 @@ export const LandingPage = () => {
               <Button 
                 variant="ghost" 
                 className="text-gray-300 hover:text-white hover:bg-white/10 text-sm font-medium"
-                onClick={() => setAuthModalOpen(true)}
+                onClick={handleAuthAction}
               >
-                Login
+                {user ? 'Logout' : 'Login'}
               </Button>
               <Button 
                 className="bg-gradient-to-r from-yellow-400 to-orange-400 text-black hover:from-yellow-300 hover:to-orange-300 font-semibold px-6"
@@ -60,9 +68,9 @@ export const LandingPage = () => {
               <Button 
                 variant="ghost" 
                 className="text-gray-300 hover:text-white hover:bg-white/10 text-sm font-medium"
-                onClick={() => setAuthModalOpen(true)}
+                onClick={handleAuthAction}
               >
-                Login
+                {user ? 'Logout' : 'Login'}
               </Button>
               <Button 
                 size="sm"
