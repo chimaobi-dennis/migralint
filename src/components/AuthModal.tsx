@@ -63,6 +63,10 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
           password: formData.password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              firstName: formData.firstName,
+              lastName: formData.lastName
+            }
           }
         });
         

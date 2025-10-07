@@ -935,6 +935,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_user_bigint_id: {
+        Args: { auth_uuid: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
