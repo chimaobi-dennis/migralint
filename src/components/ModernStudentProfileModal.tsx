@@ -23,6 +23,7 @@ interface FormData {
   current_field: string;
   area_of_study: string;
   custom_area_of_study: string;
+  desired_degree_type: string;
   desired_fields: string[];
   language_test_type: string;
   language_test_score: number | null;
@@ -266,6 +267,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     current_field: '',
     area_of_study: '',
     custom_area_of_study: '',
+    desired_degree_type: '',
     desired_fields: [],
     language_test_type: '',
     language_test_score: null,
@@ -285,14 +287,41 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [keywordSearch, setKeywordSearch] = useState('');
+  const [step5SubStep, setStep5SubStep] = useState(1); // 1: degree type, 2: topics
+  const [searchedKeywords, setSearchedKeywords] = useState<string[]>([]);
 
-  const totalSteps = 10;
+  const totalSteps = 9; // Reduced from 10 since we're removing step 10
   const progress = (currentStep / totalSteps) * 100;
 
   // Fetch programs data on component mount
   useEffect(() => {
     fetchProgramsData();
   }, []);
+
+  // Handle keyword search
+  useEffect(() => {
+    const searchKeywords = async () => {
+      if (keywordSearch.trim()) {
+        const keywords = await fetchKeywords(keywordSearch);
+        setSearchedKeywords(keywords);
+      } else {
+        setSearchedKeywords([]);
+      }
+    };
+
+    const debounceTimer = setTimeout(searchKeywords, 300);
+    return () => clearTimeout(debounceTimer);
+  }, [keywordSearch]);
+
+  // Auto-advance to substep 2 when degree type is selected in step 5
+  useEffect(() => {
+    if (currentStep === 5 && step5SubStep === 1 && formData.desired_degree_type) {
+      const timer = setTimeout(() => {
+        setStep5SubStep(2);
+      }, 500); // Small delay for better UX
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep, step5SubStep, formData.desired_degree_type]);
 
   const fetchProgramsData = async () => {
     try {
@@ -329,6 +358,52 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     }
   };
 
+  // Fetch keywords based on search term (robust, deduped, capped)
+  const fetchKeywords = async (searchTerm: string) => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return [];
+
+    try {
+      // Fetch only keywords and cap rows for performance
+      const { data: programs, error } = await supabase
+        .from('programs')
+        .select('keywords')
+        .not('keywords', 'is', null)
+        .limit(1000);
+
+      if (error) {
+        console.error('Error fetching keywords:', error);
+        return [];
+      }
+
+      if (!programs) return [];
+
+      const results = new Set<string>();
+
+      programs.forEach((p: any) => {
+        if (Array.isArray(p.keywords)) {
+          p.keywords.forEach((kw: unknown) => {
+            if (typeof kw === 'string') {
+              const norm = kw.trim();
+              if (norm.toLowerCase().includes(q)) {
+                // keep original casing in UI, dedupe via Set
+                results.add(norm);
+              }
+            }
+          });
+        }
+      });
+
+      // Sort alphabetically and cap the list returned to the UI
+      return Array.from(results)
+        .sort((a, b) => a.localeCompare(b))
+        .slice(0, 200);
+    } catch (e:any) {
+      console.error('Error fetching keywords:', e?.message || e);
+      return [];
+    }
+  };
+
   const handleClose = () => {
     if (!isSubmitting) {
       setCurrentStep(1);
@@ -338,7 +413,14 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   };
 
   const nextStep = () => {
-    if (currentStep < totalSteps) {
+    if (currentStep === 5 && step5SubStep === 1) {
+      // Move to substep 2 within step 5
+      setStep5SubStep(2);
+    } else if (currentStep === 5 && step5SubStep === 2) {
+      // Move to step 6 and reset substep
+      setCurrentStep(currentStep + 1);
+      setStep5SubStep(1);
+    } else if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
       handleSubmit();
@@ -346,8 +428,19 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   };
 
   const prevStep = () => {
+    // From step 5, always go back to step 4
+    if (currentStep === 5) {
+      setCurrentStep(4);
+      setStep5SubStep(1); // reset substep
+      return;
+    }
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
+      const target = currentStep - 1;
+      setCurrentStep(target);
+      // If returning to step 5 from step 6, show substep 2 for continuity
+      if (target === 5) {
+        setStep5SubStep(2);
+      }
     }
   };
 
@@ -370,6 +463,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         degree: formData.education_level,
         field_of_study: formData.current_field,
         area_of_study: finalAreaOfStudy,
+        desired_degree_type: formData.desired_degree_type,
         desired_fields: formData.desired_fields,
         origin_country: '',
         university_country: formData.university,
@@ -404,13 +498,17 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       case 1: return formData.education_level !== '';
       case 2: return formData.university !== '';
       case 3: return formData.current_field !== '';
-      case 4: return formData.area_of_study !== '';
-      case 5: return formData.desired_fields.length > 0;
+      case 4: return true; // Area of study is optional
+      case 5: 
+        if (step5SubStep === 1) {
+          return formData.desired_degree_type !== '';
+        } else {
+          return true; // Topics are optional
+        }
       case 6: return formData.language_test_type !== '';
       case 7: return formData.work_experience !== '';
       case 8: return formData.study_environment !== '';
       case 9: return formData.budget_preference !== '';
-      case 10: return formData.interest_keywords.length > 0;
       default: return false;
     }
   };
@@ -432,11 +530,14 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   };
 
   const addKeyword = (keyword: string) => {
-    if (!formData.interest_keywords.includes(keyword)) {
+    if (!formData.interest_keywords.includes(keyword) && formData.interest_keywords.length < 10) {
       setFormData(prev => ({
         ...prev,
         interest_keywords: [...prev.interest_keywords, keyword]
       }));
+      // Clear the search input and results to start a new search
+      setKeywordSearch('');
+      setSearchedKeywords([]);
     }
   };
 
@@ -461,9 +562,11 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   
   const filteredFields = getFilteredFields();
 
-  const filteredKeywords = programsData.keywords.filter(keyword =>
-    keyword.toLowerCase().includes(keywordSearch.toLowerCase())
-  );
+  const filteredKeywords = keywordSearch.trim() 
+    ? searchedKeywords 
+    : programsData.keywords.filter(keyword =>
+        keyword.toLowerCase().includes(keywordSearch.toLowerCase())
+      );
 
   if (showConfirmation) {
     return (
@@ -696,7 +799,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 >
                   <div className="flex items-center gap-2">
                     <ArrowRight className="h-4 w-4" />
-                    <span>Skip - I'll specify later</span>
+                    <span>Optional </span>
                   </div>
                 </div>
 
@@ -744,58 +847,119 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
           )}
 
           {currentStep === 5 && (
-            <div className="space-y-6">
+            <div className="space-y-8">
+              {/* Substep 1: Degree Type Selection - Always visible */}
               <div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  I want to study a master's degree in...
-                </h3>
-                <p className="text-gray-600">Select up to 5 fields that interest you</p>
-              </div>
-
-              <div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search fields of study..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 h-12"
-                  />
+                <div>
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                    I want to study a...
+                  </h3>
+                  <p className="text-gray-600">Select the degree type you're interested in</p>
                 </div>
-              </div>
 
-              {formData.desired_fields.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.desired_fields.map(field => (
-                    <Badge key={field} variant="default" className="bg-blue-500 text-white px-3 py-1">
-                      {field}
-                      <button
-                        onClick={() => removeField(field)}
-                        className="ml-2 hover:bg-blue-600 rounded-full p-0.5"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
+                <div className="space-y-3 mt-4">
+                  {["Bachelor's degree", "Master's degree"].map(degreeType => (
+                    <div
+                      key={degreeType}
+                      onClick={() => setFormData(prev => ({ ...prev, desired_degree_type: degreeType }))}
+                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-sm ${
+                        formData.desired_degree_type === degreeType
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium">{degreeType}</span>
+                        {formData.desired_degree_type === degreeType && (
+                          <Check className="h-4 w-4 text-blue-500" />
+                        )}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              )}
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                {filteredFields.map(field => (
-                  <button
-                    key={field}
-                    onClick={() => addField(field)}
-                    disabled={formData.desired_fields.includes(field) || formData.desired_fields.length >= 5}
-                    className="p-3 text-left border rounded-lg transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed border-gray-200 hover:border-gray-300"
-                  >
-                    {field}
-                  </button>
-                ))}
               </div>
 
-              <p className="text-sm text-gray-500">
-                Selected: {formData.desired_fields.length}/5 fields
-              </p>
+              {/* Substep 2: Topics of Interest - Show when degree type is selected */}
+              {step5SubStep === 2 && (
+                <div className="border-t pt-6">
+                  <div>
+                    <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                      I am curious about these topics...
+                    </h3>
+                    <p className="text-gray-600">Search and select up to 10 topics that interest you</p>
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Search topics (e.g., artificial intelligence, sustainability)..."
+                        value={keywordSearch}
+                        onChange={(e) => setKeywordSearch(e.target.value)}
+                        className="pl-10 h-12"
+                      />
+                    </div>
+                  </div>
+
+                  {formData.interest_keywords.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {formData.interest_keywords.map(keyword => (
+                        <Badge key={keyword} variant="default" className="bg-blue-500 text-white px-3 py-1">
+                          {keyword}
+                          <button
+                            onClick={() => removeKeyword(keyword)}
+                            className="ml-2 hover:bg-blue-600 rounded-full p-0.5"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto mt-4">
+                    {filteredKeywords.slice(0, 50).map(keyword => (
+                      <button
+                        key={keyword}
+                        onClick={() => addKeyword(keyword)}
+                        disabled={formData.interest_keywords.includes(keyword) || formData.interest_keywords.length >= 10}
+                        className="p-3 text-left border rounded-lg transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed border-gray-200 hover:border-gray-300 text-sm"
+                      >
+                        {keyword}
+                      </button>
+                    ))}
+                    {keywordSearch && !filteredKeywords.some(k => k.toLowerCase() === keywordSearch.toLowerCase()) && (
+                      <button
+                        onClick={() => addKeyword(keywordSearch)}
+                        disabled={formData.interest_keywords.includes(keywordSearch) || formData.interest_keywords.length >= 10}
+                        className="p-3 text-left border border-dashed rounded-lg transition-all hover:shadow-sm border-gray-300 hover:border-blue-500 hover:bg-blue-50 text-sm"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Plus className="h-4 w-4 text-blue-500" />
+                          <span>Add "{keywordSearch}" as custom topic</span>
+                        </div>
+                      </button>
+                    )}
+                    {filteredKeywords.length === 0 && !keywordSearch && (
+                      <div className="col-span-full text-center py-8 text-gray-500">
+                        <BookOpen className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                        <p>Start typing to search for topics...</p>
+                      </div>
+                    )}
+                    {filteredKeywords.length === 0 && !!keywordSearch && (
+                      <div className="col-span-full text-center py-8 text-gray-500">
+                        <Search className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                        <p>No topics found matching "{keywordSearch}"</p>
+                        <p className="text-sm mt-1">Use the button above to add it as a custom topic</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <p className="text-sm text-gray-500 mt-4">
+                    Selected: {formData.interest_keywords.length}/10 topics
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -968,57 +1132,6 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             </div>
           )}
 
-          {currentStep === 10 && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  I am curious about these topics...
-                </h3>
-                <p className="text-gray-600">Select topics that interest you to help us personalize recommendations</p>
-              </div>
-
-              <div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                  <Input
-                    placeholder="Search topics..."
-                    value={keywordSearch}
-                    onChange={(e) => setKeywordSearch(e.target.value)}
-                    className="pl-10 h-12"
-                  />
-                </div>
-              </div>
-
-              {formData.interest_keywords.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.interest_keywords.map(keyword => (
-                    <Badge key={keyword} variant="default" className="bg-blue-500 text-white px-3 py-1">
-                      {keyword}
-                      <button
-                        onClick={() => removeKeyword(keyword)}
-                        className="ml-2 hover:bg-blue-600 rounded-full p-0.5"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-60 overflow-y-auto">
-                {filteredKeywords.slice(0, 50).map(keyword => (
-                  <button
-                    key={keyword}
-                    onClick={() => addKeyword(keyword)}
-                    disabled={formData.interest_keywords.includes(keyword)}
-                    className="p-3 text-left border rounded-lg transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed border-gray-200 hover:border-gray-300 text-sm"
-                  >
-                    {keyword}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Navigation */}
@@ -1049,7 +1162,8 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
               disabled={!isStepValid() || isSubmitting}
               className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white"
             >
-              {currentStep === totalSteps ? 'Complete' : 'Next'}
+              {currentStep === totalSteps ? 'Complete' : 
+               currentStep === 5 && step5SubStep === 1 ? 'Continue' : 'Next'}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
