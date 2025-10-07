@@ -79,9 +79,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
             }
           }
         });
-        
         if (error) throw error;
-        
         toast.success("Account created! Please check your email to verify your account.");
         onOpenChange(false);
       } else {
