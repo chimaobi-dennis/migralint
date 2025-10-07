@@ -37,13 +37,6 @@ interface ProgramsData {
   universities: string[];
 }
 
-interface Program {
-  id: number;
-  course_name: string;
-  university_name: string;
-  country: string;
-}
-
 const educationLevels = [
   { value: "bachelor", label: "Bachelor's Degree", description: "Undergraduate level" },
   { value: "master", label: "Master's Degree", description: "Postgraduate level" },
@@ -448,9 +441,19 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     }));
   };
 
-  const filteredFields = programsData.fields_of_study.filter(field =>
-    field.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter bachelor degrees for step 3, or use program fields for other steps
+  const getFilteredFields = () => {
+    if (currentStep === 3) {
+      return bachelorDegrees.filter(degree =>
+        degree.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    return programsData.fields_of_study.filter(field =>
+      field.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  };
+  
+  const filteredFields = getFilteredFields();
 
   const filteredKeywords = programsData.keywords.filter(keyword =>
     keyword.toLowerCase().includes(keywordSearch.toLowerCase())
@@ -622,10 +625,26 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 {searchTerm && !filteredFields.some(f => f.toLowerCase() === searchTerm.toLowerCase()) && (
                   <button
                     onClick={() => setFormData(prev => ({ ...prev, current_field: searchTerm }))}
-                    className="p-3 text-left border border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50"
+                    className="p-3 text-left border border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-all"
                   >
-                    Add "{searchTerm}"
+                    <div className="flex items-center gap-2">
+                      <Plus className="h-4 w-4 text-blue-500" />
+                      <span>Add "{searchTerm}" as custom degree</span>
+                    </div>
                   </button>
+                )}
+                {filteredFields.length === 0 && !searchTerm && (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    <BookOpen className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p>Start typing to search for your degree...</p>
+                  </div>
+                )}
+                {filteredFields.length === 0 && searchTerm && (
+                  <div className="col-span-full text-center py-8 text-gray-500">
+                    <Search className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                    <p>No degrees found matching "{searchTerm}"</p>
+                    <p className="text-sm mt-1">Click the "Add custom degree" button above to add it</p>
+                  </div>
                 )}
               </div>
             </div>
