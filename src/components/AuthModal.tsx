@@ -21,6 +21,8 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
   const [mode, setMode] = useState<AuthMode>('signin');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [phoneError, setPhoneError] = useState('');
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,8 +34,53 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     countryCode: ''
   });
 
+  const checkEmailUnique = async (email: string) => {
+    if (!email || mode !== 'signup') return;
+    try {
+      const { data, error } = await supabase
+        .from('user')
+        .select('email')
+        .eq('email', email)
+        .maybeSingle();
+      
+      if (data) {
+        setEmailError('This email is already registered');
+      } else {
+        setEmailError('');
+      }
+    } catch (error) {
+      console.error('Error checking email:', error);
+    }
+  };
+
+  const checkPhoneUnique = async (phone: string) => {
+    if (!phone || mode !== 'signup') return;
+    try {
+      const { data, error } = await supabase
+        .from('user')
+        .select('phone')
+        .eq('phone', phone)
+        .maybeSingle();
+      
+      if (data) {
+        setPhoneError('This phone number is already registered');
+      } else {
+        setPhoneError('');
+      }
+    } catch (error) {
+      console.error('Error checking phone:', error);
+    }
+  };
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear errors when user starts typing
+    if (field === 'email') {
+      setEmailError('');
+    } else if (field === 'phone') {
+      setPhoneError('');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,8 +111,14 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
           toast.error("Passwords do not match");
           return;
         }
+
+        // Check for existing email/phone
+        if (emailError || phoneError) {
+          toast.error("Please fix the validation errors before submitting");
+          return;
+        }
         
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: formData.email,
           password: formData.password,
           options: {
@@ -79,7 +132,16 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
             }
           }
         });
+        
         if (error) throw error;
+        
+        // Check if user already exists
+        if (data?.user?.identities?.length === 0) {
+          toast.error("An account with this email already exists. Please sign in instead.");
+          switchMode('signin');
+          return;
+        }
+        
         toast.success("Account created! Please check your email to verify your account.");
         onOpenChange(false);
       } else {
@@ -240,12 +302,14 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                   id="email"
                   type="email"
                   placeholder="your@email.com"
-                  className="pl-10"
+                  className={`pl-10 ${emailError ? 'border-red-500' : ''}`}
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
+                  onBlur={(e) => checkEmailUnique(e.target.value)}
                   required
                 />
               </div>
+              {emailError && <p className="text-sm text-red-500">{emailError}</p>}
             </div>
             {mode === 'signup' && (
               <div className="space-y-2">
@@ -259,10 +323,20 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                       country: country.name,
                       countryCode: country.code
                     }));
+                    setPhoneError('');
                   }}
                   placeholder="Enter your phone number"
                   required
+                  className={phoneError ? 'border-red-500' : ''}
                 />
+                <input
+                  type="text"
+                  className="hidden"
+                  value={formData.phone}
+                  onBlur={(e) => checkPhoneUnique(e.target.value)}
+                  onChange={() => {}}
+                />
+                {phoneError && <p className="text-sm text-red-500">{phoneError}</p>}
               </div>
             )}
             {mode !== 'reset' && (
