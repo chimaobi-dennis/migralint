@@ -1,0 +1,127 @@
+{
+  "metadata": {
+    "scraped_date": "2025-10-07T11:13:41.490Z",
+    "total_universities": 3,
+    "total_programs": 4,
+    "source": "universityadmissions.se",
+    "parser_version": "3.0",
+    "note": "Sample data extracted from provided HTML content"
+  },
+  "universities": [
+    {
+      "id": 1,
+      "name": "Jönköping University",
+      "country": "Sweden",
+      "website": null,
+      "country_code": "SE",
+      "state": null
+    },
+    {
+      "id": 2,
+      "name": "Linköping University",
+      "country": "Sweden",
+      "website": null,
+      "country_code": "SE",
+      "state": null
+    },
+    {
+      "id": 3,
+      "name": "Swedish University of Agricultural Sciences",
+      "country": "Sweden",
+      "website": null,
+      "country_code": "SE",
+      "state": null
+    }
+  ],
+  "programs": [
+    {
+      "id": 1,
+      "name": "Adult Learning and Global Change, Master's Programme, Distance",
+      "university": "Linköping University",
+      "location": "Linköping",
+      "credits": 60,
+      "application_code": "LIU-91200",
+      "level": "Master's",
+      "language": "English",
+      "application_period": "16 Oct - 15 Jan",
+      "start_date": "Autumn 2026 Period 1",
+      "pace_of_study": "Half-time",
+      "subject_areas": [
+        "Education",
+        "Education/Educational Sciences/Didactics",
+        "Educational Sciences/Didactics"
+      ],
+      "program_link": "https://liu.se/en/education/program/l7mlg",
+      "first_tuition": 54800,
+      "total_tuition": 109600
+    },
+    {
+      "id": 2,
+      "name": "Aeronautical Engineering, Master's Programme",
+      "university": "Linköping University",
+      "location": "Linköping",
+      "credits": 120,
+      "application_code": "LIU-91125",
+      "level": "Master's",
+      "language": "English",
+      "application_period": "16 Oct - 15 Jan",
+      "start_date": "Autumn 2026 Period 1",
+      "pace_of_study": "Full-time",
+      "subject_areas": [
+        "Materials, Construction and Manufacturing",
+        "Mechanical Engineering",
+        "Technology",
+        "Vehicle Engineering"
+      ],
+      "program_link": "https://liu.se/en/education/program/6maer",
+      "first_tuition": 83000,
+      "total_tuition": 332000
+    },
+    {
+      "id": 3,
+      "name": "Agricultural Economics and Management - Master's Programme",
+      "university": "Swedish University of Agricultural Sciences",
+      "location": "Uppsala",
+      "credits": 120,
+      "application_code": "SLU-81071",
+      "level": "Master's",
+      "language": "English",
+      "application_period": "16 Oct - 15 Jan",
+      "start_date": "Autumn 2026 Period 1",
+      "pace_of_study": "Full-time",
+      "subject_areas": [
+        "Business Administration",
+        "Economics",
+        "Industrial Economics",
+        "Organisation and Management",
+        "Leadership",
+        "Organisation and Management",
+        "Marketing"
+      ],
+      "program_link": "https://www.slu.se/en/education/programmes-courses/course/fb7c8b63-51bc-11f0-9455-252115c64b6d",
+      "first_tuition": 65000,
+      "total_tuition": 260000
+    },
+    {
+      "id": 4,
+      "name": "AI Engineering (master)",
+      "university": "Jönköping University",
+      "location": "Jönköping",
+      "credits": 120,
+      "application_code": "HJ-MU126",
+      "level": "Master's",
+      "language": "English",
+      "application_period": "16 Oct - 15 Jan",
+      "start_date": "Autumn 2026 Period 1",
+      "pace_of_study": "Full-time",
+      "subject_areas": [
+        "Computer Science",
+        "Computer Technology",
+        "Information Technology"
+      ],
+      "program_link": "http://ju.se/en/study-at-ju/our-programmes/master-programmes/ai-engineering-master-autumn-2026-mu126.html",
+      "first_tuition": 85000,
+      "total_tuition": 340000
+    }
+  ]
+}
