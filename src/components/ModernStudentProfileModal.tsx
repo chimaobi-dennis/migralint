@@ -520,7 +520,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         area_of_study: finalAreaOfStudy,
         desired_degree_type: formData.desired_degree_type,
         desired_fields: formData.desired_fields,
-        origin_country: '',
+        origin_country: formData.country,
         university_country: formData.university,
         language: formData.language_test_type,
         language_test_type: formData.language_test_type,

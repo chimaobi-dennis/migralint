@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Mail, Lock, User, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { PhoneInput } from '@/components/ui/phone-input';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { emailSchema, passwordSchema } from '@/lib/validations';
@@ -25,7 +26,10 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
     password: '',
     confirmPassword: '',
     firstName: '',
-    lastName: ''
+    lastName: '',
+    country: '',
+    phone: '',
+    countryCode: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -65,7 +69,10 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
             emailRedirectTo: `${window.location.origin}/`,
             data: {
               firstName: formData.firstName,
-              lastName: formData.lastName
+              lastName: formData.lastName,
+              country: formData.country,
+              countryCode: formData.countryCode,
+              phone: formData.phone
             }
           }
         });
@@ -117,7 +124,10 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       password: '',
       confirmPassword: '',
       firstName: '',
-      lastName: ''
+      lastName: '',
+      country: '',
+      phone: '',
+      countryCode: ''
     });
   };
 
@@ -236,7 +246,24 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
                 />
               </div>
             </div>
-
+            {mode === 'signup' && (
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <PhoneInput
+                  value={formData.phone}
+                  onChange={(fullNumber, country) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      phone: fullNumber,
+                      country: country.name,
+                      countryCode: country.code
+                    }));
+                  }}
+                  placeholder="Enter your phone number"
+                  required
+                />
+              </div>
+            )}
             {mode !== 'reset' && (
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
