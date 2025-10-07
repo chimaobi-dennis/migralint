@@ -37,6 +37,13 @@ interface ProgramsData {
   universities: string[];
 }
 
+interface Program {
+  id: number;
+  course_name: string;
+  university_name: string;
+  country: string;
+}
+
 const educationLevels = [
   { value: "bachelor", label: "Bachelor's Degree", description: "Undergraduate level" },
   { value: "master", label: "Master's Degree", description: "Postgraduate level" },
@@ -105,10 +112,12 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     universities: []
   });
 
+  const [bachelorPrograms, setBachelorPrograms] = useState<Program[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [keywordSearch, setKeywordSearch] = useState('');
+  const [programSearch, setProgramSearch] = useState('');
 
   const totalSteps = 10;
   const progress = (currentStep / totalSteps) * 100;
@@ -116,6 +125,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   // Fetch programs data on component mount
   useEffect(() => {
     fetchProgramsData();
+    fetchBachelorPrograms();
   }, []);
 
   const fetchProgramsData = async () => {
@@ -267,12 +277,35 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
     }));
   };
 
+  const fetchBachelorPrograms = async () => {
+    try {
+      const { data: programs } = await supabase
+        .from('programs')
+        .select('id, course_name, university_name, country')
+        .eq('level', 'bachelor')
+        .not('course_name', 'is', null)
+        .order('course_name', { ascending: true });
+
+      if (programs) {
+        setBachelorPrograms(programs);
+      }
+    } catch (error) {
+      console.error('Error fetching bachelor programs:', error);
+    }
+  };
+
   const filteredFields = programsData.fields_of_study.filter(field =>
     field.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const filteredKeywords = programsData.keywords.filter(keyword =>
     keyword.toLowerCase().includes(keywordSearch.toLowerCase())
+  );
+
+  const filteredPrograms = bachelorPrograms.filter(program =>
+    program.course_name?.toLowerCase().includes(programSearch.toLowerCase()) ||
+    program.university_name?.toLowerCase().includes(programSearch.toLowerCase()) ||
+    program.country?.toLowerCase().includes(programSearch.toLowerCase())
   );
 
   if (showConfirmation) {
@@ -484,18 +517,18 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                  I want to study a master's degree in...
+                  Browse Bachelor Programs
                 </h3>
-                <p className="text-gray-600">Select up to 5 fields that interest you</p>
+                <p className="text-gray-600">Search and select programs that interest you (up to 5)</p>
               </div>
               
               <div>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    placeholder="Search fields of study..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search programs by name, university, or country..."
+                    value={programSearch}
+                    onChange={(e) => setProgramSearch(e.target.value)}
                     className="pl-10 h-12"
                   />
                 </div>
@@ -517,21 +550,34 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
-                {filteredFields.map(field => (
-                  <button
-                    key={field}
-                    onClick={() => addField(field)}
-                    disabled={formData.desired_fields.includes(field) || formData.desired_fields.length >= 5}
-                    className="p-3 text-left border rounded-lg transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed border-gray-200 hover:border-gray-300"
-                  >
-                    {field}
-                  </button>
-                ))}
+              <div className="space-y-2 max-h-96 overflow-y-auto">
+                {filteredPrograms.length > 0 ? (
+                  filteredPrograms.map(program => (
+                    <button
+                      key={program.id}
+                      onClick={() => addField(program.course_name)}
+                      disabled={formData.desired_fields.includes(program.course_name) || formData.desired_fields.length >= 5}
+                      className={`w-full p-4 text-left border rounded-lg transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                        formData.desired_fields.includes(program.course_name)
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="font-medium text-gray-900">{program.course_name}</div>
+                      <div className="text-sm text-gray-500 mt-1">
+                        {program.university_name} • {program.country}
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    {programSearch ? 'No programs found matching your search' : 'Loading programs...'}
+                  </div>
+                )}
               </div>
               
               <p className="text-sm text-gray-500">
-                Selected: {formData.desired_fields.length}/5 fields
+                Selected: {formData.desired_fields.length}/5 programs
               </p>
             </div>
           )}
