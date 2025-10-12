@@ -27,6 +27,34 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    // Get business settings for AI model selection
+    const { data: businessSettings, error: businessError } = await supabase
+      .from('business_details')
+      .select('programMatchingAI')
+      .eq('id', 1)
+      .single();
+
+    if (businessError) {
+      console.error('Business settings fetch error:', businessError);
+    }
+
+    // Map business settings to actual model identifiers
+    const modelMapping: Record<string, string> = {
+      'Gemini 2.5 Pro': 'google/gemini-2.5-pro',
+      'Gemini 2.5 Flash': 'google/gemini-2.5-flash',
+      'Gemini 2.5 Flash Lite': 'google/gemini-2.5-flash-lite',
+      'Gemini 2.5 Flash Image': 'google/gemini-2.5-flash-image-preview',
+      'GPT-5': 'openai/gpt-5',
+      'GPT-5 Mini': 'openai/gpt-5-mini',
+      'GPT-5 Nano': 'openai/gpt-5-nano',
+    };
+
+    const selectedModel = businessSettings?.programMatchingAI 
+      ? modelMapping[businessSettings.programMatchingAI] || 'google/gemini-2.5-flash'
+      : 'google/gemini-2.5-flash';
+
+    console.log('Using AI model:', selectedModel);
+
     // Get student profile
     const { data: profile, error: profileError } = await supabase
       .from('student_profile')
@@ -42,11 +70,11 @@ serve(async (req) => {
       );
     }
 
-    // Get active programs
+    // Get active programs - increased limit for more matches
     const { data: programs, error: programsError } = await supabase
       .from('programs')
       .select('id, course_name, university_name, field_of_study, level, keywords, requirements_id, total_tuition, currency, country, city, degree')
-      .limit(500);
+      .limit(1000);
 
     if (programsError) {
       console.error('Programs fetch error:', programsError);
@@ -68,7 +96,7 @@ Analyze the student profile and available programs to recommend the best matches
 6. Study environment preferences
 7. Work experience alignment with program requirements
 
-Return the top 15-20 program matches with realistic match percentages (40-95%).`;
+Return the top 100+ program matches with realistic match percentages (40-95%). Prioritize quality matches but include a wide range of options.`;
 
     const userPrompt = `Student Profile:
 - Current Degree: ${profile.degree}
@@ -106,7 +134,7 @@ Recommend the best matching programs with match percentages and brief reasons.`;
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: selectedModel,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userPrompt }
@@ -172,10 +200,10 @@ Recommend the best matching programs with match percentages and brief reasons.`;
 
     const recommendations = JSON.parse(toolCall.function.arguments).recommendations || [];
     
-    // Sort by match percentage and take top 20
+    // Sort by match percentage and take top 100+
     const topRecommendations = recommendations
       .sort((a: any, b: any) => b.match_percentage - a.match_percentage)
-      .slice(0, 20);
+      .slice(0, 150);
 
     const programIds = topRecommendations.map((r: any) => r.program_id);
     const matchPercentages = topRecommendations.map((r: any) => r.match_percentage);
