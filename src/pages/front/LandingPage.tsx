@@ -4,17 +4,40 @@ import { ArrowRight, Check, Sparkles, Plane, Users, GraduationCap, MessageSquare
 import { Link } from 'react-router-dom';
 import { AuthModal } from '@/components/AuthModal';
 import { ModernStudentProfileModal } from '@/components/ModernStudentProfileModal';
+import { MatchingResultsModal } from '@/components/MatchingResultsModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import studentHero from '@/assets/student-hero.jpg';
 
 export const LandingPage = () => {
   const { user, signOut } = useAuth();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [profileModalOpen, setProfileModalOpen] = useState(false);
+  const [matchingModalOpen, setMatchingModalOpen] = useState(false);
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
     if (user) {
-      setProfileModalOpen(true);
+      // Check if user has existing student profile
+      const { data: bigintId } = await supabase.rpc('get_user_bigint_id', { auth_uuid: user.id });
+      
+      if (bigintId) {
+        const { data: profile } = await supabase
+          .from('student_profile')
+          .select('*')
+          .eq('user_id', bigintId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        // If profile exists, open matching modal, otherwise open profile modal
+        if (profile) {
+          setMatchingModalOpen(true);
+        } else {
+          setProfileModalOpen(true);
+        }
+      } else {
+        setProfileModalOpen(true);
+      }
     } else {
       setAuthModalOpen(true);
     }
@@ -399,6 +422,9 @@ export const LandingPage = () => {
       
       {/* Modern Student Profile Modal */}
       <ModernStudentProfileModal isOpen={profileModalOpen} onClose={() => setProfileModalOpen(false)} />
+      
+      {/* Matching Results Modal */}
+      <MatchingResultsModal isOpen={matchingModalOpen} onClose={() => setMatchingModalOpen(false)} />
     </div>
   );
 };

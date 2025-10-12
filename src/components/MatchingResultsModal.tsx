@@ -59,11 +59,17 @@ export const MatchingResultsModal = ({ isOpen, onClose }: MatchingResultsModalPr
 
     try {
       // Get bigint user ID
-      const { data: bigintId } = await supabase.rpc('get_user_bigint_id', { auth_uuid: user.id });
+      const { data: bigintId, error: idError } = await supabase.rpc('get_user_bigint_id', { auth_uuid: user.id });
       
-      // Poll for profile updates
-      const pollInterval = setInterval(async () => {
-        const { data: profileData } = await supabase
+      if (idError) {
+        console.error('Error getting bigint ID:', idError);
+        setIsMatching(false);
+        return;
+      }
+
+      // Initial fetch
+      const fetchData = async () => {
+        const { data: profileData, error: profileError } = await supabase
           .from('student_profile')
           .select('*')
           .eq('user_id', bigintId)
@@ -71,12 +77,59 @@ export const MatchingResultsModal = ({ isOpen, onClose }: MatchingResultsModalPr
           .limit(1)
           .maybeSingle();
 
-        if (profileData) {
-          setProfile(profileData as any);
+        if (profileError) {
+          console.error('Profile fetch error:', profileError);
+          return null;
+        }
+
+        return profileData;
+      };
+
+      // Do initial fetch
+      const initialProfile = await fetchData();
+      
+      if (initialProfile) {
+        setProfile(initialProfile as any);
+        
+        const recPrograms = Array.isArray(initialProfile.recommended_programs) ? initialProfile.recommended_programs : [];
+        const recPercentages = Array.isArray(initialProfile.recommended_percentage) ? initialProfile.recommended_percentage : [];
+        
+        // If we already have recommendations, show them immediately
+        if (recPrograms.length > 0) {
+          setIsMatching(false);
+          
+          // Fetch program details - convert to numbers
+          const programIds = recPrograms.map((id: any) => Number(id)).filter(id => !isNaN(id));
+          const { data: programsData } = await supabase
+            .from('programs')
+            .select('*')
+            .in('id', programIds);
+
+          if (programsData) {
+            setPrograms(programsData);
+            
+            // Create match percentage map
+            const percentageMap: Record<number, number> = {};
+            programIds.forEach((id: number, index: number) => {
+              percentageMap[id] = Number(recPercentages[index] || 0);
+            });
+            setMatchPercentages(percentageMap);
+          }
+          
+          return; // Don't start polling if we already have data
+        }
+      }
+      
+      // Poll for profile updates if we don't have recommendations yet
+      const pollInterval = setInterval(async () => {
+        const updatedProfile = await fetchData();
+
+        if (updatedProfile) {
+          setProfile(updatedProfile as any);
           
           // Check if matching is complete
-          const recPrograms = Array.isArray(profileData.recommended_programs) ? profileData.recommended_programs : [];
-          const recPercentages = Array.isArray(profileData.recommended_percentage) ? profileData.recommended_percentage : [];
+          const recPrograms = Array.isArray(updatedProfile.recommended_programs) ? updatedProfile.recommended_programs : [];
+          const recPercentages = Array.isArray(updatedProfile.recommended_percentage) ? updatedProfile.recommended_percentage : [];
           
           if (recPrograms.length > 0) {
             setIsMatching(false);
@@ -87,8 +140,7 @@ export const MatchingResultsModal = ({ isOpen, onClose }: MatchingResultsModalPr
             const { data: programsData } = await supabase
               .from('programs')
               .select('*')
-              .in('id', programIds)
-              .limit(20);
+              .in('id', programIds);
 
             if (programsData) {
               setPrograms(programsData);
