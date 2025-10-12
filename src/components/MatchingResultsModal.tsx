@@ -235,7 +235,7 @@ export const MatchingResultsModal = ({ isOpen, onClose }: MatchingResultsModalPr
                       )}
                     </button>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="px-4 py-4 space-y-4 bg-white">
+                  <CollapsibleContent className="px-4 py-4 space-y-4 bg-white max-h-[50vh] overflow-y-auto">
                     {profile && <ProfileContent profile={profile} />}
                   </CollapsibleContent>
                 </Collapsible>
