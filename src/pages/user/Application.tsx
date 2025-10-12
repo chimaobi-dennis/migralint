@@ -8,80 +8,74 @@ import { DeadlineAlert } from "@/components/DeadlineAlert";
 import { ApplicationProfile } from "@/components/ApplicationProfile";
 import NewApplicationModal from "@/components/NewApplicationModal";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import axios from 'axios';
 
-interface SupabaseApplication {
+interface Requirement {
+  name: string;
+  completed: boolean;
+}
+
+interface Program {
   id: number;
-  user_id: number | null;
-  status: string | null;
-  progress: number | null;
-  degree: string | null;
-  studyField: string | null;
-  university: string | null;
-  study_destination: string | null;
-  created_at: string | null;
-  updated_at: string | null;
-  selected_programs: string | null;
-  recommended: string | null;
-  accepted_admission: string | null;
-  rejected_admission: string | null;
-  type: string | null;
+  name: string;
+  university: string;
+  status: string;
+  deadline?: string;
+  requirements: Requirement[];
+  completed_requirements: string[];
+}
+
+interface Application {
+  id: number;
+  isGroup: boolean;
+  name: string;
+  status: string;
+  progress: number;
+  programs: Program[];
+  created_at: string;
+  updated_at: string;
 }
 
 const Index = () => {
-  const [applications, setApplications] = useState<SupabaseApplication[]>([]);
-  const [filteredApplications, setFilteredApplications] = useState<SupabaseApplication[]>([]);
-  const [selectedApplication, setSelectedApplication] = useState<SupabaseApplication | null>(null);
-  const [selectedProgram, setSelectedProgram] = useState<any | null>(null);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
+  const [selectedApplication, setSelectedApplication] = useState<Application | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showNewApplicationModal, setShowNewApplicationModal] = useState(false);
   const [showNewAppModal, setShowNewAppModal] = useState(false);
   const [loadingApplications, setLoadingApplications] = useState(true);
   const [errorLoadingApplications, setErrorLoadingApplications] = useState<string | null>(null);
-  const userId = 1; // Development user ID
+  const userId = document.getElementById('root')?.getAttribute('data-user-id');
   
 
   useEffect(() => {
     const fetchApplications = async () => {
       try {
         setLoadingApplications(true);
-
-        // Fetch from Supabase with real data
-        const { data, error } = await (supabase as any)
-          .from('applications')
-          .select('*')
-          .eq('user_id', userId);
-
-        if (error) {
-          console.error('Supabase error:', error);
-          setErrorLoadingApplications(error.message);
-          return;
+        const response = await fetch(`/api/v1/applications/${userId}`);
+        const data = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(data.message || 'Failed to fetch applications');
         }
-
-        const apps: SupabaseApplication[] = (data || []).map((row: any) => ({
-          id: row.id,
-          user_id: row.user_id,
-          status: row.status,
-          progress: row.progress,
-          degree: row.degree,
-          studyField: row.studyField,
-          university: row.university,
-          study_destination: row.study_destination,
-          created_at: row.created_at,
-          updated_at: row.updated_at,
-          selected_programs: row.selected_programs,
-          recommended: row.recommended,
-          accepted_admission: row.accepted_admission,
-          rejected_admission: row.rejected_admission,
-          type: row.type,
-        }));
-
-        setApplications(apps);
-        setFilteredApplications(apps);
-        setErrorLoadingApplications(null);
+        
+        if (data.status === 'success') {
+          const formattedData = data.data.map((app: any) => ({
+            ...app,
+            // Map API response to frontend format if needed
+            // Add any additional formatting here
+          }));
+           
+          setApplications(formattedData);
+          setFilteredApplications(formattedData);
+          setErrorLoadingApplications(null);
+        } else {
+          throw new Error(data.message || 'Invalid response format');
+        }
       } catch (err) {
         console.error('Error fetching applications:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Failed to load applications from database';
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load applications. Please try again later.';
         setErrorLoadingApplications(errorMessage);
         toast.error(errorMessage);
       } finally {
@@ -97,20 +91,22 @@ const Index = () => {
       setFilteredApplications(applications);
     } else {
       const filtered = applications.filter(app => 
-        (app.degree?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (app.studyField?.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (app.university?.toLowerCase().includes(searchTerm.toLowerCase()))
+        app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        app.programs.some(program => 
+          program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          program.university.toLowerCase().includes(searchTerm.toLowerCase())
+        )
       );
       setFilteredApplications(filtered);
     }
   }, [searchTerm, applications]);
 
-  const handleProgramClick = (program: any) => {
+  const handleProgramClick = (program: Program) => {
     setSelectedProgram(program);
     setSelectedApplication(null);
   };
 
-  const handleApplicationClick = (application: SupabaseApplication) => {
+  const handleApplicationClick = (application: Application) => {
     setSelectedApplication(application);
     setSelectedProgram(null);
 
@@ -127,44 +123,11 @@ const Index = () => {
         }
       }, 100);
     }
-  };
+  }; 
 
-  const handleSaveNewApplication = async (data: any) => {
-    try {
-      setLoadingApplications(true);
-      
-      const { data: newApp, error } = await (supabase as any)
-        .from('applications')
-        .insert([
-          { 
-            user_id: userId,
-            status: 'In Progress',
-            progress: 0,
-            degree: data.degree,
-            studyField: data.field,
-            university: data.university,
-            study_destination: data.studyDestination,
-            selected_programs: JSON.stringify(data.selectedPrograms),
-            type: data.type
-          }
-        ])
-        .select();
-
-      if (error) throw error;
-
-      // Add the new application to the local state
-      const newApplication = newApp[0];
-      setApplications(prev => [...prev, newApplication]);
-      setFilteredApplications(prev => [...prev, newApplication]);
-      
-      toast.success('Application created successfully');
-      setShowNewApplicationModal(false);
-    } catch (err) {
-      console.error('Error creating application:', err);
-      toast.error('Failed to create application');
-    } finally {
-      setLoadingApplications(false);
-    }
+  const handleSaveNewApplication = (data: any) => {
+    console.log('New application data:', data);
+    // TODO: Implement API call to save new application
   };
 
  
@@ -227,29 +190,16 @@ const Index = () => {
                   ))}
                 </div>
               ) : (
-                filteredApplications.map((application) => {
-                  const cardApp = {
-                    id: application.id,
-                    university: application.university || 'Unknown University',
-                    program: application.studyField || 'Program',
-                    deadline: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-                    status: application.status || 'In Progress',
-                    progress: application.progress ?? 0,
-                    requirements: [] as string[],
-                    completed: [] as string[],
-                    isGroup: false,
-                  };
-                  return (
-                    <ApplicationCard
-                      key={application.id}
-                      application={cardApp}
-                      onClick={() => handleApplicationClick(application)}
-                      onProgramClick={handleProgramClick}
-                      isSelected={selectedApplication?.id === application.id}
-                      selectedProgramId={(selectedProgram as any)?.id}
-                    />
-                  );
-                })
+                filteredApplications.map((application) => (
+                  <ApplicationCard
+                    key={application.id}
+                    application={application}
+                    onClick={() => handleApplicationClick(application)}
+                    onProgramClick={handleProgramClick}
+                    isSelected={selectedApplication?.id === application.id}
+                    selectedProgramId={selectedProgram?.id}
+                  />
+                ))
               )}
             </div>
           </div>
