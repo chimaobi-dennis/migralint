@@ -150,27 +150,33 @@ export type Database = {
       }
       business_details: {
         Row: {
+          academicWritingAI: string | null
           created_at: string
           description: string | null
           id: number
+          programMatchingAI: string | null
           siteFav: string | null
           siteLogo: string | null
           siteName: string | null
           tagline: string | null
         }
         Insert: {
+          academicWritingAI?: string | null
           created_at?: string
           description?: string | null
           id?: number
+          programMatchingAI?: string | null
           siteFav?: string | null
           siteLogo?: string | null
           siteName?: string | null
           tagline?: string | null
         }
         Update: {
+          academicWritingAI?: string | null
           created_at?: string
           description?: string | null
           id?: number
+          programMatchingAI?: string | null
           siteFav?: string | null
           siteLogo?: string | null
           siteName?: string | null

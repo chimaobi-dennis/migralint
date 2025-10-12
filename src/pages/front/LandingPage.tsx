@@ -17,24 +17,16 @@ export const LandingPage = () => {
 
   const handleGetStarted = async () => {
     if (user) {
-      // Check if user has existing student profile
-      const { data: bigintId } = await supabase.rpc('get_user_bigint_id', { auth_uuid: user.id });
-      
-      if (bigintId) {
-        const { data: profile } = await supabase
-          .from('student_profile')
-          .select('*')
-          .eq('user_id', bigintId)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        
-        // If profile exists, open matching modal, otherwise open profile modal
-        if (profile) {
-          setMatchingModalOpen(true);
-        } else {
-          setProfileModalOpen(true);
-        }
+      // Rely on RLS to return only the current user's profiles
+      const { data: profile } = await supabase
+        .from('student_profile')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (profile) {
+        setMatchingModalOpen(true);
       } else {
         setProfileModalOpen(true);
       }
