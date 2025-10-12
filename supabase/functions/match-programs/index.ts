@@ -27,65 +27,72 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Get business settings for AI model selection
-    const { data: businessSettings, error: businessError } = await supabase
-      .from('business_details')
-      .select('programMatchingAI')
-      .eq('id', 1)
-      .single();
+    // Convert UUID to bigint for student_profile lookup
+    const { data: bigintId, error: conversionError } = await supabase
+      .rpc('get_user_bigint_id', { auth_uuid: user_id });
 
-    if (businessError) {
-      console.error('Business settings fetch error:', businessError);
-    }
-
-    // Map business settings to actual model identifiers
-    const modelMapping: Record<string, string> = {
-      'Gemini 2.5 Pro': 'google/gemini-2.5-pro',
-      'Gemini 2.5 Flash': 'google/gemini-2.5-flash',
-      'Gemini 2.5 Flash Lite': 'google/gemini-2.5-flash-lite',
-      'Gemini 2.5 Flash Image': 'google/gemini-2.5-flash-image-preview',
-      'GPT-5': 'openai/gpt-5',
-      'GPT-5 Mini': 'openai/gpt-5-mini',
-      'GPT-5 Nano': 'openai/gpt-5-nano',
-    };
-
-    const selectedModel = businessSettings?.programMatchingAI 
-      ? modelMapping[businessSettings.programMatchingAI] || 'google/gemini-2.5-flash'
-      : 'google/gemini-2.5-flash';
-
-    console.log('Using AI model:', selectedModel);
-
-    // Get student profile
-    const { data: profile, error: profileError } = await supabase
-      .from('student_profile')
-      .select('*')
-      .eq('user_id', user_id)
-      .single();
-
-    if (profileError || !profile) {
-      console.error('Profile fetch error:', profileError);
+    if (conversionError || !bigintId) {
+      console.error('ID conversion error:', conversionError);
       return new Response(
-        JSON.stringify({ error: 'Student profile not found' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Failed to process user ID' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Get active programs - increased limit for more matches
-    const { data: programs, error: programsError } = await supabase
-      .from('programs')
-      .select('id, course_name, university_name, field_of_study, level, keywords, requirements_id, total_tuition, currency, country, city, degree')
-      .limit(1000);
+    console.log('Processing matching for user:', user_id, 'bigint:', bigintId);
 
-    if (programsError) {
-      console.error('Programs fetch error:', programsError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to fetch programs' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Start background task for AI matching
+    const matchingTask = async () => {
+      try {
+        // Get business settings for AI model selection
+        const { data: businessSettings } = await supabase
+          .from('business_details')
+          .select('programMatchingAI')
+          .eq('id', 1)
+          .single();
 
-    // Prepare matching prompt
-    const systemPrompt = `You are an expert education counselor specializing in matching students to university programs.
+        // Map business settings to actual model identifiers
+        const modelMapping: Record<string, string> = {
+          'Gemini 2.5 Pro': 'google/gemini-2.5-pro',
+          'Gemini 2.5 Flash': 'google/gemini-2.5-flash',
+          'Gemini 2.5 Flash Lite': 'google/gemini-2.5-flash-lite',
+          'Gemini 2.5 Flash Image': 'google/gemini-2.5-flash-image-preview',
+          'GPT-5': 'openai/gpt-5',
+          'GPT-5 Mini': 'openai/gpt-5-mini',
+          'GPT-5 Nano': 'openai/gpt-5-nano',
+        };
+
+        const selectedModel = businessSettings?.programMatchingAI 
+          ? modelMapping[businessSettings.programMatchingAI] || 'google/gemini-2.5-flash'
+          : 'google/gemini-2.5-flash';
+
+        console.log('Using AI model:', selectedModel);
+
+        // Get student profile using bigint ID
+        const { data: profile, error: profileError } = await supabase
+          .from('student_profile')
+          .select('*')
+          .eq('user_id', bigintId)
+          .single();
+
+        if (profileError || !profile) {
+          console.error('Profile fetch error:', profileError);
+          return;
+        }
+
+        // Get active programs
+        const { data: programs, error: programsError } = await supabase
+          .from('programs')
+          .select('id, course_name, university_name, field_of_study, level, keywords, requirements_id, total_tuition, currency, country, city, degree')
+          .limit(1000);
+
+        if (programsError) {
+          console.error('Programs fetch error:', programsError);
+          return;
+        }
+
+        // Prepare matching prompt
+        const systemPrompt = `You are an expert education counselor specializing in matching students to university programs.
 
 Analyze the student profile and available programs to recommend the best matches based on:
 1. Field of study alignment (primary factor)
@@ -98,7 +105,7 @@ Analyze the student profile and available programs to recommend the best matches
 
 Return the top 100+ program matches with realistic match percentages (40-95%). Prioritize quality matches but include a wide range of options.`;
 
-    const userPrompt = `Student Profile:
+        const userPrompt = `Student Profile:
 - Current Degree: ${profile.degree}
 - Field of Study: ${profile.field_of_study}
 - Area of Study: ${profile.area_of_study || 'Not specified'}
@@ -126,111 +133,104 @@ Keywords: ${JSON.stringify(p.keywords || [])}
 
 Recommend the best matching programs with match percentages and brief reasons.`;
 
-    // Call Lovable AI with tool calling
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${lovableApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: selectedModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "recommend_programs",
-            description: "Recommend university programs with match percentages",
-            parameters: {
-              type: "object",
-              properties: {
-                recommendations: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      program_id: { type: "number", description: "The program ID" },
-                      match_percentage: { type: "number", minimum: 40, maximum: 95, description: "Match percentage" },
-                      match_reason: { type: "string", description: "Brief reason for the match" }
-                    },
-                    required: ["program_id", "match_percentage", "match_reason"]
-                  }
+        // Call Lovable AI with tool calling
+        const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${lovableApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: selectedModel,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt }
+            ],
+            tools: [{
+              type: "function",
+              function: {
+                name: "recommend_programs",
+                description: "Recommend university programs with match percentages",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    recommendations: {
+                      type: "array",
+                      items: {
+                        type: "object",
+                        properties: {
+                          program_id: { type: "number", description: "The program ID" },
+                          match_percentage: { type: "number", minimum: 40, maximum: 95, description: "Match percentage" },
+                          match_reason: { type: "string", description: "Brief reason for the match" }
+                        },
+                        required: ["program_id", "match_percentage", "match_reason"]
+                      }
+                    }
+                  },
+                  required: ["recommendations"]
                 }
-              },
-              required: ["recommendations"]
-            }
-          }
-        }],
-        tool_choice: { type: "function", function: { name: "recommend_programs" } }
-      }),
-    });
+              }
+            }],
+            tool_choice: { type: "function", function: { name: "recommend_programs" } }
+          }),
+        });
 
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('AI API error:', aiResponse.status, errorText);
-      
-      if (aiResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        if (!aiResponse.ok) {
+          const errorText = await aiResponse.text();
+          console.error('AI API error:', aiResponse.status, errorText);
+          return;
+        }
+
+        const aiData = await aiResponse.json();
+        console.log('AI Response received, processing recommendations...');
+
+        // Extract recommendations from tool call
+        const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+        if (!toolCall || !toolCall.function?.arguments) {
+          console.error('No tool call in AI response');
+          return;
+        }
+
+        const recommendations = JSON.parse(toolCall.function.arguments).recommendations || [];
+        
+        // Sort by match percentage and take top 100+
+        const topRecommendations = recommendations
+          .sort((a: any, b: any) => b.match_percentage - a.match_percentage)
+          .slice(0, 150);
+
+        const programIds = topRecommendations.map((r: any) => r.program_id);
+        const matchPercentages = topRecommendations.map((r: any) => r.match_percentage);
+
+        // Update student profile with recommendations using bigint ID
+        const { error: updateError } = await supabase
+          .from('student_profile')
+          .update({
+            recommended_programs: programIds,
+            recommended_percentage: matchPercentages,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', bigintId);
+
+        if (updateError) {
+          console.error('Update error:', updateError);
+          return;
+        }
+
+        console.log('Successfully matched', programIds.length, 'programs for user', user_id);
+      } catch (error) {
+        console.error('Background matching error:', error);
       }
-      
-      return new Response(
-        JSON.stringify({ error: 'AI matching failed' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    };
 
-    const aiData = await aiResponse.json();
-    console.log('AI Response:', JSON.stringify(aiData, null, 2));
+    // Start background task
+    EdgeRuntime.waitUntil(matchingTask());
 
-    // Extract recommendations from tool call
-    const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-    if (!toolCall || !toolCall.function?.arguments) {
-      console.error('No tool call in AI response');
-      return new Response(
-        JSON.stringify({ error: 'Failed to parse AI recommendations' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const recommendations = JSON.parse(toolCall.function.arguments).recommendations || [];
-    
-    // Sort by match percentage and take top 100+
-    const topRecommendations = recommendations
-      .sort((a: any, b: any) => b.match_percentage - a.match_percentage)
-      .slice(0, 150);
-
-    const programIds = topRecommendations.map((r: any) => r.program_id);
-    const matchPercentages = topRecommendations.map((r: any) => r.match_percentage);
-
-    // Update student profile with recommendations
-    const { error: updateError } = await supabase
-      .from('student_profile')
-      .update({
-        recommended_programs: programIds,
-        recommended_percentage: matchPercentages,
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', user_id);
-
-    if (updateError) {
-      console.error('Update error:', updateError);
-      return new Response(
-        JSON.stringify({ error: 'Failed to save recommendations' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
+    // Return immediate response
     return new Response(
       JSON.stringify({
         success: true,
-        recommendations: topRecommendations,
-        total_matched: programIds.length
+        message: 'Program matching started in background',
+        user_id: user_id
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

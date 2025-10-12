@@ -606,19 +606,19 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
 
       await saveProfileToDatabase(user.id);
       
-      // Call AI matching function
-      toast.loading("Finding your perfect programs...", { duration: 3000 });
+      // Call AI matching function in background
+      toast.success("Profile saved! Finding your perfect programs in the background...");
 
-      const { error: matchError } = await supabase.functions.invoke('match-programs', {
+      // Fire and forget - matching happens in background
+      supabase.functions.invoke('match-programs', {
         body: { user_id: user.id }
+      }).then(({ error: matchError }) => {
+        if (matchError) {
+          console.error('Matching error:', matchError);
+        } else {
+          console.log('Program matching started successfully');
+        }
       });
-
-      if (matchError) {
-        console.error('Matching error:', matchError);
-        toast.error("Program matching failed, but your profile was saved.");
-      } else {
-        toast.success("Profile saved and matched with programs!");
-      }
     } catch (error: any) {
       // Error already handled in saveProfileToDatabase
     } finally {
@@ -638,18 +638,19 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             setIsSubmitting(true);
             await saveProfileToDatabase(user.id);
             
-            // Call AI matching function
-            toast.loading("Finding your perfect programs...", { duration: 3000 });
-            const { error: matchError } = await supabase.functions.invoke('match-programs', {
-              body: { user_id: user.id }
-            });
+            // Call AI matching function in background
+            toast.success("Profile saved! Finding your perfect programs in the background...");
 
-            if (matchError) {
-              console.error('Matching error:', matchError);
-              toast.error("Program matching failed, but your profile was saved.");
-            } else {
-              toast.success("Profile saved and matched with programs!");
-            }
+            // Fire and forget - matching happens in background
+            supabase.functions.invoke('match-programs', {
+              body: { user_id: user.id }
+            }).then(({ error: matchError }) => {
+              if (matchError) {
+                console.error('Matching error:', matchError);
+              } else {
+                console.log('Program matching started successfully');
+              }
+            });
           } catch (error) {
             console.error('Error processing pending profile:', error);
             toast.error('Failed to save your profile. Please try again.');
