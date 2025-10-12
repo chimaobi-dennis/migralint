@@ -3,9 +3,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Loader2, Sparkles, GraduationCap, MapPin, DollarSign, Clock, BookOpen, X } from 'lucide-react';
+import { Loader2, Sparkles, GraduationCap, MapPin, DollarSign, Clock, BookOpen, X, ChevronDown, ChevronUp, TrendingUp } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface MatchingResultsModalProps {
   isOpen: boolean;
@@ -47,6 +48,7 @@ export const MatchingResultsModal = ({ isOpen, onClose }: MatchingResultsModalPr
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [programs, setPrograms] = useState<Program[]>([]);
   const [matchPercentages, setMatchPercentages] = useState<Record<number, number>>({});
+  const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen && user) {
@@ -187,196 +189,245 @@ export const MatchingResultsModal = ({ isOpen, onClose }: MatchingResultsModalPr
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-7xl h-[95vh] overflow-hidden p-0 border-0">
-        {/* Header */}
-        <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white p-8">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 text-white/80 hover:text-white hover:bg-white/10 rounded-full"
-            onClick={onClose}
-          >
-            <X className="h-5 w-5" />
-          </Button>
+      <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full overflow-hidden p-0 border-0 gap-0 [&>button]:hidden">
+        <div className="flex flex-col h-full w-full overflow-hidden bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30">
+          {/* Header */}
+          <div className="relative bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-4 sm:px-6 lg:px-8 py-4 sm:py-6 shadow-lg">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-3 right-3 sm:top-4 sm:right-4 text-white/90 hover:text-white hover:bg-white/20 rounded-full transition-all"
+              onClick={onClose}
+            >
+              <X className="h-5 w-5" />
+            </Button>
 
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-              <Sparkles className="h-8 w-8" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">Your Perfect Program Matches</h1>
-              <p className="text-blue-100 text-sm mt-1">
-                AI-powered recommendations based on your profile
-              </p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 max-w-7xl mx-auto pr-12">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center flex-shrink-0">
+                <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-300" />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">Your Perfect Matches</h1>
+                <p className="text-blue-100 text-xs sm:text-sm mt-1">
+                  AI-powered program recommendations tailored for you
+                </p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="flex h-[calc(100%-8rem)] overflow-hidden">
-          {/* Left Side - Profile Summary */}
-          <div className="w-80 bg-gray-50 border-r border-gray-200 overflow-y-auto p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <GraduationCap className="h-5 w-5 text-blue-600" />
-              Your Profile
-            </h2>
-            
-            {profile && (
-              <div className="space-y-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Current Education</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.degree}</p>
-                </div>
-                
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Field of Study</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.field_of_study}</p>
-                </div>
+          {/* Content Area */}
+          <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+            {/* Profile Sidebar - Collapsible on Mobile */}
+            <div className="lg:w-80 xl:w-96 bg-white/80 backdrop-blur-sm border-b lg:border-b-0 lg:border-r border-gray-200 flex-shrink-0">
+              <div className="lg:h-full lg:overflow-y-auto">
+                {/* Mobile Collapsible Header */}
+                <Collapsible open={profileOpen} onOpenChange={setProfileOpen} className="lg:hidden">
+                  <CollapsibleTrigger asChild>
+                    <button className="w-full px-4 py-3 flex items-center justify-between bg-white border-b hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <GraduationCap className="h-5 w-5 text-blue-600" />
+                        <span className="font-semibold text-gray-900">Your Profile</span>
+                      </div>
+                      {profileOpen ? (
+                        <ChevronUp className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                      )}
+                    </button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="px-4 py-4 space-y-4 bg-white">
+                    {profile && <ProfileContent profile={profile} />}
+                  </CollapsibleContent>
+                </Collapsible>
 
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Desired Degree</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.desired_degree_type}</p>
+                {/* Desktop Always-Visible Profile */}
+                <div className="hidden lg:block p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <GraduationCap className="h-5 w-5 text-blue-600" />
+                    Your Profile
+                  </h2>
+                  {profile && <ProfileContent profile={profile} />}
                 </div>
+              </div>
+            </div>
 
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Language Test</p>
-                  <p className="text-sm font-medium text-gray-900">
-                    {profile.language_test_type}
-                    {profile.language_test_score > 0 && `: ${profile.language_test_score}`}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Work Experience</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.work_experience}</p>
-                </div>
-
-                {profile.interest_keywords && Array.isArray(profile.interest_keywords) && profile.interest_keywords.length > 0 && (
-                  <div>
-                    <p className="text-xs text-gray-500 mb-2">Interests</p>
-                    <div className="flex flex-wrap gap-1">
-                      {profile.interest_keywords.map((keyword: any, idx: number) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
-                          {String(keyword)}
-                        </Badge>
-                      ))}
+            {/* Programs Area */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+                {isMatching ? (
+                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                    <div className="relative mb-8">
+                      <div className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-500 rounded-full flex items-center justify-center animate-pulse shadow-xl">
+                        <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 text-white animate-spin" />
+                      </div>
+                      <Sparkles className="absolute -top-1 -right-1 h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 animate-bounce" />
+                      <TrendingUp className="absolute -bottom-1 -left-1 h-6 w-6 sm:h-8 sm:w-8 text-green-400 animate-pulse" />
+                    </div>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                      Finding Your Perfect Matches
+                    </h3>
+                    <p className="text-gray-600 text-sm sm:text-base mb-2 max-w-md">
+                      Our AI is analyzing 1000+ programs worldwide to find the best fits for your profile...
+                    </p>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 bg-white/50 rounded-full px-4 py-2 mt-4">
+                      <Clock className="h-4 w-4" />
+                      <span>This may take up to 60 seconds</span>
                     </div>
                   </div>
-                )}
-
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Budget Preference</p>
-                  <p className="text-sm font-medium text-gray-900">{profile.fee_preference}</p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Side - Programs */}
-          <div className="flex-1 overflow-y-auto p-6">
-            {isMatching ? (
-              <div className="flex flex-col items-center justify-center h-full text-center px-8">
-                <div className="relative">
-                  <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                    <Loader2 className="h-12 w-12 text-white animate-spin" />
+                ) : programs.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                      <BookOpen className="h-10 w-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                      No Matches Yet
+                    </h3>
+                    <p className="text-gray-600 max-w-md">
+                      We're still processing your profile. Please check back in a moment.
+                    </p>
                   </div>
-                  <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-400 animate-bounce" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  Finding Your Perfect Matches
-                </h3>
-                <p className="text-gray-600 mb-2">
-                  Our AI is analyzing 1000+ programs to find the best matches for you...
-                </p>
-                <p className="text-sm text-gray-500">
-                  This may take up to 60 seconds
-                </p>
+                ) : (
+                  <>
+                    <div className="mb-6 sm:mb-8">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+                          <span className="text-xl font-bold text-white">{programs.length}</span>
+                        </div>
+                        <div>
+                          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+                            Programs Matched
+                          </h2>
+                          <p className="text-sm text-gray-600">
+                            Sorted by match score - Best fits first
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="grid gap-4 sm:gap-5">
+                      {programs
+                        .sort((a, b) => (matchPercentages[b.id] || 0) - (matchPercentages[a.id] || 0))
+                        .map((program) => {
+                          const matchPercentage = matchPercentages[program.id] || 0;
+                          return (
+                            <Card key={program.id} className="group p-4 sm:p-6 hover:shadow-2xl hover:scale-[1.01] transition-all duration-300 bg-white/90 backdrop-blur-sm border-2 hover:border-blue-200">
+                              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4">
+                                <div className="flex-1">
+                                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                                    {program.course_name}
+                                  </h3>
+                                  <p className="text-sm text-gray-600 font-medium">
+                                    {program.university_name}
+                                  </p>
+                                </div>
+                                <div className="flex-shrink-0">
+                                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-2xl ${getMatchColor(matchPercentage)} text-white font-bold shadow-lg`}>
+                                    <Sparkles className="h-4 w-4" />
+                                    <span className="text-lg">{matchPercentage}%</span>
+                                  </div>
+                                  <p className="text-xs text-center text-gray-500 mt-1.5 font-medium">
+                                    {getMatchLabel(matchPercentage)}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm mb-4">
+                                <div className="flex items-center gap-2 text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+                                  <MapPin className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                  <span className="truncate">{program.city}, {program.country}</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+                                  <GraduationCap className="h-4 w-4 text-indigo-600 flex-shrink-0" />
+                                  <span>{program.level}</span>
+                                </div>
+                                {program.duration && (
+                                  <div className="flex items-center gap-2 text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+                                    <Clock className="h-4 w-4 text-purple-600 flex-shrink-0" />
+                                    <span>{program.duration}</span>
+                                  </div>
+                                )}
+                                {program.total_tuition > 0 && (
+                                  <div className="flex items-center gap-2 text-gray-700 bg-gray-50 rounded-lg px-3 py-2">
+                                    <DollarSign className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                                    <span className="truncate">{program.total_tuition.toLocaleString()} {program.currency}</span>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="flex items-center justify-between">
+                                <Badge variant="secondary" className="text-xs font-medium">
+                                  {program.field_of_study}
+                                </Badge>
+                                <Button 
+                                  size="sm" 
+                                  variant="outline"
+                                  className="text-xs hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 transition-colors"
+                                >
+                                  View Details
+                                </Button>
+                              </div>
+                            </Card>
+                          );
+                        })}
+                    </div>
+                  </>
+                )}
               </div>
-            ) : programs.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center px-8">
-                <BookOpen className="h-16 w-16 text-gray-400 mb-4" />
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  No Matches Yet
-                </h3>
-                <p className="text-gray-600">
-                  We're still processing your profile. Please check back in a moment.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                    {programs.length} Programs Matched
-                  </h2>
-                  <p className="text-gray-600">
-                    Sorted by match percentage - Best matches first
-                  </p>
-                </div>
-
-                <div className="grid gap-4">
-                  {programs
-                    .sort((a, b) => (matchPercentages[b.id] || 0) - (matchPercentages[a.id] || 0))
-                    .map((program) => {
-                      const matchPercentage = matchPercentages[program.id] || 0;
-                      return (
-                        <Card key={program.id} className="p-6 hover:shadow-lg transition-shadow">
-                          <div className="flex items-start justify-between mb-4">
-                            <div className="flex-1">
-                              <h3 className="text-lg font-bold text-gray-900 mb-1">
-                                {program.course_name}
-                              </h3>
-                              <p className="text-sm text-gray-600 mb-2">
-                                {program.university_name}
-                              </p>
-                            </div>
-                            <div className="text-right ml-4">
-                              <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full ${getMatchColor(matchPercentage)} text-white text-sm font-semibold`}>
-                                <Sparkles className="h-4 w-4" />
-                                {matchPercentage}%
-                              </div>
-                              <p className="text-xs text-gray-500 mt-1">
-                                {getMatchLabel(matchPercentage)}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div className="flex items-center gap-2 text-gray-600">
-                              <MapPin className="h-4 w-4" />
-                              {program.city}, {program.country}
-                            </div>
-                            <div className="flex items-center gap-2 text-gray-600">
-                              <GraduationCap className="h-4 w-4" />
-                              {program.level}
-                            </div>
-                            {program.duration && (
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <Clock className="h-4 w-4" />
-                                {program.duration}
-                              </div>
-                            )}
-                            {program.total_tuition > 0 && (
-                              <div className="flex items-center gap-2 text-gray-600">
-                                <DollarSign className="h-4 w-4" />
-                                {program.total_tuition.toLocaleString()} {program.currency}
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="mt-4">
-                            <Badge variant="outline" className="text-xs">
-                              {program.field_of_study}
-                            </Badge>
-                          </div>
-                        </Card>
-                      );
-                    })}
-                </div>
-              </>
-            )}
+            </div>
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 };
+
+// Profile Content Component
+const ProfileContent = ({ profile }: { profile: StudentProfile }) => (
+  <div className="space-y-4">
+    <div className="p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+      <p className="text-xs text-blue-600 font-medium mb-1">Current Education</p>
+      <p className="text-sm font-semibold text-gray-900">{profile.degree}</p>
+    </div>
+    
+    <div className="p-3 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg border border-purple-100">
+      <p className="text-xs text-purple-600 font-medium mb-1">Field of Study</p>
+      <p className="text-sm font-semibold text-gray-900">{profile.field_of_study}</p>
+    </div>
+
+    <div className="p-3 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg border border-emerald-100">
+      <p className="text-xs text-emerald-600 font-medium mb-1">Desired Degree</p>
+      <p className="text-sm font-semibold text-gray-900">{profile.desired_degree_type}</p>
+    </div>
+
+    <div className="p-3 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg border border-amber-100">
+      <p className="text-xs text-amber-600 font-medium mb-1">Language Test</p>
+      <p className="text-sm font-semibold text-gray-900">
+        {profile.language_test_type}
+        {profile.language_test_score > 0 && ` • ${profile.language_test_score}`}
+      </p>
+    </div>
+
+    <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+      <p className="text-xs text-gray-600 font-medium mb-1">Work Experience</p>
+      <p className="text-sm font-semibold text-gray-900">{profile.work_experience}</p>
+    </div>
+
+    {profile.interest_keywords && Array.isArray(profile.interest_keywords) && profile.interest_keywords.length > 0 && (
+      <div>
+        <p className="text-xs text-gray-600 font-medium mb-2">Interests</p>
+        <div className="flex flex-wrap gap-1.5">
+          {profile.interest_keywords.map((keyword: any, idx: number) => (
+            <Badge key={idx} variant="secondary" className="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200">
+              {String(keyword)}
+            </Badge>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <div className="p-3 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border border-green-100">
+      <p className="text-xs text-green-600 font-medium mb-1">Budget Preference</p>
+      <p className="text-sm font-semibold text-gray-900">{profile.fee_preference}</p>
+    </div>
+  </div>
+);
