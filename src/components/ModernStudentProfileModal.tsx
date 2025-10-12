@@ -557,6 +557,9 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         language_test_score: formData.language_test_score || 0,
         language_test_year: formData.language_test_year || 0,
         has_language_test: (formData.language_test_type !== 'No test taken' && formData.language_test_type !== 'Test taken more than 5 years ago') ? 1 : 0 || 0,
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         study_envs: [formData.study_environment],
         interest_keywords: formData.interest_keywords,
