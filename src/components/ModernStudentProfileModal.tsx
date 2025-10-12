@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { UniversityAutocomplete } from "@/components/ui/university-autocomplete";
 import { AuthModal } from '@/components/AuthModal';
+import { MatchingResultsModal } from '@/components/MatchingResultsModal';
 import { X, ArrowLeft, ArrowRight, Check, ChevronDown, Search, GraduationCap, Plus, BookOpen } from 'lucide-react';
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -304,6 +305,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
   const [searchedKeywords, setSearchedKeywords] = useState<string[]>([]);
   const [siteName, setSiteName] = useState<string>('');
   const [authOpen, setAuthOpen] = useState(false);
+  const [showMatchingModal, setShowMatchingModal] = useState(false);
 
   const totalSteps = 9; // Reduced from 10 since we're removing step 10
   const progress = (currentStep / totalSteps) * 100;
@@ -577,7 +579,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       console.log(error);
       if (error) throw error;
 
-      setShowConfirmation(true);
+      setShowMatchingModal(true);
       toast.success("Profile Created! Your information has been saved successfully.");
       sessionStorage.removeItem('pendingStudentProfileData');
     } catch (error: any) {
@@ -605,9 +607,6 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       }
 
       await saveProfileToDatabase(user.id);
-      
-      // Call AI matching function in background
-      toast.success("Profile saved! Finding your perfect programs in the background...");
 
       // Fire and forget - matching happens in background
       supabase.functions.invoke('match-programs', {
@@ -637,9 +636,6 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             setFormData(parsedData);
             setIsSubmitting(true);
             await saveProfileToDatabase(user.id);
-            
-            // Call AI matching function in background
-            toast.success("Profile saved! Finding your perfect programs in the background...");
 
             // Fire and forget - matching happens in background
             supabase.functions.invoke('match-programs', {
@@ -740,29 +736,17 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       keyword.toLowerCase().includes(keywordSearch.toLowerCase())
     );
 
-  if (showConfirmation) {
+  if (showMatchingModal) {
     return (
-      <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="max-w-lg mx-auto">
-          <div className="text-center py-8 px-4">
-            <div className="w-20 h-20 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Check className="h-10 w-10 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Profile Created Successfully!
-            </h2>
-            <p className="text-gray-600 mb-8">
-              Your personalized study abroad journey is ready. We'll help you find the perfect programs.
-            </p>
-            <Button
-              onClick={handleClose}
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3"
-            >
-              Start Your Journey <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <>
+        <MatchingResultsModal 
+          isOpen={showMatchingModal} 
+          onClose={() => {
+            setShowMatchingModal(false);
+            handleClose();
+          }} 
+        />
+      </>
     );
   }
 

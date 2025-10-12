@@ -73,7 +73,9 @@ serve(async (req) => {
           .from('student_profile')
           .select('*')
           .eq('user_id', bigintId)
-          .single();
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
         if (profileError || !profile) {
           console.error('Profile fetch error:', profileError);
