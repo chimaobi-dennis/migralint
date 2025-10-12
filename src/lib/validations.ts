@@ -3,7 +3,7 @@ import { z } from 'zod';
 export const studentProfileSchema = z.object({
   degree: z.string().min(1, "Degree is required").max(100),
   field_of_study: z.string().min(1, "Field of study is required").max(100),
-  area_of_study: z.string().min(1, "Area of study is required").max(100),
+  area_of_study: z.string().max(100).optional(),
   country: z.string().min(1, "Origin country is required").max(100),
   university: z.string().min(1, "University country is required").max(100),
   language: z.string().min(1, "Language is required").max(50),
