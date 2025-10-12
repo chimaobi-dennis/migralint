@@ -605,6 +605,20 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
       }
 
       await saveProfileToDatabase(user.id);
+      
+      // Call AI matching function
+      toast.loading("Finding your perfect programs...", { duration: 3000 });
+
+      const { error: matchError } = await supabase.functions.invoke('match-programs', {
+        body: { user_id: user.id }
+      });
+
+      if (matchError) {
+        console.error('Matching error:', matchError);
+        toast.error("Program matching failed, but your profile was saved.");
+      } else {
+        toast.success("Profile saved and matched with programs!");
+      }
     } catch (error: any) {
       // Error already handled in saveProfileToDatabase
     } finally {
@@ -623,6 +637,19 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
             setFormData(parsedData);
             setIsSubmitting(true);
             await saveProfileToDatabase(user.id);
+            
+            // Call AI matching function
+            toast.loading("Finding your perfect programs...", { duration: 3000 });
+            const { error: matchError } = await supabase.functions.invoke('match-programs', {
+              body: { user_id: user.id }
+            });
+
+            if (matchError) {
+              console.error('Matching error:', matchError);
+              toast.error("Program matching failed, but your profile was saved.");
+            } else {
+              toast.success("Profile saved and matched with programs!");
+            }
           } catch (error) {
             console.error('Error processing pending profile:', error);
             toast.error('Failed to save your profile. Please try again.');
