@@ -930,7 +930,7 @@ export type Database = {
               p_language_test_year: number
               p_origin_country: string
               p_study_envs: string
-              p_university_country: string
+              p_university: string
               p_user_id: string
               p_work_experience: string
             }

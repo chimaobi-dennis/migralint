@@ -563,6 +563,7 @@ export const ModernStudentProfileModal = ({ isOpen, onClose }: ModernStudentProf
         p_area_of_study: validatedData.area_of_study,
         p_desired_fields: JSON.stringify([validatedData.desired_degree_type]),
         p_origin_country: validatedData.country || '',
+        p_university: validatedData.university || '',
         p_language: validatedData.language,
         p_language_test_type: validatedData.language_test_type,
         p_language_test_score: validatedData.language_test_score,
