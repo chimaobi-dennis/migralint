@@ -1,73 +1,206 @@
-# Welcome to your Lovable project
+# migralint
 
-## Project info
+**Catch the migration that drops a column, forgets row level security, or opens
+a table to the world, before it reaches production.**
 
-**URL**: https://lovable.dev/projects/61e5de4e-5f68-4f46-a5b2-73f1a4fbc01c
+migralint is a linter for Postgres SQL migrations with first-class support for
+Supabase conventions. It reads your `supabase/migrations` folder in order,
+builds a model of the resulting schema, and reports destructive statements,
+missing or permissive RLS, SECURITY DEFINER pitfalls, unindexed foreign keys
+and hygiene problems, with the exact file and line.
 
-## How can I edit this code?
+```
+$ migralint lint examples/migrations
 
-There are several ways of editing your application.
+examples/migrations/20250101000000_init.sql
+    26  low      S004 permissive-read-policy  Policy "profiles are readable" exposes every row of profiles to authenticated.
+        CREATE POLICY "profiles are readable" ON public.profiles FOR SELECT TO authenticated US...
+        ↳ Scope the policy, or list the table under `publicTables` in .migralint.yml if it is intentionally public.
 
-**Use Lovable**
+examples/migrations/20250115000000_comments.sql
+     2  medium   P001 foreign-key-without-index  Foreign key comments(post_id) → public.posts has no covering index.
+        CREATE TABLE public.comments ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), post_id u...
+        ↳ CREATE INDEX ON <table> (<column>);
+     2  medium   P001 foreign-key-without-index  Foreign key comments(author_id) → public.profiles has no covering index.
+        CREATE TABLE public.comments ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), post_id u...
+        ↳ CREATE INDEX ON <table> (<column>);
+     2  critical S001 table-without-rls  Table public.comments has no row level security.
+        CREATE TABLE public.comments ( id uuid PRIMARY KEY DEFAULT gen_random_uuid(), post_id u...
+        ↳ ALTER TABLE <table> ENABLE ROW LEVEL SECURITY; then add policies.
+    13  critical S003 permissive-write-policy  Policy "anyone can comment" lets anyone insert every row of comments.
+        CREATE POLICY "anyone can comment" ON public.comments FOR INSERT WITH CHECK (true)
+        ↳ Restrict the policy, for example WITH CHECK (auth.uid() = user_id).
+    17  low      P002 unwrapped-auth-call-in-policy  Policy "admins delete comments" calls auth.uid()/auth.jwt() without (select ...).
+        CREATE POLICY "admins delete comments" ON public.comments FOR DELETE USING ((auth.jwt()...
+        ↳ Replace auth.uid() with (select auth.uid()).
+    17  critical S005 user-metadata-in-policy  Policy "admins delete comments" trusts user-editable metadata.
+        CREATE POLICY "admins delete comments" ON public.comments FOR DELETE USING ((auth.jwt()...
+        ↳ Use app_metadata (server-controlled) or a roles table joined on auth.uid().
+    21  high     S006 security-definer-search-path  Function public.comment_count is SECURITY DEFINER without SET search_path.
+        CREATE OR REPLACE FUNCTION public.comment_count(p uuid) RETURNS bigint LANGUAGE sql SEC...
+        ↳ Add `SET search_path = ''` (or a fixed schema list) to the function definition.
+    27  high     D002 drop-column  Dropping column posts.body deletes its data.
+        ALTER TABLE public.posts DROP COLUMN body
+        ↳ Stop writing to the column first, deploy, then drop it in a later migration once nothing reads it.
+    28  medium   D008 rename  Renaming column title to headline breaks clients that use the old name.
+        ALTER TABLE public.posts RENAME COLUMN title TO headline
+        ↳ Add the new name alongside the old one and migrate clients before removing the old name.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/61e5de4e-5f68-4f46-a5b2-73f1a4fbc01c) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+Linted 2 migration(s), 16 statement(s) in 9 ms.
+✖ 10 problem(s): 3 critical, 2 high, 3 medium, 2 low
 ```
 
-**Edit a file directly in GitHub**
+## Who it is for
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Teams shipping Postgres or Supabase apps where migrations are written by hand
+or generated by tools and reviewed in pull requests. If a bad migration has
+ever deleted data or exposed a table through a `USING (true)` policy, this
+is the check you wish had run in CI.
 
-**Use GitHub Codespaces**
+## Install
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```bash
+npm install -g migralint
+# or without installing
+npx migralint lint supabase/migrations
+```
 
-## What technologies are used for this project?
+Requires Node 20+. No database connection is needed: migralint works from the
+SQL text alone.
 
-This project is built with:
+## Usage
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+migralint                                 # lints supabase/migrations (or migrations/, db/migrations/)
+migralint lint path/to/dir other.sql      # explicit files or folders
+migralint lint --changed-since main       # report only files changed on this branch
+migralint lint --format json -o report.json
+migralint lint --format sarif -o migralint.sarif
+migralint lint --fail-on high             # exit 1 only for high/critical findings (default: medium)
+migralint rules                           # list every rule
+```
 
-## How can I deploy this project?
+`--changed-since` still reads every migration to build the schema model, so a
+new policy is judged against the real table, but only findings in changed files
+are reported. That keeps pull request checks focused.
 
-Simply open [Lovable](https://lovable.dev/projects/61e5de4e-5f68-4f46-a5b2-73f1a4fbc01c) and click on Share -> Publish.
+### Configuration: `.migralint.yml`
 
-## Can I connect a custom domain to my Lovable project?
+Searched for from the migrations directory upwards.
 
-Yes, you can!
+```yaml
+schemas:            # schemas exposed to clients (default: public)
+  - public
+publicTables:       # tables that are intentionally world-readable
+  - categories
+disabledRules:
+  - P002
+severity:           # override a rule's severity
+  D008: low
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Suppress a single statement, or a whole file:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```sql
+-- migralint:ignore D001
+DROP TABLE public.legacy_events;
+
+DROP TABLE public.tmp_import; -- migralint:ignore D001
+
+-- migralint:ignore-file   (anywhere in the file)
+```
+
+### GitHub Actions
+
+```yaml
+- uses: actions/checkout@v4
+  with: { fetch-depth: 0 }
+- run: npx migralint lint supabase/migrations --changed-since origin/main --format sarif -o migralint.sarif
+- uses: github/codeql-action/upload-sarif@v3
+  if: always()
+  with: { sarif_file: migralint.sarif }
+```
+
+Findings then show up under **Security → Code scanning** and as annotations on
+the pull request. See [.github/workflows/ci.yml](.github/workflows/ci.yml).
+
+### As a library
+
+```ts
+import { lint, lintMigrations, splitStatements } from "migralint";
+
+const result = lint(["supabase/migrations"]);
+for (const f of result.findings) console.log(f.severity, f.ruleId, f.file, f.line, f.message);
+
+// or feed SQL you already have in memory
+const migration = splitStatements(sqlText, "20250101000000_init.sql");
+lintMigrations([migration]);
+```
+
+## Rules
+
+| Id | Severity | What it catches |
+|---|---|---|
+| D001 | critical | `DROP TABLE` |
+| D002 | high | `DROP COLUMN` |
+| D003 | critical | `TRUNCATE` |
+| D004 | critical | `DELETE` without `WHERE` |
+| D005 | high | `UPDATE` without `WHERE` |
+| D006 | medium | `DROP SCHEMA/TYPE/FUNCTION/VIEW/SEQUENCE` (schema is critical) |
+| D007 | medium | `ALTER COLUMN ... TYPE` (table rewrite, possible data loss) |
+| D008 | medium | `RENAME` table or column |
+| D009 | medium | `NOT NULL` added without a default on an existing table |
+| D010 | medium | `DROP CONSTRAINT` |
+| S001 | critical | table in an exposed schema without row level security |
+| S002 | low | RLS enabled but no policies (all access denied) |
+| S003 | critical | write policy with `USING (true)` / `WITH CHECK (true)` |
+| S004 | medium | `SELECT` policy with `USING (true)` (low when limited to authenticated) |
+| S005 | critical | policy that trusts `user_metadata` / `raw_user_meta_data` |
+| S006 | high | `SECURITY DEFINER` function without `SET search_path` |
+| S007 | high | `GRANT INSERT/UPDATE/DELETE/ALL ... TO anon` or `PUBLIC` |
+| S008 | low | deprecated `auth.role()` in a policy |
+| P001 | medium | foreign key without a covering index |
+| P002 | low | `auth.uid()` / `auth.jwt()` not wrapped in `(select ...)` |
+| H001 | low | filename without a 14-digit timestamp prefix |
+| H002 | medium | two migrations with the same version |
+| H003 | low | `DROP` without `IF EXISTS` |
+| H004 | medium | `CREATE POLICY` with a name that already exists on the table |
+| H005 | low | policy or index on a table no migration creates |
+
+Run `migralint rules` for the full descriptions and fix hints.
+
+## How it works
+
+1. **Split.** [src/sql/split.ts](src/sql/split.ts) turns each file into
+   statements while respecting comments, string literals, quoted identifiers
+   and dollar-quoted function bodies, and records line numbers and inline
+   ignore directives.
+2. **Classify.** [src/sql/classify.ts](src/sql/classify.ts) recognises the
+   statement shapes that matter (create table with column definitions and
+   references, alter table variants, policies with their `USING` and `WITH
+   CHECK` expressions, indexes, functions, grants, DML) without needing a full
+   SQL parser.
+3. **Model.** [src/model.ts](src/model.ts) applies statements in migration
+   order to build the final schema: tables, columns, RLS state, policies,
+   foreign keys and indexes.
+4. **Rules.** Statement rules see the schema as it was just before each
+   statement; schema rules run once on the final model (missing RLS,
+   unindexed foreign keys, duplicate versions).
+5. **Report.** Pretty terminal output, JSON, or SARIF 2.1.0.
+
+## Development
+
+```bash
+npm install
+npm test
+npm run typecheck && npm run lint
+npm run lint:self      # lint the examples
+```
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md).
+
+## License
+
+MIT © Chimaobi Dennis
