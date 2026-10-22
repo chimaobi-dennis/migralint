@@ -6,7 +6,7 @@
   "author": "Chimaobi Dennis <igsoftwebstudio@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chimaobi-dennis/campus-application-compass"
+    "url": "https://github.com/chimaobi-dennis/migralint"
   },
   "keywords": ["postgres", "supabase", "migrations", "sql", "lint", "rls", "row-level-security", "sarif", "devsecops"],
   "type": "module",

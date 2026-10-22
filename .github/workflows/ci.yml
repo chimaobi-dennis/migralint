@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   security-events: write
 
 jobs:
@@ -38,6 +39,7 @@ jobs:
       - name: Produce SARIF (the examples intentionally contain problems, so do not fail here)
         run: npx tsx src/cli/index.ts lint examples/migrations --format sarif --output migralint.sarif --fail-on none
       - uses: github/codeql-action/upload-sarif@v3
+        continue-on-error: true # code scanning upload is best-effort; the lint itself ran above
         with:
           sarif_file: migralint.sarif
           category: migralint

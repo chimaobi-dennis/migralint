@@ -15,7 +15,7 @@ export function formatSarif(result: LintResult, version = "0.1.0"): string {
             driver: {
               name: "migralint",
               version,
-              informationUri: "https://github.com/chimaobi-dennis/campus-application-compass",
+              informationUri: "https://github.com/chimaobi-dennis/migralint",
               rules: rules.map((r) => ({
                 id: r.id,
                 name: r.name,
