@@ -1,0 +1,7 @@
+# migralint configuration. All keys are optional.
+schemas:
+  - public
+publicTables:
+  - categories        # intentionally world-readable lookup table
+disabledRules: []
+severity: {}
